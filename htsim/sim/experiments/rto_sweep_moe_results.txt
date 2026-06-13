@@ -1,113 +1,87 @@
 ############################################################
 # MoE8x8B (64 nodes, fat_tree_64_1os, 200Gbps) -min_rto sweep
-# -sender_cc_only, NO -sleek.  Generated: Sat 13 Jun 2026 23:02:38 IDT
-# Baseline (default RTO) = 100us.
+# -sender_cc_only, NO -sleek.  Generated: Sun 14 Jun 2026 00:06:05 IDT
+# Auto-computed default RTO at 1xBDP = ~93.7us (now overridable via the
+# -min_rto guard fix). 94 ~= the default operating point (control).
 ############################################################
 
 ============================================================
-min_rto = 100 us
+min_rto = 50 us
 ============================================================
 ============================================================
- htsim run summary: ../experiments/runs/moe8x8b_ft64_rto100.out
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_rto50.out
 ============================================================
 --- Makespan (workload runtime) ---
-  last flow completed at : 62486 us  (= 62.486 ms)
+  last flow completed at : 46311.1 us  (= 46.311 ms)
 --- Flow / message counts ---
-  flows (messages) completed : 3007
+  flows (messages) completed : 1116
   all reported in_flight=0   : yes (clean)
 --- Total bytes transferred ---
-  total = 2753404218 bytes (2.56 GiB)
+  total = 1014782616 bytes (0.95 GiB)
 --- FCT distribution (us) ---
-  count=3007  min=8631.00  mean=42310.92  max=62486.00
-  p50=42414.90  p90=58044.90  p99=61774.50
+  count=1116  min=8601.78  mean=32870.08  max=46311.10
+  p50=34192.30  p90=42391.20  p99=43792.90
 --- Packets & retransmits ---
-  total packets sent : 684984
-  RTS (retransmit-on-timeout) flows : 2905 / 3007
-  duplicate-pkt (Spurious) log lines: 278160
+  total packets sent : 264102
+  RTS (Request-To-Send ctrl pkts) flows>0 : 1073 / 1116
+  duplicate-pkt (Spurious) log lines      : 188397
 --- Slowest 5 flows (tail latency, us) ---
-  62486
-  62391
-  62389.3
-  62344.1
-  62319.6
+  46311.1
+  44622.7
+  44349.5
+  44033.7
+  43995.1
 
 ============================================================
-min_rto = 200 us
+min_rto = 94 us
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_rto94.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 73926.3 us  (= 73.926 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 3806
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 3487572612 bytes (3.25 GiB)
+--- FCT distribution (us) ---
+  count=3806  min=8631.00  mean=48293.59  max=73926.30
+  p50=48146.00  p90=69292.70  p99=73525.70
+--- Packets & retransmits ---
+  total packets sent : 868937
+  RTS (Request-To-Send ctrl pkts) flows>0 : 3640 / 3806
+  duplicate-pkt (Spurious) log lines      : 361995
+--- Slowest 5 flows (tail latency, us) ---
+  73926.3
+  73901
+  73895
+  73881.4
+  73866.1
+
+============================================================
+min_rto = 200 us *** ABORTED: runaway, sim past 400000us without completing ***
 ============================================================
 ============================================================
  htsim run summary: ../experiments/runs/moe8x8b_ft64_rto200.out
 ============================================================
 --- Makespan (workload runtime) ---
-  last flow completed at : 62486 us  (= 62.486 ms)
+  last flow completed at : 409031 us  (= 409.031 ms)
 --- Flow / message counts ---
-  flows (messages) completed : 3007
+  flows (messages) completed : 24640
   all reported in_flight=0   : yes (clean)
 --- Total bytes transferred ---
-  total = 2753404218 bytes (2.56 GiB)
+  total = 21749716710 bytes (20.26 GiB)
 --- FCT distribution (us) ---
-  count=3007  min=8631.00  mean=42310.92  max=62486.00
-  p50=42414.90  p90=58044.90  p99=61774.50
+  count=24640  min=8713.62  mean=176436.89  max=409031.00
+  p50=175077.00  p90=301050.00  p99=347922.00
 --- Packets & retransmits ---
-  total packets sent : 684984
-  RTS (retransmit-on-timeout) flows : 2905 / 3007
-  duplicate-pkt (Spurious) log lines: 278160
+  total packets sent : 5353578
+  RTS (Request-To-Send ctrl pkts) flows>0 : 23425 / 24640
+  duplicate-pkt (Spurious) log lines      : 3376421
 --- Slowest 5 flows (tail latency, us) ---
-  62486
-  62391
-  62389.3
-  62344.1
-  62319.6
-
-============================================================
-min_rto = 400 us
-============================================================
-============================================================
- htsim run summary: ../experiments/runs/moe8x8b_ft64_rto400.out
-============================================================
---- Makespan (workload runtime) ---
-  last flow completed at : 62486 us  (= 62.486 ms)
---- Flow / message counts ---
-  flows (messages) completed : 3007
-  all reported in_flight=0   : yes (clean)
---- Total bytes transferred ---
-  total = 2753404218 bytes (2.56 GiB)
---- FCT distribution (us) ---
-  count=3007  min=8631.00  mean=42310.92  max=62486.00
-  p50=42414.90  p90=58044.90  p99=61774.50
---- Packets & retransmits ---
-  total packets sent : 684984
-  RTS (retransmit-on-timeout) flows : 2905 / 3007
-  duplicate-pkt (Spurious) log lines: 278160
---- Slowest 5 flows (tail latency, us) ---
-  62486
-  62391
-  62389.3
-  62344.1
-  62319.6
-
-============================================================
-min_rto = 800 us
-============================================================
-============================================================
- htsim run summary: ../experiments/runs/moe8x8b_ft64_rto800.out
-============================================================
---- Makespan (workload runtime) ---
-  last flow completed at : 62486 us  (= 62.486 ms)
---- Flow / message counts ---
-  flows (messages) completed : 3007
-  all reported in_flight=0   : yes (clean)
---- Total bytes transferred ---
-  total = 2753404218 bytes (2.56 GiB)
---- FCT distribution (us) ---
-  count=3007  min=8631.00  mean=42310.92  max=62486.00
-  p50=42414.90  p90=58044.90  p99=61774.50
---- Packets & retransmits ---
-  total packets sent : 684984
-  RTS (retransmit-on-timeout) flows : 2905 / 3007
-  duplicate-pkt (Spurious) log lines: 278160
---- Slowest 5 flows (tail latency, us) ---
-  62486
-  62391
-  62389.3
-  62344.1
-  62319.6
+  409031
+  408135
+  407146
+  405289
+  404248

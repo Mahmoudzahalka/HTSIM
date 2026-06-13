@@ -15,17 +15,18 @@ ANALYZE=./analyze.sh
   echo "############################################################"
   echo "# MoE8x8B (64 nodes, fat_tree_64_1os, 200Gbps) -min_rto sweep"
   echo "# -sender_cc_only, NO -sleek.  Generated: $(date)"
-  echo "# Baseline (default RTO) = 100us."
+  echo "# Auto-computed default RTO at 1xBDP = ~93.7us (now overridable via the"
+  echo "# -min_rto guard fix). 94 ~= the default operating point (control)."
   echo "############################################################"
 } >> "$SUMMARY"
 
-for rto in 100 200 400 800; do
+for rto in 50 94 200 400 800; do
   out="$RUNDIR/moe8x8b_ft64_rto${rto}.out"
   echo "===== [sweep] starting min_rto=${rto}us -> $out ====="
   ./htsim_uec -goal "$TRACE" -sender_cc_only -min_rto "$rto" -nodes 64 \
       -end 250000 -topo "$TOPO" -linkspeed 200000 > "$out" 2>&1 &
   hpid=$!
-  prev=-1; stable=0
+  prev=-1; stable=0; note=""
   while kill -0 "$hpid" 2>/dev/null; do
     sleep 15
     cur=$(grep -c "finished at" "$out" 2>/dev/null || echo 0)
@@ -33,6 +34,13 @@ for rto in 100 200 400 800; do
     echo "  [rto=$rto] finished=$cur sim_now_us=${now:-?} stable=$stable"
     if [[ "$cur" == "$prev" ]]; then stable=$((stable+1)); else stable=0; fi
     prev=$cur
+    # runaway guard: abort if sim time blows past 400ms without plateauing
+    if [[ -n "${now:-}" ]] && awk -v n="$now" 'BEGIN{exit !(n>400000)}'; then
+      note=" *** ABORTED: runaway, sim past 400000us without completing ***"
+      echo "  [rto=$rto]$note killing $hpid"
+      kill "$hpid" 2>/dev/null; sleep 3; kill -9 "$hpid" 2>/dev/null
+      break
+    fi
     if [[ $stable -ge 3 && $cur -gt 0 ]]; then
       echo "  [rto=$rto] workload complete (finished=$cur). killing $hpid"
       kill "$hpid" 2>/dev/null; sleep 3; kill -9 "$hpid" 2>/dev/null
@@ -42,7 +50,7 @@ for rto in 100 200 400 800; do
   {
     echo
     echo "============================================================"
-    echo "min_rto = ${rto} us"
+    echo "min_rto = ${rto} us${note}"
     echo "============================================================"
     bash "$ANALYZE" "$out" 2>/dev/null
   } >> "$SUMMARY"

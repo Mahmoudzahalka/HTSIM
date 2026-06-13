@@ -1,29 +1,36 @@
-===== [sweep] starting min_rto=100us -> ../experiments/runs/moe8x8b_ft64_rto100.out =====
-  [rto=100] finished=3007 sim_now_us=64723.7 stable=0
-  [rto=100] finished=3007 sim_now_us=64723.7 stable=0
-  [rto=100] finished=3007 sim_now_us=64723.7 stable=1
-  [rto=100] finished=3007 sim_now_us=64723.7 stable=2
-  [rto=100] workload complete (finished=3007). killing 199393
-===== [sweep] done min_rto=100us =====
+===== [sweep] starting min_rto=50us -> ../experiments/runs/moe8x8b_ft64_rto50.out =====
+  [rto=50] finished=1116 sim_now_us=45268.9 stable=0
+  [rto=50] finished=1116 sim_now_us=45268.9 stable=0
+  [rto=50] finished=1116 sim_now_us=45268.9 stable=1
+  [rto=50] finished=1116 sim_now_us=45268.9 stable=2
+  [rto=50] workload complete (finished=1116). killing 201865
+===== [sweep] done min_rto=50us =====
+===== [sweep] starting min_rto=94us -> ../experiments/runs/moe8x8b_ft64_rto94.out =====
+  [rto=94] finished=3574 sim_now_us=73429.5 stable=0
+  [rto=94] finished=3806 sim_now_us=77969.2 stable=0
+  [rto=94] finished=3806 sim_now_us=77969.2 stable=0
+  [rto=94] finished=3806 sim_now_us=77969.2 stable=1
+  [rto=94] finished=3806 sim_now_us=77969.2 stable=2
+  [rto=94] workload complete (finished=3806). killing 201943
+===== [sweep] done min_rto=94us =====
 ===== [sweep] starting min_rto=200us -> ../experiments/runs/moe8x8b_ft64_rto200.out =====
-  [rto=200] finished=3007 sim_now_us=64723.7 stable=0
-  [rto=200] finished=3007 sim_now_us=64723.7 stable=0
-  [rto=200] finished=3007 sim_now_us=64723.7 stable=1
-  [rto=200] finished=3007 sim_now_us=64723.7 stable=2
-  [rto=200] workload complete (finished=3007). killing 199466
+  [rto=200] finished=4302 sim_now_us=75103.5 stable=0
+  [rto=200] finished=8021 sim_now_us=125491 stable=0
+  [rto=200] finished=11963 sim_now_us=177170 stable=0
+  [rto=200] finished=16339 sim_now_us=232670 stable=0
+  [rto=200] finished=20230 sim_now_us=288048 stable=0
+  [rto=200] finished=23712 sim_now_us=326118 stable=0
+  [rto=200] finished=24334 sim_now_us=351737 stable=0
+  [rto=200] finished=24589 sim_now_us=380924 stable=0
+  [rto=200] finished=24630 sim_now_us=411039 stable=0
+  [rto=200] *** ABORTED: runaway, sim past 400000us without completing *** killing 202021
 ===== [sweep] done min_rto=200us =====
 ===== [sweep] starting min_rto=400us -> ../experiments/runs/moe8x8b_ft64_rto400.out =====
-  [rto=400] finished=3007 sim_now_us=64723.7 stable=0
-  [rto=400] finished=3007 sim_now_us=64723.7 stable=0
-  [rto=400] finished=3007 sim_now_us=64723.7 stable=1
-  [rto=400] finished=3007 sim_now_us=64723.7 stable=2
-  [rto=400] workload complete (finished=3007). killing 199534
-===== [sweep] done min_rto=400us =====
-===== [sweep] starting min_rto=800us -> ../experiments/runs/moe8x8b_ft64_rto800.out =====
-  [rto=800] finished=3007 sim_now_us=64723.7 stable=0
-  [rto=800] finished=3007 sim_now_us=64723.7 stable=0
-  [rto=800] finished=3007 sim_now_us=64723.7 stable=1
-  [rto=800] finished=3007 sim_now_us=64723.7 stable=2
-  [rto=800] workload complete (finished=3007). killing 199605
-===== [sweep] done min_rto=800us =====
-ALL DONE -> ../experiments/rto_sweep_moe_results.txt
+  [rto=400] finished=4206 sim_now_us=75797 stable=0
+  [rto=400] finished=8535 sim_now_us=134630 stable=0
+  [rto=400] finished=13216 sim_now_us=196224 stable=0
+  [rto=400] finished=17920 sim_now_us=259550 stable=0
+  [rto=400] finished=22638 sim_now_us=320490 stable=0
+  [rto=400] finished=24723 sim_now_us=345843 stable=0
+  [rto=400] finished=25772 sim_now_us=373871 stable=0
+  [rto=400] finished=26476 sim_now_us=393262 stable=0

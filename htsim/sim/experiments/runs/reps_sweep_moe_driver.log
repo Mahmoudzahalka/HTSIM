@@ -1,0 +1,30 @@
+===== [sweep] starting load_balancing_algo=mixed -> ../experiments/runs/moe8x8b_ft64_lb_mixed.out =====
+  [lb=mixed] finished=3007 sim_now_us=64723.7 stable=0
+  [lb=mixed] finished=3007 sim_now_us=64723.7 stable=0
+  [lb=mixed] finished=3007 sim_now_us=64723.7 stable=1
+  [lb=mixed] finished=3007 sim_now_us=64723.7 stable=2
+  [lb=mixed] workload complete (finished=3007). killing 202448
+===== [sweep] done load_balancing_algo=mixed =====
+===== [sweep] starting load_balancing_algo=reps -> ../experiments/runs/moe8x8b_ft64_lb_reps.out =====
+  [lb=reps] finished=3643 sim_now_us=72572.9 stable=0
+  [lb=reps] finished=7323 sim_now_us=125190 stable=0
+  [lb=reps] finished=11212 sim_now_us=179130 stable=0
+  [lb=reps] finished=15127 sim_now_us=236267 stable=0
+  [lb=reps] finished=19419 sim_now_us=295723 stable=0
+  [lb=reps] finished=23548 sim_now_us=345380 stable=0
+  [lb=reps] finished=23935 sim_now_us=370151 stable=0
+  [lb=reps] finished=24324 sim_now_us=400839 stable=0
+  [lb=reps] *** ABORTED: runaway, sim past 400000us without completing *** killing 202519
+===== [sweep] done load_balancing_algo=reps =====
+===== [sweep] starting load_balancing_algo=reps_legacy -> ../experiments/runs/moe8x8b_ft64_lb_reps_legacy.out =====
+  [lb=reps_legacy] finished=3640 sim_now_us=72481.4 stable=0
+  [lb=reps_legacy] finished=7272 sim_now_us=124530 stable=0
+  [lb=reps_legacy] finished=11170 sim_now_us=178099 stable=0
+  [lb=reps_legacy] finished=15049 sim_now_us=235088 stable=0
+  [lb=reps_legacy] finished=19318 sim_now_us=294431 stable=0
+  [lb=reps_legacy] finished=23525 sim_now_us=345061 stable=0
+  [lb=reps_legacy] finished=23927 sim_now_us=369826 stable=0
+  [lb=reps_legacy] finished=24323 sim_now_us=400293 stable=0
+  [lb=reps_legacy] *** ABORTED: runaway, sim past 400000us without completing *** killing 202641
+===== [sweep] done load_balancing_algo=reps_legacy =====
+ALL DONE -> ../experiments/reps_sweep_moe_results.txt

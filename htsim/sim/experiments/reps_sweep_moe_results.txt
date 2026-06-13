@@ -1,0 +1,86 @@
+############################################################
+# MoE8x8B (64 nodes, fat_tree_64_1os, 200Gbps) REPS-vs-MIXED sweep
+# -sender_cc_only, NO -sleek, default queue(1xBDP)/RTO.
+# Generated: Sun 14 Jun 2026 00:20:42 IDT.  mixed = default spray (control).
+############################################################
+
+============================================================
+load_balancing_algo = mixed
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_lb_mixed.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 62486 us  (= 62.486 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 3007
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 2753404218 bytes (2.56 GiB)
+--- FCT distribution (us) ---
+  count=3007  min=8631.00  mean=42310.92  max=62486.00
+  p50=42414.90  p90=58044.90  p99=61774.50
+--- Packets & retransmits ---
+  total packets sent : 684984
+  RTS (Request-To-Send ctrl pkts) flows>0 : 2905 / 3007
+  duplicate-pkt (Spurious) log lines      : 278160
+--- Slowest 5 flows (tail latency, us) ---
+  62486
+  62391
+  62389.3
+  62344.1
+  62319.6
+
+============================================================
+load_balancing_algo = reps *** ABORTED: runaway, sim past 400000us without completing ***
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_lb_reps.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 394820 us  (= 394.820 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 24328
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 21432528702 bytes (19.96 GiB)
+--- FCT distribution (us) ---
+  count=24328  min=8629.62  mean=186216.11  max=394820.00
+  p50=183685.00  p90=319694.00  p99=364354.00
+--- Packets & retransmits ---
+  total packets sent : 5322403
+  RTS (Request-To-Send ctrl pkts) flows>0 : 23208 / 24328
+  duplicate-pkt (Spurious) log lines      : 3229315
+--- Slowest 5 flows (tail latency, us) ---
+  394820
+  392458
+  391611
+  391458
+  390822
+
+============================================================
+load_balancing_algo = reps_legacy *** ABORTED: runaway, sim past 400000us without completing ***
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_lb_reps_legacy.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 394820 us  (= 394.820 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 24328
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 21432528702 bytes (19.96 GiB)
+--- FCT distribution (us) ---
+  count=24328  min=8629.62  mean=186216.11  max=394820.00
+  p50=183685.00  p90=319694.00  p99=364354.00
+--- Packets & retransmits ---
+  total packets sent : 5322403
+  RTS (Request-To-Send ctrl pkts) flows>0 : 23208 / 24328
+  duplicate-pkt (Spurious) log lines      : 3217334
+--- Slowest 5 flows (tail latency, us) ---
+  394820
+  392458
+  391611
+  391458
+  390822
