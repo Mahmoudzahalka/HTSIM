@@ -1,0 +1,16 @@
+===== [sweep] starting load_balancing_algo=mixed -> ../experiments/runs/moe8x8b_ft64_lb_mixed.out =====
+  [lb=mixed] finished=3007 sim_now_us=64723.7 stable=0
+  [lb=mixed] finished=3007 sim_now_us=64723.7 stable=0
+  [lb=mixed] finished=3007 sim_now_us=64723.7 stable=1
+  [lb=mixed] finished=3007 sim_now_us=64723.7 stable=2
+  [lb=mixed] workload complete (finished=3007). killing 200124
+===== [sweep] done load_balancing_algo=mixed =====
+===== [sweep] starting load_balancing_algo=ecmp -> ../experiments/runs/moe8x8b_ft64_lb_ecmp.out =====
+  [lb=ecmp] finished=3671 sim_now_us=82611.4 stable=0
+  [lb=ecmp] finished=5602 sim_now_us=109518 stable=0
+  [lb=ecmp] finished=5602 sim_now_us=109518 stable=0
+  [lb=ecmp] finished=5602 sim_now_us=109518 stable=1
+  [lb=ecmp] finished=5602 sim_now_us=109518 stable=2
+  [lb=ecmp] workload complete (finished=5602). killing 200201
+===== [sweep] done load_balancing_algo=ecmp =====
+ALL DONE -> ../experiments/lb_sweep_moe_results.txt

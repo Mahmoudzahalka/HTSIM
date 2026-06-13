@@ -1,0 +1,22 @@
+===== [sweep] starting queue_size_bdp_factor=1xBDP -> ../experiments/runs/moe8x8b_ft64_q1xbdp.out =====
+  [q=1x] finished=3007 sim_now_us=64723.7 stable=0
+  [q=1x] finished=3007 sim_now_us=64723.7 stable=0
+  [q=1x] finished=3007 sim_now_us=64723.7 stable=1
+  [q=1x] finished=3007 sim_now_us=64723.7 stable=2
+  [q=1x] workload complete (finished=3007). killing 199763
+===== [sweep] done queue_size_bdp_factor=1xBDP =====
+===== [sweep] starting queue_size_bdp_factor=2xBDP -> ../experiments/runs/moe8x8b_ft64_q2xbdp.out =====
+  [q=2x] finished=3788 sim_now_us=71294.5 stable=0
+  [q=2x] finished=7683 sim_now_us=126870 stable=0
+  [q=2x] finished=11528 sim_now_us=178738 stable=0
+  [q=2x] finished=15569 sim_now_us=233584 stable=0
+  [q=2x] finished=20083 sim_now_us=292734 stable=0
+  [q=2x] finished=23927 sim_now_us=336381 stable=0
+  [q=2x] finished=24739 sim_now_us=359997 stable=0
+  [q=2x] finished=24995 sim_now_us=385661 stable=0
+  [q=2x] finished=25019 sim_now_us=411647 stable=0
+  [q=2x] finished=25039 sim_now_us=438647 stable=0
+  [q=2x] finished=25059 sim_now_us=467239 stable=0
+  [q=2x] finished=25077 sim_now_us=496847 stable=0
+  [q=2x] finished=25093 sim_now_us=528315 stable=0
+  [q=2x] finished=25102 sim_now_us=561330 stable=0

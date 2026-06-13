@@ -1,0 +1,59 @@
+############################################################
+# MoE8x8B (64 nodes, fat_tree_64_1os, 200Gbps) load-balancing sweep
+# -sender_cc_only, NO -sleek, default queue (1xBDP) & RTO (100us).
+# Generated: Sat 13 Jun 2026 23:26:02 IDT.  Baseline algo = mixed (packet spray).
+############################################################
+
+============================================================
+load_balancing_algo = mixed
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_lb_mixed.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 62486 us  (= 62.486 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 3007
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 2753404218 bytes (2.56 GiB)
+--- FCT distribution (us) ---
+  count=3007  min=8631.00  mean=42310.92  max=62486.00
+  p50=42414.90  p90=58044.90  p99=61774.50
+--- Packets & retransmits ---
+  total packets sent : 684984
+  RTS (Request-To-Send ctrl pkts) flows>0 : 2905 / 3007
+  duplicate-pkt (Spurious) log lines      : 278160
+--- Slowest 5 flows (tail latency, us) ---
+  62486
+  62391
+  62389.3
+  62344.1
+  62319.6
+
+============================================================
+load_balancing_algo = ecmp
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_lb_ecmp.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 109569 us  (= 109.569 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 5602
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 5138986716 bytes (4.79 GiB)
+--- FCT distribution (us) ---
+  count=5602  min=8631.02  mean=66128.50  max=109569.00
+  p50=66744.30  p90=100720.00  p99=107996.00
+--- Packets & retransmits ---
+  total packets sent : 1273235
+  RTS (Request-To-Send ctrl pkts) flows>0 : 4781 / 5602
+  duplicate-pkt (Spurious) log lines      : 427340
+--- Slowest 5 flows (tail latency, us) ---
+  109569
+  109437
+  109388
+  109303
+  109176

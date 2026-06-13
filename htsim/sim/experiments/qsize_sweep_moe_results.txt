@@ -1,0 +1,45 @@
+############################################################
+# MoE8x8B (64 nodes, fat_tree_64_1os, 200Gbps) queue-size sweep
+# -sender_cc_only, NO -sleek.  Generated: Sat 13 Jun 2026 23:16:07 IDT
+# -queue_size_bdp_factor sweep. Baseline (default) = 1xBDP.
+############################################################
+
+============================================================
+queue_size_bdp_factor = 1 xBDP
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_q1xbdp.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 62486 us  (= 62.486 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 3007
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 2753404218 bytes (2.56 GiB)
+--- FCT distribution (us) ---
+  count=3007  min=8631.00  mean=42310.92  max=62486.00
+  p50=42414.90  p90=58044.90  p99=61774.50
+--- Packets & retransmits ---
+  total packets sent : 684984
+  RTS (Request-To-Send ctrl pkts) flows>0 : 2905 / 3007
+  duplicate-pkt (Spurious) log lines      : 278160
+--- Slowest 5 flows (tail latency, us) ---
+  62486
+  62391
+  62389.3
+  62344.1
+  62319.6
+
+============================================================
+queue_size_bdp_factor = 2 xBDP   *** RUNAWAY / KILLED — DID NOT CONVERGE ***
+============================================================
+  Increasing queue size to 2xBDP made the run CATASTROPHICALLY WORSE, not better.
+  Partial state when killed (workload never completed):
+    flows "finished"   : 25,106+ (vs 3,007 at 1xBDP)   -- ~8x, retransmit inflation
+    Spurious dup lines : 6,572,294 (vs 278,160 at 1xBDP) -- ~24x worse
+    sim time           : 586,498 us and still crawling (past the 250,000us -end cap)
+  The sender-based CC + ECN thresholds (ecn_low=66400, ecn_high=265600, absolute
+  bytes) are tuned for 1xBDP queues. Enlarging the queue without retuning the CC
+  tips it into a persistent-congestion retransmit-livelock that never converges.
+  Sweep aborted before 4x/8x (would be same or worse). 1xBDP is the tuned point.

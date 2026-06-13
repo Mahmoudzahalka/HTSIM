@@ -1,0 +1,322 @@
+[watch] 20:30:57 finished=0
+0 sim_now_us=? stable=0
+[watch] 20:31:17 finished=0
+0 sim_now_us=? stable=0
+[watch] 20:31:37 finished=0
+0 sim_now_us=? stable=1
+[watch] 20:31:57 finished=0
+0 sim_now_us=? stable=2
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:32:17 finished=0
+0 sim_now_us=? stable=3
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:32:37 finished=0
+0 sim_now_us=? stable=4
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:32:57 finished=0
+0 sim_now_us=? stable=5
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:33:17 finished=0
+0 sim_now_us=? stable=6
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:33:37 finished=0
+0 sim_now_us=? stable=7
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:33:57 finished=0
+0 sim_now_us=? stable=8
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:34:17 finished=0
+0 sim_now_us=? stable=9
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:34:37 finished=0
+0 sim_now_us=? stable=10
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:34:57 finished=0
+0 sim_now_us=? stable=11
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:35:17 finished=0
+0 sim_now_us=? stable=12
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:35:37 finished=0
+0 sim_now_us=? stable=13
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:35:57 finished=0
+0 sim_now_us=? stable=14
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:36:17 finished=0
+0 sim_now_us=? stable=15
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:36:37 finished=0
+0 sim_now_us=? stable=16
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:36:57 finished=0
+0 sim_now_us=? stable=17
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:37:17 finished=0
+0 sim_now_us=? stable=18
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:37:37 finished=0
+0 sim_now_us=? stable=19
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:37:57 finished=0
+0 sim_now_us=? stable=20
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:38:17 finished=0
+0 sim_now_us=? stable=21
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:38:37 finished=0
+0 sim_now_us=? stable=22
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:38:57 finished=0
+0 sim_now_us=? stable=23
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:39:17 finished=0
+0 sim_now_us=? stable=24
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:39:37 finished=0
+0 sim_now_us=? stable=25
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:39:57 finished=0
+0 sim_now_us=? stable=26
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:40:17 finished=0
+0 sim_now_us=? stable=27
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:40:37 finished=0
+0 sim_now_us=? stable=28
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:40:57 finished=0
+0 sim_now_us=? stable=29
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:41:17 finished=0
+0 sim_now_us=? stable=30
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:41:37 finished=0
+0 sim_now_us=? stable=31
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:41:57 finished=0
+0 sim_now_us=? stable=32
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:42:17 finished=0
+0 sim_now_us=? stable=33
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:42:37 finished=0
+0 sim_now_us=? stable=34
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:42:57 finished=0
+0 sim_now_us=? stable=35
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:43:17 finished=0
+0 sim_now_us=? stable=36
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:43:37 finished=0
+0 sim_now_us=? stable=37
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:43:57 finished=0
+0 sim_now_us=? stable=38
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:44:17 finished=0
+0 sim_now_us=? stable=39
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:44:37 finished=0
+0 sim_now_us=? stable=40
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:44:57 finished=0
+0 sim_now_us=? stable=41
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:45:17 finished=0
+0 sim_now_us=? stable=42
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:45:37 finished=0
+0 sim_now_us=? stable=43
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:45:57 finished=0
+0 sim_now_us=? stable=44
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:46:17 finished=0
+0 sim_now_us=? stable=45
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:46:37 finished=0
+0 sim_now_us=? stable=46
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:46:57 finished=0
+0 sim_now_us=? stable=47
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:47:17 finished=0
+0 sim_now_us=? stable=48
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:47:37 finished=0
+0 sim_now_us=? stable=49
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:47:57 finished=0
+0 sim_now_us=? stable=50
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:48:17 finished=0
+0 sim_now_us=? stable=51
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:48:38 finished=0
+0 sim_now_us=? stable=52
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:48:58 finished=0
+0 sim_now_us=? stable=53
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:49:18 finished=0
+0 sim_now_us=? stable=54
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:49:38 finished=0
+0 sim_now_us=? stable=55
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:49:58 finished=0
+0 sim_now_us=? stable=56
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:50:18 finished=0
+0 sim_now_us=? stable=57
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:50:38 finished=0
+0 sim_now_us=? stable=58
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:50:58 finished=0
+0 sim_now_us=? stable=59
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:51:18 finished=0
+0 sim_now_us=? stable=60
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:51:38 finished=0
+0 sim_now_us=? stable=61
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:51:58 finished=0
+0 sim_now_us=? stable=62
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:52:18 finished=0
+0 sim_now_us=? stable=63
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:52:38 finished=0
+0 sim_now_us=? stable=64
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:52:58 finished=0
+0 sim_now_us=? stable=65
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:53:18 finished=0
+0 sim_now_us=? stable=66
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:53:38 finished=0
+0 sim_now_us=? stable=67
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:53:58 finished=0
+0 sim_now_us=? stable=68
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:54:18 finished=0
+0 sim_now_us=? stable=69
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:54:38 finished=0
+0 sim_now_us=? stable=70
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:54:58 finished=0
+0 sim_now_us=? stable=71
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:55:18 finished=0
+0 sim_now_us=? stable=72
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:55:38 finished=0
+0 sim_now_us=? stable=73
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:55:58 finished=0
+0 sim_now_us=? stable=74
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:56:18 finished=0
+0 sim_now_us=? stable=75
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:56:38 finished=0
+0 sim_now_us=? stable=76
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:56:58 finished=0
+0 sim_now_us=? stable=77
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:57:18 finished=0
+0 sim_now_us=? stable=78
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:57:38 finished=0
+0 sim_now_us=? stable=79
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")
+[watch] 20:57:58 finished=0
+0 sim_now_us=? stable=80
+experiments/runs/watch_kill.sh: line 16: [[: 0
+0: syntax error in expression (error token is "0")

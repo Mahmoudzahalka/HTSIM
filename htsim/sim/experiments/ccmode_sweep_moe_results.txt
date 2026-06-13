@@ -1,0 +1,86 @@
+############################################################
+# MoE8x8B (64 nodes, fat_tree_64_1os, 200Gbps) CC-MODE sweep
+# default queue(1xBDP)/RTO(100us)/lb(mixed), NO -sleek.
+# Generated: Sat 13 Jun 2026 23:31:48 IDT.  Baseline mode = sender_only.
+############################################################
+
+============================================================
+cc_mode = sender_only  (flags: -sender_cc_only)
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_cc_sender_only.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 62486 us  (= 62.486 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 3007
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 2753404218 bytes (2.56 GiB)
+--- FCT distribution (us) ---
+  count=3007  min=8631.00  mean=42310.92  max=62486.00
+  p50=42414.90  p90=58044.90  p99=61774.50
+--- Packets & retransmits ---
+  total packets sent : 684984
+  RTS (Request-To-Send ctrl pkts) flows>0 : 2905 / 3007
+  duplicate-pkt (Spurious) log lines      : 278160
+--- Slowest 5 flows (tail latency, us) ---
+  62486
+  62391
+  62389.3
+  62344.1
+  62319.6
+
+============================================================
+cc_mode = receiver_only  (flags: -receiver_cc_only) *** ABORTED: runaway, sim past 400000us without completing ***
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_cc_receiver_only.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 135712 us  (= 135.712 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 1117
+  all reported in_flight=0   : 1089 NONZERO!
+--- Total bytes transferred ---
+  total = 1015309710 bytes (0.95 GiB)
+--- FCT distribution (us) ---
+  count=1117  min=8651.14  mean=55330.88  max=135712.00
+  p50=56611.80  p90=85644.30  p99=113513.00
+--- Packets & retransmits ---
+  total packets sent : 1034120
+  RTS (Request-To-Send ctrl pkts) flows>0 : 1036 / 1117
+  duplicate-pkt (Spurious) log lines      : 2163406
+--- Slowest 5 flows (tail latency, us) ---
+  135712
+  134210
+  134202
+  133937
+  132059
+
+============================================================
+cc_mode = both  (flags: -sender_cc -receiver_cc)
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_cc_both.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 136316 us  (= 136.316 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 8119
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 7394315706 bytes (6.89 GiB)
+--- FCT distribution (us) ---
+  count=8119  min=8631.95  mean=79272.00  max=136316.00
+  p50=79207.20  p90=125230.00  p99=133677.00
+--- Packets & retransmits ---
+  total packets sent : 1883360
+  RTS (Request-To-Send ctrl pkts) flows>0 : 8015 / 8119
+  duplicate-pkt (Spurious) log lines      : 777983
+--- Slowest 5 flows (tail latency, us) ---
+  136316
+  136304
+  136251
+  136242
+  136213

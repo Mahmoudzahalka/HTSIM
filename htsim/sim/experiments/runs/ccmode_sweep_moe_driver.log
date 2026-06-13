@@ -1,0 +1,25 @@
+===== [sweep] starting cc=sender_only  flags='-sender_cc_only' -> ../experiments/runs/moe8x8b_ft64_cc_sender_only.out =====
+  [cc=sender_only] finished=3007 sim_now_us=64723.7 stable=0
+  [cc=sender_only] finished=3007 sim_now_us=64723.7 stable=0
+  [cc=sender_only] finished=3007 sim_now_us=64723.7 stable=1
+  [cc=sender_only] finished=3007 sim_now_us=64723.7 stable=2
+  [cc=sender_only] workload complete (finished=3007). killing 200314
+===== [sweep] done cc=sender_only =====
+===== [sweep] starting cc=receiver_only  flags='-receiver_cc_only' -> ../experiments/runs/moe8x8b_ft64_cc_receiver_only.out =====
+  [cc=receiver_only] finished=397 sim_now_us=35907.1 stable=0
+  [cc=receiver_only] finished=866 sim_now_us=80349.2 stable=0
+  [cc=receiver_only] finished=1101 sim_now_us=130333 stable=0
+  [cc=receiver_only] finished=1117 sim_now_us=999941 stable=0
+  [cc=receiver_only] *** ABORTED: runaway, sim past 400000us without completing *** killing 200385
+===== [sweep] done cc=receiver_only =====
+===== [sweep] starting cc=both  flags='-sender_cc -receiver_cc' -> ../experiments/runs/moe8x8b_ft64_cc_both.out =====
+  [cc=both] finished=2390 sim_now_us=57507 stable=0
+  [cc=both] finished=4700 sim_now_us=89888.8 stable=0
+  [cc=both] finished=7222 sim_now_us=126480 stable=0
+  [cc=both] finished=8119 sim_now_us=138395 stable=0
+  [cc=both] finished=8119 sim_now_us=138395 stable=0
+  [cc=both] finished=8119 sim_now_us=138395 stable=1
+  [cc=both] finished=8119 sim_now_us=138395 stable=2
+  [cc=both] workload complete (finished=8119). killing 200458
+===== [sweep] done cc=both =====
+ALL DONE -> ../experiments/ccmode_sweep_moe_results.txt

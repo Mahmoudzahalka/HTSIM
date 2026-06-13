@@ -1,0 +1,13 @@
+[watch] 20:25:30 finished=22398 sim_now_us=44270.9 stable=0
+[watch] 20:25:51 finished=26722 sim_now_us=45918.8 stable=0
+[watch] 20:26:12 finished=31132 sim_now_us=47578.4 stable=0
+[watch] 20:26:33 finished=35692 sim_now_us=49694.1 stable=0
+[watch] 20:26:54 finished=40585 sim_now_us=52743.6 stable=0
+[watch] 20:27:16 finished=45810 sim_now_us=60150.3 stable=0
+[watch] 20:27:38 finished=51932 sim_now_us=67228.5 stable=0
+[watch] 20:28:01 finished=60663 sim_now_us=82362.4 stable=0
+[watch] 20:28:23 finished=65424 sim_now_us=92383 stable=0
+[watch] 20:28:46 finished=65424 sim_now_us=92383 stable=0
+[watch] 20:29:09 finished=65424 sim_now_us=92383 stable=1
+[watch] 20:29:31 finished=65424 sim_now_us=92383 stable=2
+[watch] workload complete (finished=65424). killing 189614

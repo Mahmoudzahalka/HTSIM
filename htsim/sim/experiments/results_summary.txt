@@ -1,0 +1,67 @@
+############################################################
+# HTSIM ATLAHS/GOAL trace runs — Fat Tree topology
+# Generated: Sat 13 Jun 2026 20:37:53 IDT
+# Common params: -sender_cc_only  -linkspeed 200000 (200Gbps)
+#                -end 250000us (killed early at workload completion)
+############################################################
+
+Trace parameters (unique-nic mapping = ranks x 4 NICs):
+  Llama7B_N32_GPU128_PP1_DP128_7B_BS128 : 32 ranks x4 = 128 nodes -> fat_tree_128_1os.topo
+  MoE8x8B_N16_GPU64_TP1_PP8_DP8_EP1_7B_BS32 : 16 ranks x4 = 64 nodes -> fat_tree_64_1os.topo
+  Llama13B_N16_GPU64_TP4_PP2_DP8_VPP5_BS32 : 16 ranks x4 = 64 nodes -> fat_tree_64_1os.topo (PENDING)
+
+
+============================================================
+RUN 1: Llama7B_N32_GPU128  (128 nodes, fat_tree_128_1os)
+============================================================
+============================================================
+ htsim run summary: experiments/runs/llama7b_ft128.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 90226.9 us  (= 90.227 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 65424
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 12766380120 bytes (11.89 GiB)
+--- FCT distribution (us) ---
+  count=65424  min=8145.32  mean=50965.33  max=90226.90
+  p50=48162.70  p90=74871.00  p99=88112.80
+--- Packets & retransmits ---
+  total packets sent : 3172543
+  RTS (retransmit-on-timeout) flows : 9707 / 65424
+  duplicate-pkt (Spurious) log lines: 1101042
+--- Slowest 5 flows (tail latency, us) ---
+  90226.9
+  90225.2
+  90221
+  90217.8
+  90212.3
+
+
+============================================================
+RUN 2: MoE8x8B_N16_GPU64  (64 nodes, fat_tree_64_1os)
+============================================================
+============================================================
+ htsim run summary: experiments/runs/moe8x8b_ft64.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 62486 us  (= 62.486 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 3007
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 2753404218 bytes (2.56 GiB)
+--- FCT distribution (us) ---
+  count=3007  min=8631.00  mean=42310.92  max=62486.00
+  p50=42414.90  p90=58044.90  p99=61774.50
+--- Packets & retransmits ---
+  total packets sent : 684984
+  RTS (retransmit-on-timeout) flows : 2905 / 3007
+  duplicate-pkt (Spurious) log lines: 278160
+--- Slowest 5 flows (tail latency, us) ---
+  62486
+  62391
+  62389.3
+  62344.1
+  62319.6
