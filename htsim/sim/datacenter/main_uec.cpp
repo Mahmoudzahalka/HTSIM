@@ -194,6 +194,14 @@ int main(int argc, char **argv) {
             queue_size_bdp_factor = atoi(argv[i+1]);
             cout << "Setting queue size to "<< queue_size_bdp_factor << "x BDP." << endl;
             i++;
+        } else if (!strcmp(argv[i],"-min_rto")) {
+            // Override the fixed retransmit timeout (default DEFAULT_UEC_RTO_MIN us).
+            // Raising this avoids spurious timeouts when queueing delay under
+            // congestion exceeds the default 100us RTO. Additive/revertible: no
+            // effect unless this flag is passed.
+            UecSrc::setMinRTO(atoi(argv[i+1]));
+            cout << "min_rto set to " << atoi(argv[i+1]) << " us" << endl;
+            i++;
         } else if (!strcmp(argv[i],"-sender_cc_algo")) {
             UecSrc::_sender_based_cc = true;
             sender_driven = true;

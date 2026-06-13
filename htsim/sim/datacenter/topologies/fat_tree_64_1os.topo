@@ -1,0 +1,29 @@
+# 3-tier FatTree, 64 nodes, 1:1 (non-oversubscribed) — derived from fat_tree_128_1os.topo
+# Same pod structure (podsize 16) but 4 pods instead of 8, so core down-radix = 4.
+Nodes 64
+Tiers 3
+Podsize 16
+
+Tier 0
+Oversubscribed 1
+Downlink_speed_Gbps 100
+Radix_Down 4
+Radix_Up 4
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+
+Tier 1
+Oversubscribed 1
+Downlink_speed_Gbps 100
+Radix_Down 4
+Radix_Up 4
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+Bundle 1
+
+Tier 2
+Downlink_speed_Gbps 100
+Radix_Down 4
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+Bundle 1

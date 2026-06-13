@@ -15,3 +15,6 @@ idmap.txt
 !example_validate.json
 build/
 *.bin
+# ATLAHS GOAL trace files (multi-GB; never commit)
+htsim/sim/experiments/traces/
+htsim/sim/lgs/*.bin
