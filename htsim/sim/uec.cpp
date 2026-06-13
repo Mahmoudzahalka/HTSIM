@@ -97,6 +97,45 @@ float UecSrc::loss_retx_factor = 1.5;
 int UecSrc::min_retx_config = 5;
 /* End SLEEK parameters */
 
+/* --- Retransmission / congestion diagnostics (additive; opt-in via -rtx_stats) ---
+ * Global cumulative counters dumped PERIODICALLY (not just at sim end) so the
+ * timeline survives even when a runaway run is killed before completion. They let
+ * us classify retransmissions: trigger mix (RTO vs NACK) and outcome (rtx_needed =
+ * filled a real gap, vs rtx_spurious = receiver already had it = wasted). No effect
+ * unless _rtx_stats is set by the -rtx_stats flag. */
+bool UecSrc::_rtx_stats = false;
+namespace {
+    uint64_t g_new_sent = 0, g_rtx_sent = 0, g_rto_events = 0, g_nacks_recv = 0;
+    uint64_t g_dup = 0, g_rtx_recv = 0, g_rtx_recv_spurious = 0;
+    uint64_t g_trimmed = 0, g_ooo = 0;
+    uint64_t g_sends_at_floor = 0;   // sends issued with cwnd collapsed to ~1 MTU
+    uint64_t g_max_ooo_count = 0;    // peak instantaneous reorder depth at ANY sink (HoL signal)
+    // measured RTT, interval-windowed (reset each printed dump): tests "RTO < RTT"
+    simtime_picosec g_rtt_sum = 0, g_rtt_max = 0;
+    uint64_t g_rtt_n = 0, g_rtt_over_rto = 0;
+    simtime_picosec g_last_dump = 0;
+    void rtx_stats_maybe_dump(simtime_picosec now) {
+        if (!UecSrc::_rtx_stats) return;
+        if (g_last_dump != 0 && now - g_last_dump < timeFromUs((uint32_t)500)) return; // ~0.5ms cadence
+        g_last_dump = now;
+        uint64_t tot_sent = g_new_sent + g_rtx_sent;
+        double avg_rtt_us = g_rtt_n ? timeAsUs(g_rtt_sum / g_rtt_n) : 0.0;
+        double rtt_over_pct = g_rtt_n ? 100.0 * g_rtt_over_rto / g_rtt_n : 0.0;
+        printf("[RTXSTATS] t=%.3fms sent_new=%lu sent_rtx=%lu rto=%lu nack=%lu | "
+               "recv_dup=%lu rtx_recv=%lu rtx_spurious=%lu rtx_needed=%lu trimmed=%lu ooo=%lu | "
+               "sends_at_floor=%lu (%.0f%%) max_ooo_depth=%lu | "
+               "avg_rtt=%.1fus max_rtt=%.1fus rtt>rto=%.0f%% (rto=%.0fus)\n",
+               timeAsUs(now) / 1000.0, g_new_sent, g_rtx_sent, g_rto_events, g_nacks_recv,
+               g_dup, g_rtx_recv, g_rtx_recv_spurious,
+               g_rtx_recv - g_rtx_recv_spurious, g_trimmed, g_ooo,
+               g_sends_at_floor, tot_sent ? 100.0 * g_sends_at_floor / tot_sent : 0.0,
+               g_max_ooo_count,
+               avg_rtt_us, timeAsUs(g_rtt_max), rtt_over_pct, timeAsUs(UecSrc::_min_rto));
+        fflush(stdout);
+        g_rtt_sum = g_rtt_max = 0; g_rtt_n = g_rtt_over_rto = 0;  // reset RTT window
+    }
+}
+
 void UecSrc::initNsccParams(simtime_picosec network_rtt,
                             linkspeed_bps linkspeed,
                             simtime_picosec target_Qdelay,
@@ -635,6 +674,7 @@ void UecSrc::connectPort(uint32_t port_num,
 }
 
 void UecSrc::receivePacket(Packet& pkt, uint32_t portnum) {
+    rtx_stats_maybe_dump(eventlist().now());  // periodic diagnostics (opt-in)
     switch (pkt.type()) {
         case UECDATA: {
             _stats.bounces_received++;
@@ -998,6 +1038,12 @@ void UecSrc::processAck(const UecAckPacket& pkt) {
         send_time = i->second.send_time;
         pkt_size = i->second.pkt_size;
         raw_rtt = eventlist().now() - send_time;
+
+        if (UecSrc::_rtx_stats) {   // RTT diagnostics window (see [RTXSTATS] dump)
+            g_rtt_sum += raw_rtt; g_rtt_n++;
+            if (raw_rtt > g_rtt_max) g_rtt_max = raw_rtt;
+            if (raw_rtt > _min_rto) g_rtt_over_rto++;
+        }
 
         if (!pkt.is_rts()) {
             update_base_rtt(raw_rtt);
@@ -1559,6 +1605,7 @@ void UecSrc::runSleek(uint32_t ooo, UecBasePacket::seq_t cum_ack) {
 void UecSrc::processNack(const UecNackPacket& pkt) {
     _nic.logReceivedCtrl(pkt.size());
     _stats.nacks_received++;
+    g_nacks_recv++;
 
     // auto pullno = pkt.pullno();
     // handlePull(pullno);
@@ -2144,6 +2191,8 @@ mem_b UecSrc::sendNewPacket(const Route& route) {
     p->sendOn();
     _highest_sent++;
     _stats.new_pkts_sent++;
+    g_new_sent++;
+    if (_cwnd <= (mem_b)_mtu) g_sends_at_floor++;
     startRTO(eventlist().now());
 
     assert(full_pkt_size > 0);
@@ -2187,6 +2236,8 @@ mem_b UecSrc::sendRtxPacket(const Route& route) {
     p->set_ar(true);
     p->sendOn();
     _stats.rtx_pkts_sent++;
+    g_rtx_sent++;
+    if (_cwnd <= (mem_b)_mtu) g_sends_at_floor++;
     startRTO(eventlist().now());
     return full_pkt_size;
 }
@@ -2363,6 +2414,8 @@ void UecSrc::recalculateRTO() {
 void UecSrc::rtxTimerExpired() {
     assert(eventlist().now() == _rtx_timeout);
     clearRTO();
+    _stats.rto_events++;   // was declared but never counted
+    g_rto_events++;
 
     auto first_entry = _send_times.begin();
     assert(first_entry != _send_times.end());
@@ -2674,6 +2727,7 @@ void UecSink::handlePullTarget(UecBasePacket::seq_t pt) {
 
 void UecSink::processData(UecDataPacket& pkt) {
     bool force_ack = false;
+    if (pkt.retransmitted()) g_rtx_recv++;   // a retransmitted data pkt arrived in full
     if (pkt.packet_type() == UecBasePacket::DATA_PROBE){
         UecAckPacket* ack_packet =
             sack(pkt.path_id(), sackBitmapBase(pkt.epsn()), pkt.epsn(), (bool)(pkt.flags() & ECN_CE), pkt.retransmitted());
@@ -2742,6 +2796,8 @@ void UecSink::processData(UecDataPacket& pkt) {
                  << endl;
 
         _stats.duplicates++;
+        g_dup++;
+        if (pkt.retransmitted()) g_rtx_recv_spurious++;  // wasted rtx: receiver already had it
         _nic.logReceivedData(pkt.size(), 0);
 
         // if (_src->flow()->flow_id() == UecSrc::_debug_flowid){   
@@ -2808,6 +2864,8 @@ void UecSink::processData(UecDataPacket& pkt) {
         _epsn_rx_bitmap[pkt.epsn()] = 1;
         _out_of_order_count++;
         _stats.out_of_order++;
+        g_ooo++;
+        if (_out_of_order_count > g_max_ooo_count) g_max_ooo_count = _out_of_order_count;
     }
     if (_src->flow()->flow_id() == UecSrc::_debug_flowid) {
         cout << timeAsUs(_src->eventlist().now()) << " flowid " << _src->flow()->flow_id()
@@ -2846,6 +2904,7 @@ void UecSink::processTrimmed(const UecDataPacket& pkt) {
     _nic.logReceivedTrim(pkt.size());
 
     _stats.trimmed++;
+    g_trimmed++;   // genuine loss event (-> NACK -> needed retransmit)
     
     /*Currently, the trimming support in htsim does not change (or support) DSCP code points. However, upon trim, it
     does save the TTL of the packet at the trim point. To detect last hop trims, we compare the received TTL to the 
@@ -2929,6 +2988,7 @@ void UecSink::processRts(const UecRtsPacket& pkt) {
                  << endl;
 
         _stats.duplicates++;
+        g_dup++;   // RTS-control duplicate (not a data rtx, so not counted as spurious-rtx)
 
         // sender is confused and sending us duplicates: ACK straight away.
         // this code is different from the proposed hardware implementation, as it keeps track of
@@ -2960,6 +3020,8 @@ void UecSink::processRts(const UecRtsPacket& pkt) {
         _epsn_rx_bitmap[pkt.epsn()] = 1;
         _out_of_order_count++;
         _stats.out_of_order++;
+        g_ooo++;
+        if (_out_of_order_count > g_max_ooo_count) g_max_ooo_count = _out_of_order_count;
     }
 
     UecAckPacket* ack_packet =

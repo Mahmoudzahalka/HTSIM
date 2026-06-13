@@ -224,6 +224,7 @@ public:
 
     static bool update_base_rtt_on_nack;
     static bool _enable_sleek;
+    static bool _rtx_stats;   // -rtx_stats: periodic global retransmit/congestion dump
 
     virtual const string& nodename() { return _nodename; }
     virtual void setName(const string& name) override { _name=name; _mp->set_debug_tag(name); }

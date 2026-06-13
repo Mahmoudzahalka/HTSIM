@@ -133,6 +133,7 @@ int main(int argc, char **argv) {
     char* topo_file = NULL;
     int8_t qa_gate = -1;
     bool conn_reuse = false;
+    bool min_rto_user_set = false;  // -min_rto overrides the auto-computed RTO below
 
     while (i<argc) {
         if (!strcmp(argv[i],"-o")) {
@@ -200,6 +201,7 @@ int main(int argc, char **argv) {
             // congestion exceeds the default 100us RTO. Additive/revertible: no
             // effect unless this flag is passed.
             UecSrc::setMinRTO(atoi(argv[i+1]));
+            min_rto_user_set = true;  // suppress the auto-computed override below
             cout << "min_rto set to " << atoi(argv[i+1]) << " us" << endl;
             i++;
         } else if (!strcmp(argv[i],"-sender_cc_algo")) {
@@ -384,6 +386,10 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i],"-sleek")){
             UecSrc::_enable_sleek = true;
             cout << "Using SLEEK, the sender-based fast loss recovery heuristic " << endl;
+        }
+        else if (!strcmp(argv[i],"-rtx_stats")){
+            UecSrc::_rtx_stats = true;
+            cout << "Retransmit/congestion diagnostics enabled (periodic [RTXSTATS] dump)" << endl;
         }
         else if (!strcmp(argv[i],"-ecn")){
             // fraction of queuesize, between 0 and 1
@@ -717,7 +723,10 @@ int main(int argc, char **argv) {
     } 
 
     //2 priority queues; 3 hops for incast
-    UecSrc::_min_rto = timeFromUs(15 + queuesize * 6.0 * 8 * 1000000 / linkspeed);
+    // Auto-compute the min RTO from queue size + linkspeed, UNLESS the user
+    // pinned it explicitly via -min_rto (otherwise that flag would be clobbered).
+    if (!min_rto_user_set)
+        UecSrc::_min_rto = timeFromUs(15 + queuesize * 6.0 * 8 * 1000000 / linkspeed);
     cout << "Setting min RTO to " << timeAsUs(UecSrc::_min_rto) << endl;
 
     if (ecn){
