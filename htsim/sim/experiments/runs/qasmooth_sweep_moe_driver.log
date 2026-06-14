@@ -1,0 +1,14 @@
+===== [sweep] qa_smooth=1.0 -> ../experiments/runs/moe8x8b_ft64_qas1.0.out =====
+  [qas=1.0] finished=3007 sim_now_us=64723.7 stable=0
+  [qas=1.0] finished=3007 sim_now_us=64723.7 stable=0
+  [qas=1.0] finished=3007 sim_now_us=64723.7 stable=1
+  [qas=1.0] finished=3007 sim_now_us=64723.7 stable=2
+  [qas=1.0] complete (finished=3007)
+===== [sweep] done qa_smooth=1.0 =====
+===== [sweep] qa_smooth=0.75 -> ../experiments/runs/moe8x8b_ft64_qas0.75.out =====
+  [qas=0.75] finished=3976 sim_now_us=78021.3 stable=0
+  [qas=0.75] finished=7902 sim_now_us=132611 stable=0
+  [qas=0.75] finished=12004 sim_now_us=191167 stable=0
+  [qas=0.75] finished=14167 sim_now_us=213003 stable=0
+  [qas=0.75] finished=14167 sim_now_us=213003 stable=0
+  [qas=0.75] finished=14167 sim_now_us=213003 stable=1

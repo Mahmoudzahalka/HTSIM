@@ -225,6 +225,9 @@ public:
     static bool update_base_rtt_on_nack;
     static bool _enable_sleek;
     static bool _rtx_stats;   // -rtx_stats: periodic global retransmit/congestion dump
+    static double _qa_smooth_alpha;  // -qa_smooth: quick_adapt blend weight (1.0=stock bang-bang)
+    static double _qa_cooldown;      // -qa_cooldown: QA refractory in periods after a fire (1.0=stock)
+    static double _qa_inc_cooldown;  // -qa_inc_cooldown: suppress fast_increase for N periods post-QA (0=stock)
 
     virtual const string& nodename() { return _nodename; }
     virtual void setName(const string& name) override { _name=name; _mp->set_debug_tag(name); }
@@ -444,6 +447,7 @@ private:
     uint32_t _fi_count = 0;
     bool _trigger_qa = false;
     simtime_picosec _qa_endtime = 0;
+    simtime_picosec _qa_last_fire = 0;  // time of last quick_adapt fire (post-QA inc damping)
     uint32_t _bytes_to_ignore = 0;
     uint32_t _bytes_ignored = 0;
     uint32_t _inc_bytes = 0;

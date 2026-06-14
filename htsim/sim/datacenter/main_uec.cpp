@@ -391,6 +391,27 @@ int main(int argc, char **argv) {
             UecSrc::_rtx_stats = true;
             cout << "Retransmit/congestion diagnostics enabled (periodic [RTXSTATS] dump)" << endl;
         }
+        else if (!strcmp(argv[i],"-qa_smooth")){
+            // quick_adapt hysteresis: blend weight on achieved rate (0..1].
+            // 1.0 = stock bang-bang slam; lower = softer, more stable QA.
+            UecSrc::_qa_smooth_alpha = atof(argv[i+1]);
+            cout << "quick_adapt smoothing alpha = " << UecSrc::_qa_smooth_alpha << endl;
+            i++;
+        }
+        else if (!strcmp(argv[i],"-qa_cooldown")){
+            // quick_adapt refractory: after a QA fire, wait this many QA periods
+            // before re-evaluating. 1.0 = stock; >1 damps fire/skip chatter.
+            UecSrc::_qa_cooldown = atof(argv[i+1]);
+            cout << "quick_adapt cooldown periods = " << UecSrc::_qa_cooldown << endl;
+            i++;
+        }
+        else if (!strcmp(argv[i],"-qa_inc_cooldown")){
+            // suppress fast_increase for this many QA periods after a QA fire, to
+            // stop cwnd overshooting back up and re-triggering QA. 0 = stock.
+            UecSrc::_qa_inc_cooldown = atof(argv[i+1]);
+            cout << "quick_adapt fast-increase cooldown periods = " << UecSrc::_qa_inc_cooldown << endl;
+            i++;
+        }
         else if (!strcmp(argv[i],"-ecn")){
             // fraction of queuesize, between 0 and 1
             param_ecn_set = true;

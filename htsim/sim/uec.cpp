@@ -104,6 +104,14 @@ int UecSrc::min_retx_config = 5;
  * filled a real gap, vs rtx_spurious = receiver already had it = wasted). No effect
  * unless _rtx_stats is set by the -rtx_stats flag. */
 bool UecSrc::_rtx_stats = false;
+// quick_adapt hysteresis weight: 1.0 = stock bang-bang slam (default, no change);
+// alpha<1 blends new cwnd = alpha*achieved + (1-alpha)*old_cwnd (see quick_adapt).
+double UecSrc::_qa_smooth_alpha = 1.0;
+// quick_adapt refractory: after a QA fire, re-evaluate only after this many QA
+// periods (1.0 = stock, re-evaluate every period). >1 damps trigger chatter.
+double UecSrc::_qa_cooldown = 1.0;
+// post-QA fast_increase suppression window, in QA periods (0 = stock, no damping).
+double UecSrc::_qa_inc_cooldown = 0.0;
 namespace {
     uint64_t g_new_sent = 0, g_rtx_sent = 0, g_rto_events = 0, g_nacks_recv = 0;
     uint64_t g_dup = 0, g_rtx_recv = 0, g_rtx_recv_spurious = 0;
@@ -1253,7 +1261,15 @@ bool UecSrc::quick_adapt(bool is_loss, bool skip, simtime_picosec delay) {
             } 
             
             mem_b before = _cwnd;
-            _cwnd = max(_achieved_bytes, _min_cwnd); //* _qa_scaling;
+            // ORIGINAL (bang-bang hard slam to achieved rate):
+            // _cwnd = max(_achieved_bytes, _min_cwnd); //* _qa_scaling;
+            // QA hysteresis (opt-in via -qa_smooth): instead of a hard bang-bang
+            // slam to the achieved rate, blend toward it. This widens the stable
+            // region (stock NSCC is bistable at the QA trigger boundary). alpha=1.0
+            // (default) reproduces the original slam exactly; alpha<1 softens it.
+            mem_b qa_target = (mem_b)(_qa_smooth_alpha * (double)_achieved_bytes
+                                      + (1.0 - _qa_smooth_alpha) * (double)before);
+            _cwnd = max(qa_target, _min_cwnd);
             _nscc_overall_stats.dec_quick_bytes += before - _cwnd;
             _nscc_fulfill_stats.dec_quick_bytes += before - _cwnd;
 
@@ -1267,9 +1283,22 @@ bool UecSrc::quick_adapt(bool is_loss, bool skip, simtime_picosec delay) {
             _bytes_ignored = 0;
             _trigger_qa = false;
             qa_done_or_ignore = true;
+            _qa_last_fire = eventlist().now();  // for post-QA fast_increase damping
         }
         _achieved_bytes = 0;
-        _qa_endtime = eventlist().now() + _base_rtt + _target_Qdelay;
+        // ORIGINAL (re-evaluate QA every period):
+        // _qa_endtime = eventlist().now() + _base_rtt + _target_Qdelay;
+        // QA cooldown / trigger-hysteresis (opt-in via -qa_cooldown): after an
+        // ACTUAL fire (qa_done_or_ignore set in the block above), push the next
+        // evaluation out by _qa_cooldown periods so QA can't chatter fire/skip
+        // every period (the bistability is in the trigger, not the cut size).
+        // _qa_cooldown=1.0 (default) reproduces stock behavior exactly.
+        {
+            simtime_picosec qa_period = _base_rtt + _target_Qdelay;
+            if (qa_done_or_ignore && _qa_cooldown > 1.0)
+                qa_period = (simtime_picosec)(_qa_cooldown * (double)qa_period);
+            _qa_endtime = eventlist().now() + qa_period;
+        }
     }
 
     if (qa_done_or_ignore) {
@@ -1300,6 +1329,15 @@ void UecSrc::proportional_increase(uint32_t newly_acked_bytes,simtime_picosec de
 }
 
 void UecSrc::fast_increase(uint32_t newly_acked_bytes,simtime_picosec delay){
+    // Post-QA increase damping (opt-in via -qa_inc_cooldown): for a window after a
+    // QA fire, suppress fast_increase so cwnd doesn't immediately overshoot back up
+    // and re-trigger QA (suspected oscillation). 0 (default) = stock behavior.
+    if (_qa_inc_cooldown > 0.0 && _qa_last_fire != 0
+        && eventlist().now() - _qa_last_fire
+               < (simtime_picosec)(_qa_inc_cooldown * (double)(_base_rtt + _target_Qdelay))) {
+        _fi_count = 0;
+        return;
+    }
     if (delay < timeFromUs(1u)){
         _fi_count += newly_acked_bytes;
         if (_fi_count > _cwnd || _increase){

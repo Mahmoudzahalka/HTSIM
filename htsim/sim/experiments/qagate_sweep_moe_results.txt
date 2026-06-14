@@ -1,0 +1,145 @@
+############################################################
+# MoE8x8B (64n) quick_adapt -qa_gate sweep (default gate=3=maxwnd/8)
+# -sender_cc_only -rtx_stats, NO -sleek. Generated: Sun 14 Jun 2026 10:44:38 IDT.
+# Tests whether the QA bang-bang has any stable (non stall/runaway) point.
+############################################################
+
+============================================================
+qa_gate = 1  (maxwnd/2^1)
+  flows=12839  makespan_us=196834  (3007 flows = full MoE completion)
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_qag1.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 196834 us  (= 196.834 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 12839
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 11674580490 bytes (10.87 GiB)
+--- FCT distribution (us) ---
+  count=12839  min=8631.00  mean=109736.57  max=196834.00
+  p50=109925.00  p90=177710.00  p99=193786.00
+--- Packets & retransmits ---
+  total packets sent : 2898114
+  RTS (Request-To-Send ctrl pkts) flows>0 : 12606 / 12839
+  duplicate-pkt (Spurious) log lines      : 1178201
+--- Slowest 5 flows (tail latency, us) ---
+  196834
+  196825
+  196823
+  196795
+  196755
+
+============================================================
+qa_gate = 2  (maxwnd/2^2)
+  flows=1639  makespan_us=46332.4  (3007 flows = full MoE completion)
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_qag2.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 46332.4 us  (= 46.332 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 1639
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 1495471914 bytes (1.39 GiB)
+--- FCT distribution (us) ---
+  count=1639  min=8631.00  mean=33272.34  max=46332.40
+  p50=34649.00  p90=42312.70  p99=45147.00
+--- Packets & retransmits ---
+  total packets sent : 370994
+  RTS (Request-To-Send ctrl pkts) flows>0 : 1527 / 1639
+  duplicate-pkt (Spurious) log lines      : 140133
+--- Slowest 5 flows (tail latency, us) ---
+  46332.4
+  46097.8
+  45977.4
+  45949.7
+  45848.9
+
+============================================================
+qa_gate = 3  (maxwnd/2^3)
+  flows=3007  makespan_us=62486  (3007 flows = full MoE completion)
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_qag3.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 62486 us  (= 62.486 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 3007
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 2753404218 bytes (2.56 GiB)
+--- FCT distribution (us) ---
+  count=3007  min=8631.00  mean=42310.92  max=62486.00
+  p50=42414.90  p90=58044.90  p99=61774.50
+--- Packets & retransmits ---
+  total packets sent : 684984
+  RTS (Request-To-Send ctrl pkts) flows>0 : 2905 / 3007
+  duplicate-pkt (Spurious) log lines      : 278160
+--- Slowest 5 flows (tail latency, us) ---
+  62486
+  62391
+  62389.3
+  62344.1
+  62319.6
+
+============================================================
+qa_gate = 5  (maxwnd/2^5)
+  flows=1116  makespan_us=38989.3  (3007 flows = full MoE completion)
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_qag5.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 38989.3 us  (= 38.989 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 1116
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 1014521112 bytes (0.94 GiB)
+--- FCT distribution (us) ---
+  count=1116  min=8631.00  mean=30351.84  max=38989.30
+  p50=31657.00  p90=37611.00  p99=38678.30
+--- Packets & retransmits ---
+  total packets sent : 254574
+  RTS (Request-To-Send ctrl pkts) flows>0 : 1031 / 1116
+  duplicate-pkt (Spurious) log lines      : 121875
+--- Slowest 5 flows (tail latency, us) ---
+  38989.3
+  38968.7
+  38941.9
+  38858.2
+  38851
+
+============================================================
+qa_gate = 8  (maxwnd/2^8)
+  flows=1126  makespan_us=39979  (3007 flows = full MoE completion)
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_qag8.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 39979 us  (= 39.979 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 1126
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 1023976116 bytes (0.95 GiB)
+--- FCT distribution (us) ---
+  count=1126  min=8631.00  mean=30600.21  max=39979.00
+  p50=31798.20  p90=37856.40  p99=38807.50
+--- Packets & retransmits ---
+  total packets sent : 257092
+  RTS (Request-To-Send ctrl pkts) flows>0 : 1018 / 1126
+  duplicate-pkt (Spurious) log lines      : 119518
+--- Slowest 5 flows (tail latency, us) ---
+  39979
+  39946.1
+  39840.4
+  39718.3
+  39680.6

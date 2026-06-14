@@ -1,0 +1,33 @@
+############################################################
+# MoE8x8B (64n) QA-hysteresis (-qa_smooth) sweep. 3007 flows = clean.
+# alpha=1.0 = stock bang-bang (control). -sender_cc_only -rtx_stats.
+# Generated: Sun 14 Jun 2026 10:59:42 IDT.
+############################################################
+
+============================================================
+qa_smooth alpha = 1.0
+  flows=3007 (3007=clean)  makespan_us=62486  mean_avg_rtt_us=42.8
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_qas1.0.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 62486 us  (= 62.486 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 3007
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 2753404218 bytes (2.56 GiB)
+--- FCT distribution (us) ---
+  count=3007  min=8631.00  mean=42310.92  max=62486.00
+  p50=42414.90  p90=58044.90  p99=61774.50
+--- Packets & retransmits ---
+  total packets sent : 684984
+  RTS (Request-To-Send ctrl pkts) flows>0 : 2905 / 3007
+  duplicate-pkt (Spurious) log lines      : 278160
+--- Slowest 5 flows (tail latency, us) ---
+  62486
+  62391
+  62389.3
+  62344.1
+  62319.6

@@ -1,0 +1,61 @@
+############################################################
+# MoE8x8B (64n, fat_tree_64_1os, 200Gbps) NSCC target_q_delay sweep
+# -sender_cc_only -rtx_stats, NO -sleek. Default target_q_delay ~9.76us.
+# Generated: Sun 14 Jun 2026 10:34:59 IDT. Tests whether tighter NSCC backoff bounds the queue.
+############################################################
+
+============================================================
+target_q_delay = 9.76 us
+  RTT: mean avg_rtt=39.7us  mean max_rtt=0.0us  (n=27)
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_tq9.76.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 30066.5 us  (= 30.067 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 450
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 460091772 bytes (0.43 GiB)
+--- FCT distribution (us) ---
+  count=450  min=8631.00  mean=23261.72  max=30066.50
+  p50=24014.70  p90=28414.70  p99=29901.20
+--- Packets & retransmits ---
+  total packets sent : 113877
+  RTS (Request-To-Send ctrl pkts) flows>0 : 390 / 450
+  duplicate-pkt (Spurious) log lines      : 36312
+--- Slowest 5 flows (tail latency, us) ---
+  30066.5
+  29967.7
+  29959.6
+  29929.6
+  29928.9
+
+============================================================
+target_q_delay = 6 us *** ABORTED: runaway past 400000us ***
+  RTT: mean avg_rtt=35.8us  mean max_rtt=0.0us  (n=827)
+============================================================
+============================================================
+ htsim run summary: ../experiments/runs/moe8x8b_ft64_tq6.out
+============================================================
+--- Makespan (workload runtime) ---
+  last flow completed at : 430526 us  (= 430.526 ms)
+--- Flow / message counts ---
+  flows (messages) completed : 24638
+  all reported in_flight=0   : yes (clean)
+--- Total bytes transferred ---
+  total = 21756380976 bytes (20.26 GiB)
+--- FCT distribution (us) ---
+  count=24638  min=8631.00  mean=190330.60  max=430526.00
+  p50=187587.00  p90=325284.00  p99=366449.00
+--- Packets & retransmits ---
+  total packets sent : 5379747
+  RTS (Request-To-Send ctrl pkts) flows>0 : 23161 / 24638
+  duplicate-pkt (Spurious) log lines      : 3628906
+--- Slowest 5 flows (tail latency, us) ---
+  430526
+  407884
+  403399
+  401741
+  395802

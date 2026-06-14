@@ -1,0 +1,25 @@
+===== [sweep] target_q_delay=9.76us -> ../experiments/runs/moe8x8b_ft64_tq9.76.out =====
+  [tq=9.76] finished=450 sim_now_us=30611.3 stable=0
+  [tq=9.76] finished=450 sim_now_us=30611.3 stable=0
+  [tq=9.76] finished=450 sim_now_us=30611.3 stable=1
+  [tq=9.76] finished=450 sim_now_us=30611.3 stable=2
+  [tq=9.76] complete (finished=450)
+===== [sweep] done tq=9.76 =====
+===== [sweep] target_q_delay=6us -> ../experiments/runs/moe8x8b_ft64_tq6.out =====
+  [tq=6] finished=3920 sim_now_us=78407.2 stable=0
+  [tq=6] finished=8298 sim_now_us=141027 stable=0
+  [tq=6] finished=12782 sim_now_us=203988 stable=0
+  [tq=6] finished=17460 sim_now_us=271480 stable=0
+  [tq=6] finished=22193 sim_now_us=339070 stable=0
+  [tq=6] finished=24085 sim_now_us=366625 stable=0
+  [tq=6] finished=24632 sim_now_us=398921 stable=0
+  [tq=6] finished=24637 sim_now_us=434238 stable=0
+  [tq=6] *** ABORTED: runaway past 400000us ***
+===== [sweep] done tq=6 =====
+===== [sweep] target_q_delay=3us -> ../experiments/runs/moe8x8b_ft64_tq3.out =====
+  [tq=3] finished=4293 sim_now_us=82169.7 stable=0
+  [tq=3] finished=8979 sim_now_us=145880 stable=0
+  [tq=3] finished=13944 sim_now_us=213027 stable=0
+  [tq=3] finished=19087 sim_now_us=283906 stable=0
+  [tq=3] finished=23826 sim_now_us=337808 stable=0
+  [tq=3] finished=24585 sim_now_us=365025 stable=0
