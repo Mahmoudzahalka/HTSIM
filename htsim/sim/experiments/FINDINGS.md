@@ -148,49 +148,180 @@ raw per-run outputs in `experiments/runs/`.
 
 ---
 
-## 5. Conclusion
+## 5. Why it's so brittle: the quick_adapt bistability (and 5 failed fixes)
 
-**No config lever beats the baseline** (sender-only, 1×BDP, MIXED, auto-RTO ≈94 µs,
-no-sleek: 62.5 ms, 278K spurious, clean). But — unlike the earlier draft of this
-doc — the duplicate rate is **not** an opaque "intrinsic cost." Instrumentation
-pinned the mechanism (§3):
+§3 said "NSCC under-damps." Drilling in revealed *why*, and why it can't be tuned
+out. NSCC's `quick_adapt` (`uec.cpp:1226`, called first in `updateCwndOnAck_NSCC`)
+is a **bang-bang controller**: when it fires it hard-slams `_cwnd =
+max(_achieved_bytes, _min_cwnd)`. Both its trigger (`_qa_threshold = 4 ×
+_target_Qdelay`) and its evaluation period (`_qa_endtime = now + _base_rtt +
+_target_Qdelay`) scale with `_target_Qdelay`.
 
-- The storm is **RTO-timeout-driven with no real loss** (`trimmed ≈ nack ≈ 0`).
-- **RTT rises to meet whatever RTO you set** (max_rtt: 94→94 µs, 200→199 µs), so
-  the RTO can never get above the RTT — that's why raising it is *worse*, not
-  better, and why the config sweeps all fail the same way.
-- The true root cause is **NSCC under-damping**: its queue-delay target
-  (`_target_Qdelay ≈ 9.76 µs`) is missed 4–6×, so queues stay near-full and RTT
-  rides the RTO ceiling.
+**The system is bistable at QA's trigger boundary.** The two failure modes map
+exactly onto QA:
+- QA fires **too eagerly** → cwnd slammed to floor → throughput collapses → **stall**.
+- QA fires **too rarely** → cwnd grows → queue fills → RTT rides RTO → **runaway**.
 
-The runs are **correct** (all flows delivered, `in_flight = 0`); the duplicates
-are wasted work, not wrong results.
+This is why it's chaotically sensitive: a **0.002 µs** change in `-target_q_delay`
+(9.758 default vs 9.76 explicit) flips complete↔stall, because it shifts when/whether
+QA fires. The default `qa_gate=3` is a **knife-edge sweet spot** — the *only* value
+that completes cleanly; `qa_gate` 1/2/5/8 all stall or over-run.
 
-**Recommendation:** the fix is **not** an adaptive RTO (an earlier draft said it
-was — but since RTT chases the RTO, an adaptive RTO would track the inflated RTT
-and behave like the runaway). The lever is **NSCC's responsiveness to queue
-delay** — make its multiplicative decrease (`uec.cpp:1308`, `_gamma` /
-`_target_Qdelay`) bound the queue so RTT stops riding the RTO. Validate with
-`-rtx_stats` watching `avg_rtt`/`max_rtt` and the spurious counters.
+**Five fixes tried, all failed** (each flag-gated, default = stock; originals kept
+as comments in `uec.cpp`):
+
+| Fix | Flag | Result |
+|---|---|---|
+| Lower NSCC delay setpoint | `-target_q_delay 6/3/1.5` | all stall or runaway |
+| Re-tune QA trigger | `-qa_gate 1/2/5/8` | only default (3) is stable |
+| Smooth the QA cut magnitude | `-qa_smooth <1` | runaway (softer cut = weaker brake) |
+| QA trigger refractory | `-qa_cooldown >1` | stall / no benefit |
+| Damp fast_increase post-QA | `-qa_inc_cooldown >0` | drags / worse |
+
+So the bistability is **robust to single-knob interventions** on the setpoint,
+trigger timing, cut magnitude, and post-fire recovery. A genuine fix needs a
+*coupled* control-law redesign (multiple coordinated changes) + ground-truth
+validation — not a tweak.
+
+## 6. Conclusion
+
+**No config lever and no single-knob code change beats the stock baseline**
+(sender-only, 1×BDP, MIXED, auto-RTO ≈94 µs, no-sleek: 62.5 ms, 278K spurious,
+clean). The runs are **correct** (`in_flight = 0`); the duplicates are wasted
+work, not wrong results.
+
+The deliverable is the **characterization**, which is a defensible result on its own:
+*stock UEC/NSCC is bistable under AI-incast (MoE expert all-to-all); its quick_adapt
+bang-bang has a single knife-edge stable point and resists single-parameter fixes.*
+That framing turns the whole study into the motivation for a **"more stable NSCC
+variant"** — a legitimate CC contribution where the simulator is the testbed and
+stock-vs-variant comparison is the accepted methodology (don't claim it models stock
+UEC; claim it improves it). The actual fix is **future work**.
+
+**Two things to carry forward:**
+1. The `-rtx_stats` diagnostics (§7) make this debuggable for *any* model, not just MoE.
+2. A credible CC fix must (a) not regress cases that already work (e.g. Llama7B), and
+   (b) show breadth across workloads/scales — not just one trace.
 
 ---
 
-## 6. Instrumentation added (`-rtx_stats`)
+## 7. Code added this study (all additive, flag-gated, default = stock)
 
-An opt-in diagnostic (additive; zero output unless `-rtx_stats` is passed) that
-periodically (~0.5 ms sim) prints a global `[RTXSTATS]` line — periodic so the
-timeline survives even when a runaway is killed before completion. It classifies
-retransmissions and exposes the dynamics that resolved §3:
-
+**`-rtx_stats`** — opt-in diagnostic; periodically (~0.5 ms sim) prints a global
+`[RTXSTATS]` line (periodic so the timeline survives an early-killed runaway):
 - **trigger:** `rto` (timeouts), `nack`, `trimmed` — shows the storm is RTO-driven.
 - **outcome:** `rtx_needed` (filled a real gap) vs `rtx_spurious` (receiver already
   had it); `recv_dup`.
 - **state:** `sends_at_floor` (cwnd collapsed?), `max_ooo_depth` (head-of-line?),
   and **measured RTT** (`avg_rtt`/`max_rtt`, `rtt>rto%`) — the decisive signal.
 
-Also fixes a latent bug: `_stats.rto_events` was declared but never incremented.
-Counters live in `uec.cpp` (file-scope, gated on `UecSrc::_rtx_stats`); flag parsed
-in `main_uec.cpp`.
+**Bug fixes:** `_stats.rto_events` was declared but never incremented (fixed).
+`-min_rto` was silently clobbered by `main_uec.cpp:720` (fixed with a
+`min_rto_user_set` guard).
+
+**Experimental knobs** (default values = exact stock behavior; for future CC work):
+`-min_rto <us>`, `-qa_smooth <alpha>`, `-qa_cooldown <periods>`,
+`-qa_inc_cooldown <periods>` — see §5. All in `uec.{h,cpp}` + `main_uec.cpp`;
+originals preserved as comments.
+
+---
+
+## 8. Reference — diagnosing congestion/retransmit problems in ANY model
+
+A model-agnostic playbook (Llama, dense, MoE, any GOAL trace). The numbers above
+are MoE-specific; the *method* generalizes. Keep this as a checklist.
+
+### 8.1 Is something actually wrong? (triage)
+
+Healthy run: completes near the expected makespan, `in_flight = 0` for all flows,
+flow-completion count ≈ number of messages in the trace. Suspect a pathology if:
+
+- **Sim time runs past `-end`** / never plateaus → *runaway* (congestion collapse).
+- **Flow-completion ("finished at") count ≫ messages in the trace** (e.g. 4–8×) →
+  retransmit-inflated; the network is doing huge wasted work.
+- **`Spurious` log lines flood** (a duplicate-packet at the receiver).
+- **Makespan much higher than a back-of-envelope** (bytes ÷ per-host linkspeed).
+
+A *stall* is the opposite of runaway: the flow count plateaus far **below** the
+message count and the watcher thinks it's "done." Always sanity-check the final
+flow count against the trace — `1,116 of 3,007` is a stall, not a completion.
+
+### 8.2 First move: re-run with `-rtx_stats`
+
+Add `-rtx_stats` and read the periodic `[RTXSTATS]` line. It's the fastest way to
+classify the problem. Key fields and what they tell you:
+
+| Field | Meaning | What a high value implies |
+|---|---|---|
+| `rto` | RTO timeouts fired | retransmission is **timeout-driven** |
+| `nack`, `trimmed` | NACKs / trimmed pkts received | retransmission is **loss-driven** (real drops) |
+| `rtx_needed` vs `rtx_spurious` | retransmit filled a gap vs receiver already had it | needed≫spurious = retransmit beats a *delayed* (not lost) original |
+| `recv_dup` | duplicate pkts at receiver | ≈ the `Spurious` flood |
+| `sends_at_floor` | % sends with cwnd at ~1 MTU | **cwnd collapse** |
+| `max_ooo_depth` | peak reorder-buffer at any sink | **head-of-line blocking** |
+| `avg_rtt` / `max_rtt` / `rtt>rto%` | measured RTT | **`max_rtt` pinned at the RTO ⇒ RTT-rides-RTO** |
+
+### 8.3 Decision tree (which pathology is it?)
+
+1. **`trimmed`/`nack` large** → genuine loss/incast overflow. Bottleneck is buffer
+   capacity → look at queue size, ECN thresholds, or oversubscription.
+2. **`rto ≈ sent_rtx`, `trimmed ≈ nack ≈ 0`** → no real loss; it's **RTO/timeout
+   driven**. Then check RTT:
+   - **`max_rtt` pins to the RTO** (and rises if you raise `-min_rto`) → **RTT
+     chases the RTO** = the NSCC quick_adapt bistability (§3, §5). Config won't fix
+     it; raising the RTO makes it *worse*. This is the MoE case.
+   - `max_rtt` well below RTO yet RTO still fires → look at cwnd-blocked / ACK-path
+     delay.
+3. **`max_ooo_depth` huge** (10⁴–10⁵) → head-of-line blocking: one missing packet
+   stalls cumulative ACK. (Was *not* the MoE cause — depth stayed ~200.)
+4. **`sends_at_floor` high** → cwnd collapsed to the floor; throughput crawls.
+   (Also *not* the MoE cause — stayed ~0–1%.)
+
+### 8.4 Gotchas that bite every run
+
+- **`-end` is a hard cap, not a stop.** The `Clock` reschedules forever, so htsim
+  always idle-ticks to `-end` even after the workload finishes. Set `-end` just
+  above the expected makespan, or kill on plateau (`experiments/runs/watch_kill.sh`).
+- **Judge only at completion.** A mid-run snapshot can look fine and then storm
+  later (we saw 226K spurious mid-run finish at 778K). Don't conclude from partials.
+- **Chaotic sensitivity near the stability edge.** A ~0.002 µs setpoint change
+  flipped complete↔stall. Tiny param/flag differences can flip outcomes — don't
+  over-read a single run; confirm the *trend*.
+- **Watch for clobbered flags.** `-min_rto` was silently overwritten in setup
+  (`main_uec.cpp:720`). If a flag sweep gives *byte-identical* results, the flag
+  isn't taking effect — verify it changed the intended value (grep the run header).
+- **Kill leftover `htsim_uec` processes** between runs (`pgrep -x htsim_uec`); a
+  detached run idle-ticking to `-end` wastes CPU.
+
+### 8.5 Levers, and the honest expectation
+
+For a **terminal-incast** pathology (RTT-rides-RTO / NSCC bistability), nearly every
+lever made it *worse* on MoE: `-min_rto↑`, `-queue_size_bdp_factor↑`, `-sleek`,
+`-load_balancing_algo ecmp|reps`, `-receiver_cc_only`, `-sender_cc -receiver_cc`,
+`-target_q_delay↓`, `-qa_gate≠3`, and the three QA code knobs. **MIXED spray + 1×BDP
++ default RTO/QA is the tuned baseline.** Treat config tuning as unlikely to help an
+incast-bound workload; it's the *communication pattern + CC*, not the fabric.
+
+### 8.6 Topology note (why a bigger fat tree won't help incast)
+
+Many-to-one incast (e.g. MoE expert all-to-all, or any reduce/gather) is bound by
+the **receiver's last-hop link**, whose capacity a bigger fabric does not increase.
+The runs are already on a **1:1 (full-bisection) fat tree** — the most generous
+core per node — so extra fabric has nothing to relieve (`trimmed ≈ 0` confirms the
+core isn't overflowing). Scale the fabric only when the bottleneck is *core/cross-
+sectional* (oversubscribed tree, or permutation/spread traffic). To ease incast,
+reduce the **fan-in** (placement, smaller collective groups, in-network reduction)
+or fix the CC — not raw fabric size. (Note: htsim rejects running an N-node trace on
+a differently-sized `.topo`, so test *scale* with a larger trace, not a bigger tree
+under the same workload.)
+
+### 8.7 When it's NOT a bug
+
+A run that **completes with `in_flight = 0`** but a high `Spurious` count is
+*correct* — duplicates are wasted work, not wrong results. For comparative topology/
+placement studies the baseline is usable as-is; just report the retransmission
+overhead as a caveat. Only chase it if you specifically need the absolute makespan
+or are proposing a CC improvement.
 
 ---
 
@@ -203,8 +334,10 @@ cd htsim/sim/datacenter
     -sender_cc_only -nodes 128 -end 250000 -topo topologies/fat_tree_128_1os.topo \
     -linkspeed 200000 > out.txt 2>&1
 ./analyze.sh out.txt
-# sweeps:
+# config sweeps:
 bash ../experiments/runs/{rto,qsize,lb,ccmode,reps}_sweep_moe.sh
+# NSCC fix-attempt sweeps (all default-stock; see §5):
+bash ../experiments/runs/{targetq,qagate,qasmooth,qacooldown,qaic}_sweep_moe.sh
 # mechanism diagnostics (the [RTXSTATS] timeline; baseline vs runaway):
 ./htsim_uec -goal ../experiments/traces/MoE8x8B_N16_GPU64_TP1_PP8_DP8_EP1_7B_BS32.bin \
     -sender_cc_only -rtx_stats -nodes 64 -end 250000 \

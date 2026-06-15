@@ -533,7 +533,22 @@ class SerializedGraph {
 	public:
 
 	uint32_t GetNumNodes() {
-		return this->num_nodes;		
+		return this->num_nodes;
+	}
+
+	// [DIAG] count nodes of a given op type (OP_SEND/OP_RECV/OP_LOCOP) by walking the
+	// mmap'd node array and reading only the Type byte. Used once at parse time to learn
+	// how many of the GOAL ops are actually flows (sends) vs recv/compute.
+	uint64_t CountNodesOfType(char wanted) {
+		uint32_t nn  = (uint32_t) *((uint32_t*) mapping_start);
+		uint32_t nrn = (uint32_t) *((uint32_t*) (mapping_start + sizeof(uint32_t)));
+		int SIZEOF_NODE_INFO = sizeof(char) + sizeof(uint64_t) + sizeof(uint32_t)*7 + sizeof(uint8_t)*2;
+		char* base = mapping_start + sizeof(uint32_t)*2 + sizeof(uint32_t)*nrn;
+		uint64_t cnt = 0;
+		for (uint32_t off = 0; off < nn; off++)
+			if (*(base + (size_t)SIZEOF_NODE_INFO*off + sizeof(uint32_t)) == wanted)
+				cnt++;
+		return cnt;
 	}
 
 	void write_as_dot(char *filename) {

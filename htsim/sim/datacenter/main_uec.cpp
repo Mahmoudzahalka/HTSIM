@@ -391,6 +391,10 @@ int main(int argc, char **argv) {
             UecSrc::_rtx_stats = true;
             cout << "Retransmit/congestion diagnostics enabled (periodic [RTXSTATS] dump)" << endl;
         }
+        else if (!strcmp(argv[i],"-sack_ideal")){
+            UecSrc::_sack_ideal = true;
+            cout << "SACK bitmap base anchored at oldest unacked recvd pkt (-sack_ideal)" << endl;
+        }
         else if (!strcmp(argv[i],"-ecn")){
             // fraction of queuesize, between 0 and 1
             param_ecn_set = true;

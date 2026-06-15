@@ -104,6 +104,13 @@ int UecSrc::min_retx_config = 5;
  * filled a real gap, vs rtx_spurious = receiver already had it = wasted). No effect
  * unless _rtx_stats is set by the -rtx_stats flag. */
 bool UecSrc::_rtx_stats = false;
+/* -sack_ideal (additive, default off = stock): when set, the SACK bitmap base is
+ * anchored at the OLDEST unacknowledged received packet (sackBitmapBaseIdeal)
+ * instead of ending at the just-received epsn (sackBitmapBase). Targets the
+ * spurious-RTO storm seen on Llama (reorder depth > 64-wide bitmap): keeps the
+ * about-to-time-out packets inside the reportable window so the sender cancels
+ * their RTO instead of spuriously retransmitting already-delivered packets. */
+bool UecSrc::_sack_ideal = false;
 namespace {
     uint64_t g_new_sent = 0, g_rtx_sent = 0, g_rto_events = 0, g_nacks_recv = 0;
     uint64_t g_dup = 0, g_rtx_recv = 0, g_rtx_recv_spurious = 0;
@@ -1210,9 +1217,16 @@ bool UecSrc::can_send_RCCC() {
 
 bool UecSrc::can_send_NSCC(mem_b pkt_size) {
     assert(_sender_based_cc);
-    return (pkt_size > 0) 
-    	   && (((!_loss_recovery_mode && _cwnd >= _in_flight + pkt_size) 
-                || (_loss_recovery_mode && (!_rtx_queue.empty() || _cwnd >= _in_flight + pkt_size))));
+    // BUGFIX(deadlock 2026-06-14): empty-pipe escape hatch. Under the NACK/trim storm
+    // cwnd can collapse below one packet (observed _cwnd=2758 < pkt 4096). With nothing
+    // in flight, _cwnd >= _in_flight + pkt_size stays false forever AND no packet ever
+    // goes out to elicit an ACK that would re-grow cwnd -> the flow wedges and the GOAL
+    // collective deadlocks. Standard CC must always permit one packet into an empty
+    // pipe (zero-window-probe safety): if nothing is in flight, allow the send.
+    return (pkt_size > 0)
+           && ((!_loss_recovery_mode && _cwnd >= _in_flight + pkt_size)
+               || (_loss_recovery_mode && (!_rtx_queue.empty() || _cwnd >= _in_flight + pkt_size))
+               || (_in_flight <= 0));
 }
 
 void UecSrc::set_cwnd_bounds() {
@@ -2405,6 +2419,16 @@ void UecSrc::recalculateRTO() {
     cancelRTO();
     if (_send_times.empty()) {
         // nothing left that we're waiting for
+        // BUGFIX(deadlock 2026-06-14): _send_times can empty (everything cum-acked)
+        // while the flow is NOT yet done -- either a packet still sits in _rtx_queue
+        // behind cwnd/NIC, OR a tail loss was never re-detected so nothing is queued
+        // at all -- with nothing in flight to generate a fresh ACK. The original code
+        // returned here with no armed timer, so the flow went silent forever
+        // (isActivelySending() still reports it busy -> LGS sends_active stuck -> GOAL
+        // collective deadlocks). If we still owe data, arm a probe RTO so the flow
+        // keeps trying (the probe drives a retransmit / RTS in rtxTimerExpired).
+        if (!_done_sending && _highest_sent > 0)
+            startRTO(eventlist().now());
         return;
     }
     auto earliest_send_time = _send_times.begin()->first;
@@ -2417,8 +2441,36 @@ void UecSrc::rtxTimerExpired() {
     _stats.rto_events++;   // was declared but never counted
     g_rto_events++;
 
+    // BUGFIX(deadlock 2026-06-14): a probe RTO armed by recalculateRTO() (see there)
+    // can fire with _send_times empty but a retransmit still owed. The original code
+    // asserted non-empty here (crash in debug; in release it would fall through and
+    // leave the flow wedged with no timer). Handle it: try to push the rtx queue
+    // (sendRtxPacket re-adds a send record and re-arms the RTO); if we still can't
+    // send, prompt the receiver with an RTS and re-arm so we keep trying.
     auto first_entry = _send_times.begin();
-    assert(first_entry != _send_times.end());
+    if (first_entry == _send_times.end()) {
+        // [STALL-DIAG] this fires only for an idle, not-yet-done flow (rare except a
+        // wedged one), so it's low volume; it pinpoints the stuck flow's state.
+        if (!_done_sending)
+            cout << timeAsUs(eventlist().now()) << " [RTO-PROBE] flowid " << flowId()
+                 << " not done: rtx_backlog=" << _rtx_backlog << " rtx_queue=" << _rtx_queue.size()
+                 << " in_flight=" << _in_flight << " cwnd=" << _cwnd
+                 << " highest_sent=" << _highest_sent << " backlog=" << _backlog << endl;
+        // Drive an actual send: sendIfPermitted() pushes the rtx queue or new backlog
+        // data, and now that can_send_NSCC has an empty-pipe escape this won't be
+        // blocked by a collapsed cwnd. (Earlier versions blindly sent an RTS here,
+        // which only addresses LOST data, not UNSENT backlog -- so a backlog-stuck flow
+        // RTS-looped forever, _highest_sent climbing into the millions. Don't do that.)
+        if (!_done_sending && _highest_sent > 0) {
+            sendIfPermitted();
+            // Receiver-CC may genuinely need a credit nudge; only then is an RTS useful.
+            if (_receiver_based_cc && credit() <= 0)
+                sendRTS();
+            if (!_rtx_timeout_pending)
+                startRTO(eventlist().now());  // keep probing until the flow completes
+        }
+        return;
+    }
     auto seqno = first_entry->second;
 
     auto send_record = _tx_bitmap.find(seqno);
@@ -2808,7 +2860,7 @@ void UecSink::processData(UecDataPacket& pkt) {
         // this code is different from the proposed hardware implementation, as it keeps track of
         // the ACK state of OOO packets.
         UecAckPacket* ack_packet =
-            sack(pkt.path_id(), ecn ? pkt.epsn() : sackBitmapBase(pkt.epsn()), pkt.epsn(), ecn, pkt.retransmitted());
+            sack(pkt.path_id(), (ecn && !UecSrc::_sack_ideal) ? pkt.epsn() : sackBitmapBase(pkt.epsn()), pkt.epsn(), ecn, pkt.retransmitted());
         _nic.sendControlPacket(ack_packet, NULL, this);
 
         _accepted_bytes = 0;  // careful about this one.
@@ -2875,7 +2927,7 @@ void UecSink::processData(UecDataPacket& pkt) {
     }
     if (ecn || shouldSack() || force_ack) {
         UecAckPacket* ack_packet =
-            sack(pkt.path_id(), (ecn || pkt.ar()) ? pkt.epsn() : sackBitmapBase(pkt.epsn()), pkt.epsn(), ecn, pkt.retransmitted());
+            sack(pkt.path_id(), ((ecn || pkt.ar()) && !UecSrc::_sack_ideal) ? pkt.epsn() : sackBitmapBase(pkt.epsn()), pkt.epsn(), ecn, pkt.retransmitted());
 
         if (_src->debug()) {
             cout << " UecSink " << _nodename << " src " << _src->nodename()
@@ -3025,7 +3077,7 @@ void UecSink::processRts(const UecRtsPacket& pkt) {
     }
 
     UecAckPacket* ack_packet =
-        sack(pkt.path_id(), (ecn || pkt.ar()) ? pkt.epsn() : sackBitmapBase(pkt.epsn()), pkt.epsn(), ecn, pkt.retransmitted());
+        sack(pkt.path_id(), ((ecn || pkt.ar()) && !UecSrc::_sack_ideal) ? pkt.epsn() : sackBitmapBase(pkt.epsn()), pkt.epsn(), ecn, pkt.retransmitted());
     ack_packet->set_is_rts(true);
     if (_src->debug())
         cout << " UecSink " << _nodename << " src " << _src->nodename()
@@ -3122,12 +3174,19 @@ bool UecSink::shouldSack() {
 }
 
 UecBasePacket::seq_t UecSink::sackBitmapBase(UecBasePacket::seq_t epsn) {
+    // -sack_ideal: anchor at the oldest unacked received packet so the
+    // about-to-time-out packets stay inside the 64-wide reportable window.
+    if (UecSrc::_sack_ideal)
+        return sackBitmapBaseIdeal(epsn);
     return max((int64_t)epsn - 63, (int64_t)(_expected_epsn + 1));
 }
 
-UecBasePacket::seq_t UecSink::sackBitmapBaseIdeal() {
+// `epsn` = the just-received packet's seqno; used as a safe fallback base when
+// there is no out-of-order backlog to anchor on.
+UecBasePacket::seq_t UecSink::sackBitmapBaseIdeal(UecBasePacket::seq_t epsn) {
     uint8_t lowest_value = UINT8_MAX;
     UecBasePacket::seq_t lowest_position = 0;
+    bool found = false;
 
     // find the lowest non-zero value in the sack bitmap; that is the candidate for the base, since
     // it is the oldest packet that we are yet to sack. on sack bitmap construction that covers a
@@ -3136,8 +3195,18 @@ UecBasePacket::seq_t UecSink::sackBitmapBaseIdeal() {
         if (_epsn_rx_bitmap[crt] && _epsn_rx_bitmap[crt] < lowest_value) {
             lowest_value = _epsn_rx_bitmap[crt];
             lowest_position = crt;
+            found = true;
         }
 
+    // Guard (added): with no OOO backlog, or too few seqnos to fill a window, the
+    // original `_high_epsn - 64` underflows (seq_t is unsigned) -> out-of-bounds
+    // bitmap read. Fall back to the stock base in that case.
+    if (!found || _high_epsn < 64)
+        return max((int64_t)epsn - 63, (int64_t)(_expected_epsn + 1));
+
+    // ORIGINAL (stock sackBitmapBaseIdeal body, preserved):
+    // if (lowest_position + 64 > _high_epsn)
+    //     lowest_position = _high_epsn - 64;
     if (lowest_position + 64 > _high_epsn)
         lowest_position = _high_epsn - 64;
 

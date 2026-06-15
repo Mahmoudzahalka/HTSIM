@@ -466,7 +466,8 @@ int start_lgs(std::string filename_goal, LogSimInterface &lgs) {
     gettimeofday(&tstart, NULL);
   
     int host=0; 
-    uint64_t num_events=0;    
+    uint64_t num_events=0;
+    uint64_t num_sends_total=0, num_recvs_total=0;
 
     printf("Starting %lu\n", parser.schedules.size());
     
@@ -484,6 +485,8 @@ int start_lgs(std::string filename_goal, LogSimInterface &lgs) {
       // std::sort(free_ops.begin(), free_ops.end(), gnp_op_comp_func());
   
       num_events += sched->GetNumNodes();
+      num_sends_total += sched->CountNodesOfType(OP_SEND);
+      num_recvs_total += sched->CountNodesOfType(OP_RECV);
   
       // walk all new free operations and throw them in the queue 
       for(SerializedGraph::nodelist_t::iterator freeop=free_ops.begin(); freeop != free_ops.end(); ++freeop) {
@@ -513,6 +516,17 @@ int start_lgs(std::string filename_goal, LogSimInterface &lgs) {
       }
     }
 
+    // [DIAG] total GOAL operations parsed from the trace (sends+recvs+compute),
+    // summed across all ranks. Printed once after parse to ground-truth the
+    // workload size vs how many flows actually finish.
+    printf("[LGS-DIAG] total num_events (all GOAL ops, %lu ranks) = %lu\n",
+           parser.schedules.size(), (unsigned long)num_events);
+    printf("[LGS-DIAG] SENDS (flows) = %lu | RECVS = %lu | other(compute) = %lu | sends/iter(=/2) = %lu\n",
+           (unsigned long)num_sends_total, (unsigned long)num_recvs_total,
+           (unsigned long)(num_events - num_sends_total - num_recvs_total),
+           (unsigned long)(num_sends_total/2));
+    fflush(stdout);
+
     bool qstat_given = false;
     bool comm_dep_file_given = false;
     bool qstat_arg = false; 
@@ -531,6 +545,22 @@ int start_lgs(std::string filename_goal, LogSimInterface &lgs) {
       if (count_cycless > 20000000) {
           //printf("Count1 Cycles Exceeded 200000\n");
           //exit(0);
+      }
+      // [STALL-DIAG] loop-gated (NOT packet-gated) snapshot: tells deadlock (sim-time
+      // frozen + aq non-empty, spinning) apart from a long compute phase (sim-time
+      // advancing). Shows the op at the head of the active queue = what we're stuck on.
+      if (count_cycless % 3000000 == 0) {
+          int srq = size_queue(rq, p), suq = size_queue(uq, p);
+          printf("[STALL-DIAG] cyc=%d htsim_t=%lu ns | aq=%zu sends_active=%d compute=%d | tot_rq=%d tot_uq=%d",
+                 count_cycless, (unsigned long)lgs_interface->htsim_api->getGlobalTimeNs(),
+                 (size_t)lgs_interface->aq.size(), lgs_interface->sends_active,
+                 lgs_interface->compute_started, srq, suq);
+          if (!lgs_interface->aq.empty())
+              printf(" | aq.top host=%d target=%d tag=%d type=%d time=%lu",
+                     lgs_interface->aq.top().host, lgs_interface->aq.top().target,
+                     lgs_interface->aq.top().tag, lgs_interface->aq.top().type,
+                     (unsigned long)lgs_interface->aq.top().time);
+          printf("\n"); fflush(stdout);
       }
       int count_cycles = 0;
       int64_t can_simulate_until = -1;

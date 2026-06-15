@@ -225,6 +225,7 @@ public:
     static bool update_base_rtt_on_nack;
     static bool _enable_sleek;
     static bool _rtx_stats;   // -rtx_stats: periodic global retransmit/congestion dump
+    static bool _sack_ideal;  // -sack_ideal: anchor SACK bitmap at oldest unacked recvd pkt (vs newest)
 
     virtual const string& nodename() { return _nodename; }
     virtual void setName(const string& name) override { _name=name; _mp->set_debug_tag(name); }
@@ -536,7 +537,7 @@ class UecSink : public DataReceiver {
     void setEndTrigger(Trigger& trigger);
 
     UecBasePacket::seq_t sackBitmapBase(UecBasePacket::seq_t epsn);
-    UecBasePacket::seq_t sackBitmapBaseIdeal();
+    UecBasePacket::seq_t sackBitmapBaseIdeal(UecBasePacket::seq_t epsn);
     uint64_t buildSackBitmap(UecBasePacket::seq_t ref_epsn);
     UecAckPacket* sack(uint32_t path_id, UecBasePacket::seq_t seqno, UecBasePacket::seq_t acked_psn, bool ce, bool rtx_echo);
 
