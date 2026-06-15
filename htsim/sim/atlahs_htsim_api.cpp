@@ -65,8 +65,13 @@ void AtlahsHtsimApi::Send(const SendEvent &event, graph_node_properties elem) {
         }
     }
 
-    if (_logsim_interface->get_protocol() == UEC_PROTOCOL) { 
+    if (_logsim_interface->get_protocol() == UEC_PROTOCOL) {
         TrafficLoggerSimple* traffic_logger = NULL;
+
+        // GOAL replay creates one short-lived flow per send (millions total), so enable
+        // flow teardown: free each (src,sink) pair once it is fully quiescent (stage 2:
+        // detection only). Harmless to set every call; off for fixed-flow drivers.
+        UecSrc::_free_completed_flows = true;
 
         // Construct a fresh multipath instance per flow
         if (!mp_factory) {

@@ -102,7 +102,7 @@ private:
     const Route* _route;  // we're only going to support ECMP_HOST for now.
 };
 
-class UecSrc : public EventSource, public TriggerTarget, public UecTransportConnection {
+class UecSrc : public EventSource, public TriggerTarget, public UecTransportConnection, public FlowRefListener {
 public:
     struct Stats {
         /* all must be non-negative, but we'll make them signed so we
@@ -234,6 +234,16 @@ public:
     mem_b flowsize() { return _flow_size; }
     inline PacketFlow* flow() { return &_flow; }
     optional<UecMsgTracker*> msg_tracker() { return _msg_tracker; };
+
+    // Flow teardown (free completed flows to bound memory on huge GOAL traces).
+    // onFlowDrained() fires when an outstanding-packet refcount hits zero;
+    // maybeTeardown() frees the (src,sink) pair once it is fully quiescent
+    // (done sending, no in-flight packets on either flow, no RTO, not NIC-queued).
+    // Gated by _free_completed_flows so other (fixed-flow) drivers are unaffected.
+    virtual void onFlowDrained() override;
+    void maybeTeardown();
+    static bool _free_completed_flows;   // enable teardown (set by the GOAL/atlahs driver)
+    static bool _debug_teardown;         // verbose [FLOW-QUIESCENT]/[FLOW-FREED] logging
 
     inline flowid_t flowId() const { return _flow.flow_id(); }
 
@@ -476,6 +486,7 @@ private:
 
     // Connectivity
     PacketFlow _flow;
+    bool _torn_down = false;   // teardown guard: free the (src,sink) pair at most once
     string _nodename;
     int _node_num;
     uint32_t _dstaddr;
@@ -529,6 +540,7 @@ class UecSink : public DataReceiver {
     virtual uint32_t drops() { return 0; }
 
     inline flowid_t flowId() const { return _flow.flow_id(); }
+    inline PacketFlow* flow() { return &_flow; }
 
     UecPullPacket* pull(UecBasePacket::pull_quanta& extra_credit);
 

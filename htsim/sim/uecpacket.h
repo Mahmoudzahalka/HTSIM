@@ -68,6 +68,7 @@ public:
         p->_trim_hop = {};
         p->_trim_direction = NONE;
 
+        flow.refInc();   // flow teardown: this packet now references the flow
         return p;
     }
   
@@ -92,7 +93,7 @@ public:
     };
 
 
-    void free() {set_pathid(UINT32_MAX),  _packetdb.freePacket(this);}
+    void free() {set_pathid(UINT32_MAX), flow().refDec(), _packetdb.freePacket(this);}
     virtual ~UecDataPacket(){}
 
     inline seq_t epsn() const {return _epsn;}
@@ -164,10 +165,11 @@ public:
         p->_pathid = ev;
         //p->_rnr = rnr;
         p->_slow_pull = false;
+        flow.refInc();
         return p;
-    }    
+    }
 
-    void free() {set_pathid(UINT32_MAX), _packetdb.freePacket(this);}
+    void free() {set_pathid(UINT32_MAX), flow().refDec(), _packetdb.freePacket(this);}
     inline mem_b pullno() const {return _pullno;}
     inline bool is_rnr() const {return _rnr;}
     inline bool is_slow_pull() const {return _slow_pull;}
@@ -218,10 +220,11 @@ public:
 
         p->_recvd_bytes = recv_bytes;
         p->_rcv_cwnd_pen = rcv_wnd_pen;
+        flow.refInc();
         return p;
     }
-  
-    void free() {set_pathid(UINT32_MAX), _packetdb.freePacket(this);}
+
+    void free() {set_pathid(UINT32_MAX), flow().refDec(), _packetdb.freePacket(this);}
     inline seq_t ref_ack() const {return _ref_ack;}
     inline seq_t acked_psn() const {return _acked_psn;}
     inline seq_t cumulative_ack() const {return _cumulative_ack;}
@@ -304,10 +307,11 @@ public:
         p->_target_bytes = tbytes;
         p->_last_hop = false;
 
+        flow.refInc();
         return p;
     }
-  
-    void free() {set_pathid(UINT32_MAX), _packetdb.freePacket(this);}
+
+    void free() {set_pathid(UINT32_MAX), flow().refDec(), _packetdb.freePacket(this);}
     inline seq_t ref_ack() const {return _ref_epsn;}
     //inline pull_quanta pullno() const {return _pullno;}
     uint32_t ev() const {return _ev;}
@@ -355,11 +359,12 @@ public:
 
         p->_ar = true; //always request ack.
         p->set_dst(destination);
+        flow.refInc();
         return p;
     }
-    
-    void free() {set_pathid(UINT32_MAX), _packetdb.freePacket(this);}
-    
+
+    void free() {set_pathid(UINT32_MAX), flow().refDec(), _packetdb.freePacket(this);}
+
     inline bool ar() const {return _ar;}
 
     virtual PktPriority priority() const {return Packet::PRIO_HI;}

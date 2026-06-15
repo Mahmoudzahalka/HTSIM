@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cassert>
 #include "config.h"
 #include "loggertypes.h"
 #include "route.h"
@@ -25,6 +26,14 @@ class DataReceiver : public Logged {
     virtual uint32_t drops()=0;
 };
 
+// Observer notified when a PacketFlow's outstanding-packet refcount drains to 0.
+// Used by UEC flow teardown to learn when no packets reference a flow any more.
+class FlowRefListener {
+ public:
+    virtual ~FlowRefListener() {}
+    virtual void onFlowDrained() = 0;
+};
+
 class PacketFlow : public Logged {
     friend class Packet;
  public:
@@ -35,10 +44,24 @@ class PacketFlow : public Logged {
     void set_flowid(flowid_t id);
     inline flowid_t flow_id() const {return _flow_id;}
     bool log_me() const {return _logger != NULL;}
+    // Outstanding-packet reference counting (for flow teardown). A packet calls
+    // refInc() when created carrying this flow and refDec() when freed. When the
+    // count drains to zero the registered listener (if any) is notified, so the
+    // flow's owner can check whether it is now safe to tear the flow down.
+    inline void refInc() { _refcount++; }
+    inline void refDec() {
+        assert(_refcount > 0);
+        if (--_refcount == 0 && _ref_listener)
+            _ref_listener->onFlowDrained();
+    }
+    inline int refCount() const { return _refcount; }
+    inline void setRefListener(FlowRefListener* l) { _ref_listener = l; }
  protected:
     static packetid_t _max_flow_id;
     flowid_t _flow_id;
     TrafficLogger* _logger;
+    int _refcount = 0;
+    FlowRefListener* _ref_listener = nullptr;
 };
 
 

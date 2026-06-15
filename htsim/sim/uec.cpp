@@ -111,7 +111,13 @@ bool UecSrc::_rtx_stats = false;
  * about-to-time-out packets inside the reportable window so the sender cancels
  * their RTO instead of spuriously retransmitting already-delivered packets. */
 bool UecSrc::_sack_ideal = false;
+// Flow teardown (free completed flows to bound memory on huge GOAL traces). Off by
+// default so fixed-flow drivers (main_uec etc.) are unaffected; the GOAL/atlahs driver
+// turns it on. _debug_teardown enables per-flow [FLOW-QUIESCENT]/[FLOW-FREED] logging.
+bool UecSrc::_free_completed_flows = false;
+bool UecSrc::_debug_teardown = false;
 namespace {
+    uint64_t g_flows_quiescent = 0;  // flows that reached the safe-to-free state
     uint64_t g_new_sent = 0, g_rtx_sent = 0, g_rto_events = 0, g_nacks_recv = 0;
     uint64_t g_dup = 0, g_rtx_recv = 0, g_rtx_recv_spurious = 0;
     uint64_t g_trimmed = 0, g_ooo = 0;
@@ -672,6 +678,14 @@ void UecSrc::connectPort(uint32_t port_num,
         //_flow.set_id(get_id());  // identify the packet flow with the UEC source that generated it
         _flow._name = _name;
 
+        // Flow teardown: observe when this flow's packets fully drain. A late ACK
+        // (sink's flow) references the src and a late DATA (src's flow) references the
+        // sink, so we listen on BOTH; the src owns the teardown decision (maybeTeardown).
+        if (_free_completed_flows) {
+            _flow.setRefListener(this);
+            sink.flow()->setRefListener(this);
+        }
+
         if (start_time != TRIGGER_START || true) {
             eventlist().sourceIsPending(*this, start_time);
         }
@@ -953,11 +967,16 @@ bool UecSrc::checkFinished(UecDataPacket::seq_t cum_ack) {
     if (_debug_src)
         cout << _flow.str() << " " << _nodename << " checkFinished "
              << " cum_acc " << cum_ack << " mss " << _mss << " RTS sent " << _stats.rts_pkts_sent
-             << " total bytes " << ((int64_t)cum_ack - _stats.rts_pkts_sent) * _mss 
-             << " flow_size " << _flow_size 
+             << " total bytes " << ((int64_t)cum_ack - _stats.rts_pkts_sent) * _mss
+             << " flow_size " << _flow_size
              << " backlog " << _backlog
              << " rtx_queue " << _rtx_queue.size()
              << " done_sending " << _done_sending << endl;
+
+    // Flow teardown: completion may coincide with the pipe already being drained
+    // (no in-flight packets), in which case no future refDec will fire -- so check now.
+    if (_done_sending)
+        maybeTeardown();
 
     return _done_sending;
 }
@@ -2433,6 +2452,37 @@ void UecSrc::recalculateRTO() {
     }
     auto earliest_send_time = _send_times.begin()->first;
     startRTO(earliest_send_time);
+}
+
+// Called when one of this flow's PacketFlow refcounts (src's data/RTS, or sink's
+// ack/nack) drains to zero. Re-check whether the whole (src,sink) pair is now quiescent.
+void UecSrc::onFlowDrained() {
+    maybeTeardown();
+}
+
+// Free a completed flow once it is fully quiescent, to bound memory on GOAL traces
+// that create millions of one-shot flows. Quiescent means: done sending, no in-flight
+// packets on EITHER flow (a late ACK references the src; a late DATA references the
+// sink), no armed RTO, and not queued at the NIC. STAGE 2: detection only -- we record
+// the quiescent point and log; actual freeing (removeHostPort + delete, deferred via an
+// event to avoid freeing inside a packet's free()) is wired in stage 3.
+void UecSrc::maybeTeardown() {
+    if (!_free_completed_flows || _torn_down)
+        return;
+    if (!_done_sending || _rtx_timeout_pending || _send_blocked_on_nic)
+        return;
+    if (_flow.refCount() != 0)
+        return;
+    if (_sink && _sink->flow()->refCount() != 0)
+        return;
+    _torn_down = true;
+    g_flows_quiescent++;
+    if (_debug_teardown)
+        cout << timeAsUs(eventlist().now()) << " [FLOW-QUIESCENT] flowid " << flowId() << endl;
+    if (g_flows_quiescent % 50000 == 0) {
+        cout << "[QUIESCENT-COUNT] " << g_flows_quiescent << endl;
+        fflush(stdout);
+    }
 }
 
 void UecSrc::rtxTimerExpired() {
