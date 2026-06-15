@@ -41,6 +41,30 @@ void AtlahsHtsimApi::Send(const SendEvent &event, graph_node_properties elem) {
         exit(0);
     }
 
+    // [CC-DIAG] record same-pair overlap (uses the htsim node numbers + tag that
+    // EventOver will carry, so EventFinished can match this entry on completion).
+    {
+        auto key = std::make_pair(from, to);
+        auto &tags = _cc_inflight[key];
+        _cc_total++;
+        _cc_pairs.insert(key);
+        if (!tags.empty()) {
+            _cc_overlap++;
+            if (tags.count(tag) > 0) _cc_overlap_sametag++;
+        }
+        tags.insert(tag);
+        if (tags.size() > _cc_max_concurrent) _cc_max_concurrent = tags.size();
+        if (_cc_total % 50000 == 0) {
+            printf("[CC-DIAG] sends=%lu distinct_pairs=%zu max_concurrent_pair=%lu "
+                   "overlap=%lu (sametag=%lu difftag=%lu)\n",
+                   (unsigned long)_cc_total, _cc_pairs.size(),
+                   (unsigned long)_cc_max_concurrent, (unsigned long)_cc_overlap,
+                   (unsigned long)_cc_overlap_sametag,
+                   (unsigned long)(_cc_overlap - _cc_overlap_sametag));
+            fflush(stdout);
+        }
+    }
+
     if (_logsim_interface->get_protocol() == UEC_PROTOCOL) { 
         TrafficLoggerSimple* traffic_logger = NULL;
 
@@ -151,6 +175,14 @@ void AtlahsHtsimApi::EventFinished(const EventOver &event) {
     //std::cout << "AtlahsHtsimApi: Event is over" << std::endl;
 
     if (AtlahsEventType::SEND_EVENT_OVER == event.getEventType()) {
+        // [CC-DIAG] this send finished -> remove one entry for its (from,to)+tag.
+        {
+            auto it = _cc_inflight.find(std::make_pair(event.getFrom(), event.getTo()));
+            if (it != _cc_inflight.end()) {
+                auto t = it->second.find(event.getTag());
+                if (t != it->second.end()) it->second.erase(t);
+            }
+        }
         //_logsim_interface->flow_over(*(event.getPacket()));
         _logsim_interface->flow_over(event);
     } else if (AtlahsEventType::COMPUTE_EVENT_OVER == event.getEventType()) {

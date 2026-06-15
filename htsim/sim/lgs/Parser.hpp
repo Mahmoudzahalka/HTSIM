@@ -551,6 +551,20 @@ class SerializedGraph {
 		return cnt;
 	}
 
+	// [DIAG] read type/peer/tag of node `offset` (layout per get_node_by_offset:
+	// after DependenciesCnt(uint32): Type(char), Peer(uint32), Size(uint64), Tag(uint32)).
+	// Returns op type; fills peer (target/source) and tag. Used to count distinct
+	// (rank,peer,tag) send tuples = the connection count under (from,to,tag) reuse.
+	char getNodeTypePeerTag(uint32_t offset, uint32_t* peer, uint32_t* tag) {
+		uint32_t nrn = (uint32_t) *((uint32_t*) (mapping_start + sizeof(uint32_t)));
+		int SIZEOF_NODE_INFO = sizeof(char) + sizeof(uint64_t) + sizeof(uint32_t)*7 + sizeof(uint8_t)*2;
+		char* sn = mapping_start + sizeof(uint32_t)*2 + sizeof(uint32_t)*nrn + (size_t)SIZEOF_NODE_INFO*offset;
+		char t = *(sn + sizeof(uint32_t));
+		*peer = *((uint32_t*) (sn + sizeof(uint32_t) + sizeof(char)));
+		*tag  = *((uint32_t*) (sn + sizeof(uint32_t) + sizeof(char) + sizeof(uint32_t) + sizeof(uint64_t)));
+		return t;
+	}
+
 	void write_as_dot(char *filename) {
 		/** 
 			Produces a dot representation of the graph. This is usefull for debugging purposes.

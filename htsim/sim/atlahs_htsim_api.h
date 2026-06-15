@@ -5,6 +5,9 @@
 #include <iostream>
 #include <functional>
 #include <memory>
+#include <map>
+#include <set>
+#include <utility>
 #include "compute_event.h"
 #include "null_event.h"
 #include "atlahs_event.h"
@@ -178,6 +181,13 @@ public:
     std::vector<UecNIC*> uec_nics; // TO DO
     std::vector<UecPullPacer*> uec_pacers; // TO DO
     uint64_t cwnd_b = 0; // TO DO
+
+    // [CC-DIAG] measures same-pair message overlap to decide if connection-reuse
+    // ((from,to) keying) is faithful or whether (from,to,tag) keying is needed.
+    // Send() increments the pair's in-flight tag multiset; EventFinished() decrements.
+    std::map<std::pair<int,int>, std::multiset<int>> _cc_inflight;
+    std::set<std::pair<int,int>> _cc_pairs;
+    uint64_t _cc_total=0, _cc_overlap=0, _cc_overlap_sametag=0, _cc_max_concurrent=0;
 
     // Generate Setter and getter for multipathing
     // Replace single-instance setter with a factory to create a new instance per flow

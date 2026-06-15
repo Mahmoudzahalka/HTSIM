@@ -468,6 +468,8 @@ int start_lgs(std::string filename_goal, LogSimInterface &lgs) {
     int host=0; 
     uint64_t num_events=0;
     uint64_t num_sends_total=0, num_recvs_total=0;
+    // [CC-DIAG] distinct (rank,peer,tag) send tuples = #connections under (from,to,tag) reuse.
+    std::set<std::tuple<int,int,int>> send_triples;
 
     printf("Starting %lu\n", parser.schedules.size());
     
@@ -487,6 +489,12 @@ int start_lgs(std::string filename_goal, LogSimInterface &lgs) {
       num_events += sched->GetNumNodes();
       num_sends_total += sched->CountNodesOfType(OP_SEND);
       num_recvs_total += sched->CountNodesOfType(OP_RECV);
+      // collect distinct (rank,peer,tag) for sends to size (from,to,tag) reuse
+      for (uint32_t off = 0; off < sched->GetNumNodes(); off++) {
+        uint32_t peer=0, tg=0;
+        if (sched->getNodeTypePeerTag(off, &peer, &tg) == OP_SEND)
+          send_triples.insert(std::make_tuple(host, (int)peer, (int)tg));
+      }
   
       // walk all new free operations and throw them in the queue 
       for(SerializedGraph::nodelist_t::iterator freeop=free_ops.begin(); freeop != free_ops.end(); ++freeop) {
@@ -525,6 +533,10 @@ int start_lgs(std::string filename_goal, LogSimInterface &lgs) {
            (unsigned long)num_sends_total, (unsigned long)num_recvs_total,
            (unsigned long)(num_events - num_sends_total - num_recvs_total),
            (unsigned long)(num_sends_total/2));
+    printf("[CC-DIAG] distinct (rank,peer,tag) send-tuples = %zu | total sends = %lu | "
+           "avg sends per (from,to,tag) connection = %.1f\n",
+           send_triples.size(), (unsigned long)num_sends_total,
+           send_triples.empty() ? 0.0 : (double)num_sends_total / send_triples.size());
     fflush(stdout);
 
     bool qstat_given = false;
