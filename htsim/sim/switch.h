@@ -35,6 +35,9 @@ class Switch : public EventSource, public Drawable, public PacketSink {
 
     virtual int addPort(BaseQueue* q);
     virtual void addHostPort(int addr, int flowid, PacketSink* transport) { abort();};
+    // Default no-op: only switches with a per-flow host FIB (e.g. FatTreeSwitch)
+    // need to remove host routes on flow teardown.
+    virtual void removeHostPort(int addr, int flowid) {};
 
     uint32_t getID(){return _id;};
     virtual uint32_t getType() {return 0;}

@@ -24,6 +24,21 @@ void RouteTable::addHostRoute(int destination, Route* port, int flowid){
 }
 
 
+void RouteTable::removeHostRoute(int destination, int flowid){
+    auto dit = _hostfib.find(destination);
+    if (dit == _hostfib.end())
+        return;
+    auto fit = dit->second->find(flowid);
+    if (fit == dit->second->end())
+        return;
+    HostFibEntry* e = fit->second;
+    dit->second->erase(fit);
+    if (e) {
+        delete e->getEgressPort();  // the Route allocated in FatTreeSwitch::addHostPort
+        delete e;
+    }
+}
+
 vector<FibEntry*>* RouteTable::getRoutes(int destination){
     if (_fib.find(destination) == _fib.end())
         return NULL;

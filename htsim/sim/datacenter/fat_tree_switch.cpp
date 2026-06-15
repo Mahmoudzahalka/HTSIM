@@ -47,11 +47,19 @@ void FatTreeSwitch::receivePacket(Packet& pkt){
         _packets[&pkt] = true;
 
         const Route * nh = getNextHop(pkt,NULL);
+        // nh == NULL means no route for this packet's flow (e.g. flow torn down while
+        // a late/duplicate packet was in flight). Drop it: such packets are redundant
+        // (the flow already completed), so dropping is semantically harmless.
+        if (!nh) {
+            _packets.erase(&pkt);
+            pkt.free();
+            return;
+        }
         //set next hop which is peer switch.
         pkt.set_route(*nh);
 
         //emulate the switching latency between ingress and packet arriving at the egress queue.
-        _pipe->receivePacket(pkt); 
+        _pipe->receivePacket(pkt);
     }
     else {
         _packets.erase(&pkt);
@@ -68,6 +76,12 @@ void FatTreeSwitch::addHostPort(int addr, int flowid, PacketSink* transport_port
     rt->push_back(_ft->pipes_nlp_ns[_ft->cfg().HOST_POD_SWITCH(addr)][addr][0]);
     rt->push_back(transport_port);
     _fib->addHostRoute(addr,rt,flowid);
+}
+
+void FatTreeSwitch::removeHostPort(int addr, int flowid){
+    // Flow teardown: drop the per-flow host route so a late packet for this flow
+    // misses the FIB and is dropped (see getNextHop) instead of reaching freed memory.
+    _fib->removeHostRoute(addr, flowid);
 }
 
 uint32_t mhash(uint32_t x) {
@@ -420,7 +434,10 @@ Route* FatTreeSwitch::getNextHop(Packet& pkt, BaseQueue* ingress_port){
         if ( _ft->cfg().HOST_POD_SWITCH(pkt.dst()) == _id) { 
             //this host is directly connected!
             HostFibEntry* fe = _fib->getHostRoute(pkt.dst(),pkt.flow_id());
-            assert(fe);
+            // fe may be NULL if the flow was torn down (its host route removed) while
+            // a late/duplicate packet was still in flight. Return NULL -> caller drops.
+            if (!fe)
+                return NULL;
             pkt.set_direction(DOWN);
             return fe->getEgressPort();
         } else {

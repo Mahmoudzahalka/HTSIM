@@ -43,8 +43,12 @@ class RouteTable {
 public:
     RouteTable() {};
     void addRoute(int destination, Route* port, int cost, packet_direction direction);  
-    void addHostRoute(int destination, Route* port, int flowid);  
-    void setRoutes(int destination, vector<FibEntry*>* routes);  
+    void addHostRoute(int destination, Route* port, int flowid);
+    // Remove a per-flow host route (used by flow teardown). Frees the HostFibEntry
+    // and its egress Route. After removal getHostRoute returns NULL so a late packet
+    // for the torn-down flow is dropped rather than dereferencing freed memory.
+    void removeHostRoute(int destination, int flowid);
+    void setRoutes(int destination, vector<FibEntry*>* routes);
     vector <FibEntry*>* getRoutes(int destination);
     HostFibEntry* getHostRoute(int destination, int flowid);
     

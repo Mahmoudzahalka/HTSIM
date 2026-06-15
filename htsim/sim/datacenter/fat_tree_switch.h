@@ -118,6 +118,7 @@ public:
     static int8_t (*fn)(FibEntry*,FibEntry*);
 
     virtual void addHostPort(int addr, int flowid, PacketSink* transport_port);
+    virtual void removeHostPort(int addr, int flowid);
 
     virtual void permute_paths(vector<FibEntry*>* uproutes);
 
