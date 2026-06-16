@@ -651,6 +651,14 @@ UecSrc::UecSrc(TrafficLogger* trafficLogger,
     _nscc_fulfill_stats = {};
 }
 
+UecSrc::~UecSrc() {
+    // Free the per-flow source ports (allocated in the ctor). Runs only via the
+    // GOAL/atlahs teardown path (drainPendingFree); the switch host-route is removed
+    // before this delete, so no FIB entry still points at these ports.
+    for (UecSrcPort* p : _ports)
+        delete p;
+}
+
 void UecSrc::delFromSendTimes(simtime_picosec time, UecDataPacket::seq_t seq_no) {
     //cout << eventlist().now() << " flowid " << _flow.flow_id() << " _send_times.erase " << time << " for " << seq_no << endl;
     auto snd_seq_range = _send_times.equal_range(time);
@@ -2483,6 +2491,13 @@ void UecSrc::maybeTeardown() {
         cout << "[QUIESCENT-COUNT] " << g_flows_quiescent << endl;
         fflush(stdout);
     }
+    // STAGE 3: this flow is provably safe to free (done, no in-flight packets either
+    // direction, no RTO, not NIC-queued). We must NOT delete inline -- maybeTeardown can
+    // run from inside a packet free() via onFlowDrained, so deleting `this` here would be
+    // a use-after-free. Hand the (src,sink) pair to the driver, which frees it later from
+    // the LGS loop (a safe, non-packet context) via drainPendingFree().
+    if (_atlahs_api)
+        _atlahs_api->scheduleFlowFree(this);
 }
 
 void UecSrc::rtxTimerExpired() {
@@ -2796,6 +2811,14 @@ UecSink::UecSink(TrafficLogger* trafficLogger,
 
     _pcie = NULL;
     _receiver_cc = NULL;
+}
+
+UecSink::~UecSink() {
+    // Free the per-flow sink ports (allocated in the ctor). Runs only via the
+    // GOAL/atlahs teardown path. _pullPacer is intentionally NOT freed here (NULL in
+    // -sender_cc_only; possibly shared/externally-owned otherwise).
+    for (UecSinkPort* p : _ports)
+        delete p;
 }
 
 void UecSink::connectPort(uint32_t port_num, UecSrc& src, const Route& route) {

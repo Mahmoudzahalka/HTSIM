@@ -553,6 +553,11 @@ int start_lgs(std::string filename_goal, LogSimInterface &lgs) {
 
     while(!lgs_interface->aq.empty() || new_events || lgs_interface->sends_active > 0 ||  lgs_interface->compute_started > 0) {
 
+      // STAGE 3: free flows that became quiescent during the previous iteration's
+      // packet processing. Safe here -- we are in the driver loop, not inside any
+      // packet/event handler that could still reference those (src,sink) objects.
+      lgs_interface->htsim_api->drainPendingFree();
+
       count_cycless++;
       if (count_cycless > 20000000) {
           //printf("Count1 Cycles Exceeded 200000\n");

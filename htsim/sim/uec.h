@@ -127,12 +127,16 @@ public:
         mem_b dec_quick_bytes;
         mem_b dec_nack_bytes;
     };
-    UecSrc(TrafficLogger* trafficLogger, 
-           EventList& eventList, 
+    UecSrc(TrafficLogger* trafficLogger,
+           EventList& eventList,
            unique_ptr<UecMultipath> mp,
-           UecNIC& nic, 
-           uint32_t no_of_ports, 
+           UecNIC& nic,
+           uint32_t no_of_ports,
            bool rts = false);
+    // Frees the per-flow ports this object owns. Only ever invoked by the GOAL/atlahs
+    // teardown path (drainPendingFree); no other code deletes a UecSrc. _mp (unique_ptr)
+    // is freed automatically.
+    ~UecSrc();
     void delFromSendTimes(simtime_picosec time, UecDataPacket::seq_t seq_no);
     /**
      * Initialize global NSCC parameters.
@@ -153,6 +157,11 @@ public:
     virtual void connectPort(uint32_t portnum, Route& routeout, Route& routeback, UecSink& sink, simtime_picosec start);
     const Route* getPortRoute(uint32_t port_num) const {return _ports[port_num]->route();}
     UecSrcPort* getPort(uint32_t port_num) {return _ports[port_num];}
+    UecSink* sink() { return _sink; }   // for driver-side teardown (stage 3 free)
+    // Per-flow Routes allocated by the GOAL/atlahs driver in Send(); held here so the
+    // driver can free them at teardown (they are only referenced by this flow's ports).
+    Route* _fwd_route = nullptr;
+    Route* _rev_route = nullptr;
     void timeToSend(const Route& route);
     void receivePacket(Packet& pkt, uint32_t portnum);
     void doNextEvent();
@@ -527,6 +536,10 @@ class UecSink : public DataReceiver {
              uint16_t mtu,
              EventList& eventList,
              UecNIC& nic, uint32_t no_of_ports);
+    // Frees the per-flow ports this object owns (teardown path only; see ~UecSrc). Does
+    // NOT delete _pullPacer: in -sender_cc_only it is NULL, and in receiver-CC the pacer
+    // may be externally owned/shared, so pacer lifetime is the driver's concern.
+    ~UecSink();
     void receivePacket(Packet& pkt, uint32_t port_num);
 
     void processData(UecDataPacket& pkt);

@@ -25,6 +25,7 @@ class NdpPullPacer;
 class UecNIC;
 class UecPullPacer;
 class UecMultipath;
+class UecSrc;
 //class ComputeEvent;
 
 // Added FlowInfo class
@@ -65,6 +66,13 @@ public:
     virtual void Calc(const ComputeAtlahsEvent &event) override;
     virtual void Setup() override;
     virtual void EventFinished(const EventOver &event) override;
+
+    // STAGE 3 flow teardown. A quiescent (safe-to-free) flow calls scheduleFlowFree()
+    // from maybeTeardown() -- possibly mid packet-free -- so we only QUEUE it here.
+    // drainPendingFree() does the actual removeHostPort + delete, and must be called
+    // from a safe (non-packet) context, i.e. the LGS driver loop.
+    void scheduleFlowFree(UecSrc* src);
+    void drainPendingFree();
 
     // Getter and setter for EventList
     void setEventList(EventList* eventlist) { _eventlist = eventlist; }
@@ -178,6 +186,7 @@ public:
     std::vector<FlowInfo> flowInfos;
     bool print_stats_flows = false;
 
+    std::vector<UecSrc*> _pending_free;   // STAGE 3: flows queued for deferred teardown
     std::vector<UecNIC*> uec_nics; // TO DO
     std::vector<UecPullPacer*> uec_pacers; // TO DO
     uint64_t cwnd_b = 0; // TO DO

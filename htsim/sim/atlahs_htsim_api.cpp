@@ -121,6 +121,11 @@ void AtlahsHtsimApi::Send(const SendEvent &event, graph_node_properties elem) {
         dsttotor->push_back(_topo->pipes_ns_nlp[to][_topo->cfg().HOST_POD_SWITCH(to)][0]);
         dsttotor->push_back(_topo->queues_ns_nlp[to][_topo->cfg().HOST_POD_SWITCH(to)][0]->getRemoteEndpoint());
 
+        // Stash the per-flow routes on the src so they can be freed at teardown (stage 3);
+        // they are only referenced by this flow's ports, so the driver owns their lifetime.
+        uecSrc->_fwd_route = srctotor;
+        uecSrc->_rev_route = dsttotor;
+
         graph_node_properties* node_copy = new graph_node_properties(elem);
         uecSrc->lgs_node = node_copy;
         //uecSrc->connect(srctotor, dsttotor, *uecSink, _eventlist->now());
@@ -195,4 +200,43 @@ void AtlahsHtsimApi::EventFinished(const EventOver &event) {
     } else {
         abort();
     }
+}
+
+// STAGE 3: queue a quiescent flow for deferred teardown. Called from
+// UecSrc::maybeTeardown(), which can run mid packet-free, so we ONLY enqueue here --
+// never delete inline (that would be a use-after-free of the in-progress flow).
+void AtlahsHtsimApi::scheduleFlowFree(UecSrc* src) {
+    _pending_free.push_back(src);
+}
+
+// STAGE 3: actually free the flows queued by scheduleFlowFree(). MUST be called from a
+// safe (non-packet-processing) context -- the LGS driver loop -- so no packet handler is
+// on the stack referencing these objects. By construction each flow here is quiescent
+// (done, both refcounts 0, no RTO, not NIC-queued), so nothing in the network, eventlist
+// or NIC still points at it; we additionally drop its switch host-routes first so any
+// straggler misses the FIB and is dropped (stage 1) instead of touching freed memory.
+void AtlahsHtsimApi::drainPendingFree() {
+    if (_pending_free.empty())
+        return;
+    static uint64_t flows_freed = 0;
+    for (UecSrc* src : _pending_free) {
+        UecSink* sink = src->sink();
+        int from = src->from;
+        int to = src->to;
+        // Mirror the two addHostPort() calls in Send() (DATA carries src flowid -> sink
+        // port at `to`; ACK carries sink flowid -> src port at `from`).
+        _topo->switches_lp[_topo->cfg().HOST_POD_SWITCH(from)]->removeHostPort(from, sink->flowId());
+        _topo->switches_lp[_topo->cfg().HOST_POD_SWITCH(to)]->removeHostPort(to, src->flowId());
+        // Free everything Send() allocated for this flow.
+        delete sink;
+        delete src->_fwd_route;
+        delete src->_rev_route;
+        delete src->lgs_node;
+        delete src;
+        if (++flows_freed % 50000 == 0) {
+            std::cout << "[FLOW-FREED] " << flows_freed << std::endl;
+            std::cout.flush();
+        }
+    }
+    _pending_free.clear();
 }
