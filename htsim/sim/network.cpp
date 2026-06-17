@@ -263,6 +263,9 @@ Packet::str() const {
 #define FLOW_ID_DYNAMIC_BASE 1000000000
 flowid_t PacketFlow::_max_flow_id = FLOW_ID_DYNAMIC_BASE;
 
+uint64_t PacketFlow::_live_pkts = 0;   // [PKT-DIAG]
+uint64_t PacketFlow::_peak_pkts = 0;   // [PKT-DIAG]
+
 PacketFlow::PacketFlow(TrafficLogger* logger)
     : Logged("PacketFlow"),
       _logger(logger)

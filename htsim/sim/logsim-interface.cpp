@@ -568,10 +568,11 @@ int start_lgs(std::string filename_goal, LogSimInterface &lgs) {
       // advancing). Shows the op at the head of the active queue = what we're stuck on.
       if (count_cycless % 3000000 == 0) {
           int srq = size_queue(rq, p), suq = size_queue(uq, p);
-          printf("[STALL-DIAG] cyc=%d htsim_t=%lu ns | aq=%zu sends_active=%d compute=%d | tot_rq=%d tot_uq=%d",
+          printf("[STALL-DIAG] cyc=%d htsim_t=%lu ns | aq=%zu sends_active=%d compute=%d | tot_rq=%d tot_uq=%d | live_pkts=%lu peak_pkts=%lu",
                  count_cycless, (unsigned long)lgs_interface->htsim_api->getGlobalTimeNs(),
                  (size_t)lgs_interface->aq.size(), lgs_interface->sends_active,
-                 lgs_interface->compute_started, srq, suq);
+                 lgs_interface->compute_started, srq, suq,
+                 (unsigned long)PacketFlow::livePkts(), (unsigned long)PacketFlow::peakPkts());
           if (!lgs_interface->aq.empty())
               printf(" | aq.top host=%d target=%d tag=%d type=%d time=%lu",
                      lgs_interface->aq.top().host, lgs_interface->aq.top().target,

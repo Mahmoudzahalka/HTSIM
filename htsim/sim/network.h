@@ -48,20 +48,28 @@ class PacketFlow : public Logged {
     // refInc() when created carrying this flow and refDec() when freed. When the
     // count drains to zero the registered listener (if any) is notified, so the
     // flow's owner can check whether it is now safe to tear the flow down.
-    inline void refInc() { _refcount++; }
+    inline void refInc() { _refcount++; if (++_live_pkts > _peak_pkts) _peak_pkts = _live_pkts; }
     inline void refDec() {
         assert(_refcount > 0);
+        _live_pkts--;
         if (--_refcount == 0 && _ref_listener)
             _ref_listener->onFlowDrained();
     }
     inline int refCount() const { return _refcount; }
     inline void setRefListener(FlowRefListener* l) { _ref_listener = l; }
+    // [PKT-DIAG] global live-packet count (sum of all flows' outstanding packets) and its
+    // peak. The packet pools (PacketDB::_alloc_count) grow to this peak and never shrink,
+    // so a rising peak == rising RSS. Tells a bounded high-water-mark apart from a leak.
+    static uint64_t livePkts() { return _live_pkts; }
+    static uint64_t peakPkts() { return _peak_pkts; }
  protected:
     static packetid_t _max_flow_id;
     flowid_t _flow_id;
     TrafficLogger* _logger;
     int _refcount = 0;
     FlowRefListener* _ref_listener = nullptr;
+    static uint64_t _live_pkts;   // [PKT-DIAG] current live packets across all flows
+    static uint64_t _peak_pkts;   // [PKT-DIAG] peak ever (== pool size, never shrinks)
 };
 
 
