@@ -1,0 +1,5 @@
+Flow Uec_95_0 flowId 2 uecSrc 1 finished at 51.8751 total messages 1 total packets 62 RTS 0 total bytes 253332 in_flight now 0 fair_inc 0 prop_inc 1069 fast_inc 0 eta_inc 3987 multi_dec -0 quick_dec -0 nack_dec -25718
+Flow Uec_61_0 flowId 3 uecSrc 2 finished at 52.3731 total messages 1 total packets 62 RTS 0 total bytes 253332 in_flight now 0 fair_inc 0 prop_inc 1044 fast_inc 0 eta_inc 3987 multi_dec -0 quick_dec -0 nack_dec -16600
+Flow Uec_127_0 flowId 1 uecSrc 0 finished at 114.538 total messages 1 total packets 490 RTS 0 total bytes 2002140 in_flight now 0 fair_inc 9008 prop_inc 47886 fast_inc 446540 eta_inc 10632 multi_dec -565 quick_dec -0 nack_dec -149400
+New: 614 Rtx: 47 RTS: 0 Bounced: 0 ACKs: 339 NACKs: 47 Pulls: 0 sleek_pkts: 0
+SPURIOUS_COUNT 0

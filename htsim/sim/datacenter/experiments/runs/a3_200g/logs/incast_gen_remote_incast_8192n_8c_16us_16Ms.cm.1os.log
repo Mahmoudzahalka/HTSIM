@@ -1,0 +1,10 @@
+Flow Uec_8189_0 flowId 3 uecSrc 2 finished at 4622.04 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 290821 prop_inc 858 fast_inc 0 eta_inc 284406 multi_dec -622114 quick_dec -3421 nack_dec -365200
+Flow Uec_8187_0 flowId 5 uecSrc 4 finished at 5194.74 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 332433 prop_inc 1497 fast_inc 0 eta_inc 366804 multi_dec -686040 quick_dec -10972 nack_dec -406700
+Flow Uec_8186_0 flowId 6 uecSrc 5 finished at 5216.83 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 287535 prop_inc 3985 fast_inc 0 eta_inc 332250 multi_dec -677908 quick_dec -9346 nack_dec -352750
+Flow Uec_8188_0 flowId 4 uecSrc 3 finished at 5391.3 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 322420 prop_inc 15893 fast_inc 0 eta_inc 380094 multi_dec -653747 quick_dec -4170 nack_dec -431600
+Flow Uec_8190_0 flowId 2 uecSrc 1 finished at 5402.93 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 315025 prop_inc 16200 fast_inc 0 eta_inc 353514 multi_dec -645262 quick_dec --805 nack_dec -431600
+Flow Uec_8191_0 flowId 1 uecSrc 0 finished at 5408.24 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 306330 prop_inc 15389 fast_inc 0 eta_inc 336237 multi_dec -588297 quick_dec -765 nack_dec -415000
+Flow Uec_8185_0 flowId 7 uecSrc 6 finished at 5462.89 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 300521 prop_inc 87552 fast_inc 17998 eta_inc 364146 multi_dec -631062 quick_dec --2847 nack_dec -431600
+Flow Uec_8184_0 flowId 8 uecSrc 7 finished at 5486.92 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 277208 prop_inc 123276 fast_inc 56329 eta_inc 348198 multi_dec -576826 quick_dec --2041 nack_dec -439900
+New: 32856 Rtx: 789 RTS: 0 Bounced: 0 ACKs: 32561 NACKs: 789 Pulls: 0 sleek_pkts: 0
+SPURIOUS_COUNT 0

@@ -1,0 +1,10 @@
+Flow Uec_8187_0 flowId 5 uecSrc 4 finished at 4588.32 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 513255 prop_inc 8496 fast_inc 0 eta_inc 269787 multi_dec -778834 quick_dec -119905 nack_dec -419150
+Flow Uec_8185_0 flowId 7 uecSrc 6 finished at 4992.87 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 502619 prop_inc 17579 fast_inc 0 eta_inc 304341 multi_dec -846051 quick_dec -0 nack_dec -398400
+Flow Uec_8191_0 flowId 1 uecSrc 0 finished at 5022.76 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 509841 prop_inc 18292 fast_inc 0 eta_inc 291051 multi_dec -797704 quick_dec -19471 nack_dec -415000
+Flow Uec_8184_0 flowId 8 uecSrc 7 finished at 5093.65 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 507224 prop_inc 26228 fast_inc 0 eta_inc 318960 multi_dec -831953 quick_dec -4567 nack_dec -410850
+Flow Uec_8188_0 flowId 4 uecSrc 3 finished at 5248.03 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 470137 prop_inc 53520 fast_inc 0 eta_inc 310986 multi_dec -803145 quick_dec --3197 nack_dec -394250
+Flow Uec_8189_0 flowId 3 uecSrc 2 finished at 5292.53 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 462885 prop_inc 78217 fast_inc 0 eta_inc 322947 multi_dec -834410 quick_dec -145 nack_dec -381800
+Flow Uec_8186_0 flowId 6 uecSrc 5 finished at 5391.53 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 452123 prop_inc 162811 fast_inc 0 eta_inc 328263 multi_dec -768557 quick_dec -24848 nack_dec -419150
+Flow Uec_8190_0 flowId 2 uecSrc 1 finished at 5476.22 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 387952 prop_inc 182301 fast_inc 895480 eta_inc 342882 multi_dec -742169 quick_dec -6210 nack_dec -410850
+New: 32856 Rtx: 783 RTS: 0 Bounced: 0 ACKs: 31767 NACKs: 783 Pulls: 0 sleek_pkts: 0
+SPURIOUS_COUNT 0

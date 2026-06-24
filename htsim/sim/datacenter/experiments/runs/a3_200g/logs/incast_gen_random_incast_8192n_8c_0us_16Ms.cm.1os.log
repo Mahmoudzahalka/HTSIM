@@ -1,0 +1,10 @@
+Flow Uec_7621_0 flowId 4 uecSrc 3 finished at 4979.93 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 329252 prop_inc 1055 fast_inc 0 eta_inc 328263 multi_dec -670137 quick_dec -3458 nack_dec -431600
+Flow Uec_6379_0 flowId 2 uecSrc 1 finished at 5168.51 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 311901 prop_inc 3232 fast_inc 0 eta_inc 303012 multi_dec -599556 quick_dec -14464 nack_dec -419150
+Flow Uec_3060_0 flowId 6 uecSrc 5 finished at 5171.67 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 321925 prop_inc 1959 fast_inc 0 eta_inc 318960 multi_dec -646639 quick_dec -7076 nack_dec -402550
+Flow Uec_2901_0 flowId 1 uecSrc 0 finished at 5180.31 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 305088 prop_inc 2833 fast_inc 0 eta_inc 322947 multi_dec -635170 quick_dec --1177 nack_dec -402550
+Flow Uec_2095_0 flowId 7 uecSrc 6 finished at 5213.91 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 335186 prop_inc 29207 fast_inc 0 eta_inc 380094 multi_dec -725234 quick_dec -11127 nack_dec -394250
+Flow Uec_2193_0 flowId 8 uecSrc 7 finished at 5304.88 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 350661 prop_inc 63370 fast_inc 0 eta_inc 381423 multi_dec -715529 quick_dec --647 nack_dec -406700
+Flow Uec_1121_0 flowId 5 uecSrc 4 finished at 5410.96 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 266986 prop_inc 138256 fast_inc 0 eta_inc 333579 multi_dec -568914 quick_dec --4 nack_dec -415000
+Flow Uec_363_0 flowId 3 uecSrc 2 finished at 5476.07 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 239004 prop_inc 189709 fast_inc 497277 eta_inc 329592 multi_dec -557393 quick_dec -14778 nack_dec -402550
+New: 32856 Rtx: 789 RTS: 0 Bounced: 0 ACKs: 32104 NACKs: 789 Pulls: 0 sleek_pkts: 0
+SPURIOUS_COUNT 0

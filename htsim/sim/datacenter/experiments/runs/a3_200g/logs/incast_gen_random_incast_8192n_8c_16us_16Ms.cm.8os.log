@@ -1,0 +1,10 @@
+Flow Uec_6936_0 flowId 1 uecSrc 0 finished at 4930.28 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 382584 prop_inc 12141 fast_inc 0 eta_inc 289722 multi_dec -667095 quick_dec -157255 nack_dec -398400
+Flow Uec_4623_0 flowId 2 uecSrc 1 finished at 5053.29 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 389485 prop_inc 9434 fast_inc 0 eta_inc 293709 multi_dec -684968 quick_dec -159 nack_dec -435750
+Flow Uec_2698_0 flowId 8 uecSrc 7 finished at 5130.65 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 359003 prop_inc 8949 fast_inc 0 eta_inc 309657 multi_dec -630038 quick_dec -132355 nack_dec -431600
+Flow Uec_7734_0 flowId 5 uecSrc 4 finished at 5174.15 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 365389 prop_inc 14667 fast_inc 0 eta_inc 318960 multi_dec -695289 quick_dec -5439 nack_dec -394250
+Flow Uec_4146_0 flowId 4 uecSrc 3 finished at 5283.06 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 388656 prop_inc 29070 fast_inc 0 eta_inc 310986 multi_dec -686857 quick_dec -6419 nack_dec -390100
+Flow Uec_7694_0 flowId 6 uecSrc 5 finished at 5373.86 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 378721 prop_inc 64724 fast_inc 0 eta_inc 325605 multi_dec -665237 quick_dec -3182 nack_dec -410850
+Flow Uec_2767_0 flowId 3 uecSrc 2 finished at 5380.84 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 352889 prop_inc 81583 fast_inc 0 eta_inc 337566 multi_dec -702911 quick_dec -21826 nack_dec -381800
+Flow Uec_496_0 flowId 7 uecSrc 6 finished at 5487.5 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 302410 prop_inc 113999 fast_inc 1059720 eta_inc 352185 multi_dec -651671 quick_dec -10580 nack_dec -402550
+New: 32856 Rtx: 782 RTS: 0 Bounced: 0 ACKs: 32212 NACKs: 782 Pulls: 0 sleek_pkts: 0
+SPURIOUS_COUNT 0

@@ -1,0 +1,4 @@
+Flow Uec_1933_0 flowId 1 uecSrc 0 finished at 171.716 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 8935 prop_inc 21397 fast_inc 0 eta_inc 17277 multi_dec -125724 quick_dec -0 nack_dec -128650
+Flow Uec_210_0 flowId 2 uecSrc 1 finished at 179.923 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 5246 prop_inc 53893 fast_inc 0 eta_inc 17277 multi_dec -76346 quick_dec -0 nack_dec -95450
+New: 1028 Rtx: 54 RTS: 0 Bounced: 0 ACKs: 968 NACKs: 54 Pulls: 0 sleek_pkts: 0
+SPURIOUS_COUNT 0

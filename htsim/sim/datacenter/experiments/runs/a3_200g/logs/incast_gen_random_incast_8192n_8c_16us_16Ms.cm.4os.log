@@ -1,0 +1,10 @@
+Flow Uec_4146_0 flowId 4 uecSrc 3 finished at 4703.52 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 357672 prop_inc 8946 fast_inc 0 eta_inc 288393 multi_dec -672747 quick_dec -17433 nack_dec -385950
+Flow Uec_4623_0 flowId 2 uecSrc 1 finished at 4778.39 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 358447 prop_inc 9543 fast_inc 0 eta_inc 277761 multi_dec -615585 quick_dec -124055 nack_dec -431600
+Flow Uec_2698_0 flowId 8 uecSrc 7 finished at 4981.58 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 373631 prop_inc 16489 fast_inc 0 eta_inc 306999 multi_dec -715894 quick_dec -691 nack_dec -385950
+Flow Uec_7734_0 flowId 5 uecSrc 4 finished at 5337.99 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 361705 prop_inc 25915 fast_inc 0 eta_inc 308328 multi_dec -666610 quick_dec --4324 nack_dec -427450
+Flow Uec_2767_0 flowId 3 uecSrc 2 finished at 5363.06 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 350435 prop_inc 29421 fast_inc 0 eta_inc 310986 multi_dec -641963 quick_dec -148016 nack_dec -410850
+Flow Uec_6936_0 flowId 1 uecSrc 0 finished at 5392.95 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 312569 prop_inc 52824 fast_inc 0 eta_inc 310986 multi_dec -624034 quick_dec -116180 nack_dec -402550
+Flow Uec_7694_0 flowId 6 uecSrc 5 finished at 5438.33 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 359530 prop_inc 119373 fast_inc 0 eta_inc 325605 multi_dec -679985 quick_dec -5529 nack_dec -398400
+Flow Uec_496_0 flowId 7 uecSrc 6 finished at 5479.19 total messages 1 total packets 4107 RTS 0 total bytes 16781202 in_flight now 0 fair_inc 337713 prop_inc 146662 fast_inc 236310 eta_inc 333579 multi_dec -662852 quick_dec -9017 nack_dec -390100
+New: 32856 Rtx: 779 RTS: 0 Bounced: 0 ACKs: 32378 NACKs: 779 Pulls: 0 sleek_pkts: 0
+SPURIOUS_COUNT 0

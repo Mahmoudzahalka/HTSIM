@@ -1,0 +1,10 @@
+Flow Uec_8184_0 flowId 8 uecSrc 7 finished at 595.046 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 67330 prop_inc 5015 fast_inc 0 eta_inc 38541 multi_dec -110168 quick_dec -0 nack_dec -402550
+Flow Uec_8191_0 flowId 1 uecSrc 0 finished at 649.372 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 99256 prop_inc 7931 fast_inc 0 eta_inc 38541 multi_dec -83005 quick_dec -165555 nack_dec -390100
+Flow Uec_8187_0 flowId 5 uecSrc 4 finished at 650.246 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 68020 prop_inc 8972 fast_inc 0 eta_inc 57147 multi_dec -144735 quick_dec -0 nack_dec -398400
+Flow Uec_8185_0 flowId 7 uecSrc 6 finished at 652.946 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 84537 prop_inc 5621 fast_inc 0 eta_inc 55818 multi_dec -128789 quick_dec -0 nack_dec -410850
+Flow Uec_8186_0 flowId 6 uecSrc 5 finished at 660.626 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 89277 prop_inc 13955 fast_inc 0 eta_inc 57147 multi_dec -120415 quick_dec -0 nack_dec -423300
+Flow Uec_8190_0 flowId 2 uecSrc 1 finished at 678.495 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 75121 prop_inc 36257 fast_inc 0 eta_inc 59805 multi_dec -128026 quick_dec -17347 nack_dec -402550
+Flow Uec_8189_0 flowId 3 uecSrc 2 finished at 707.525 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 65479 prop_inc 62697 fast_inc 61337 eta_inc 46515 multi_dec -86243 quick_dec -150022 nack_dec -390100
+Flow Uec_8188_0 flowId 4 uecSrc 3 finished at 714.663 total messages 1 total packets 514 RTS 0 total bytes 2100204 in_flight now 0 fair_inc 61805 prop_inc 68693 fast_inc 83833 eta_inc 46515 multi_dec -83610 quick_dec -130799 nack_dec -402550
+New: 4112 Rtx: 776 RTS: 0 Bounced: 0 ACKs: 3970 NACKs: 776 Pulls: 0 sleek_pkts: 0
+SPURIOUS_COUNT 0

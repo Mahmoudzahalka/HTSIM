@@ -1,0 +1,10 @@
+Flow Uec_1969_0 flowId 4 uecSrc 3 finished at 20823 total messages 1 total packets 16425 RTS 0 total bytes 67112550 in_flight now 0 fair_inc 1271012 prop_inc 2805 fast_inc 0 eta_inc 1202745 multi_dec -2513759 quick_dec -6869 nack_dec -398400
+Flow Uec_4945_0 flowId 1 uecSrc 0 finished at 21191.9 total messages 1 total packets 16425 RTS 0 total bytes 67112550 in_flight now 0 fair_inc 1295803 prop_inc 5219 fast_inc 0 eta_inc 1239957 multi_dec -2593859 quick_dec -1961 nack_dec -415000
+Flow Uec_8096_0 flowId 7 uecSrc 6 finished at 21225.2 total messages 1 total packets 16425 RTS 0 total bytes 67112550 in_flight now 0 fair_inc 1271468 prop_inc 7815 fast_inc 0 eta_inc 1221351 multi_dec -2529042 quick_dec -4392 nack_dec -415000
+Flow Uec_789_0 flowId 3 uecSrc 2 finished at 21260.3 total messages 1 total packets 16425 RTS 0 total bytes 67112550 in_flight now 0 fair_inc 1292793 prop_inc 11117 fast_inc 0 eta_inc 1274511 multi_dec -2614770 quick_dec -1397 nack_dec -410850
+Flow Uec_4736_0 flowId 6 uecSrc 5 finished at 21390.9 total messages 1 total packets 16425 RTS 0 total bytes 67112550 in_flight now 0 fair_inc 1281112 prop_inc 34026 fast_inc 0 eta_inc 1257234 multi_dec -2600321 quick_dec -6121 nack_dec -394250
+Flow Uec_2372_0 flowId 2 uecSrc 1 finished at 21451.1 total messages 1 total packets 16425 RTS 0 total bytes 67112550 in_flight now 0 fair_inc 1250765 prop_inc 60308 fast_inc 0 eta_inc 1261221 multi_dec -2541114 quick_dec -5111 nack_dec -402550
+Flow Uec_1041_0 flowId 8 uecSrc 7 finished at 21737.2 total messages 1 total packets 16425 RTS 0 total bytes 67112550 in_flight now 0 fair_inc 1204291 prop_inc 147993 fast_inc 0 eta_inc 1266537 multi_dec -2452879 quick_dec -4494 nack_dec -419150
+Flow Uec_5381_0 flowId 5 uecSrc 4 finished at 21831.7 total messages 1 total packets 16425 RTS 0 total bytes 67112550 in_flight now 0 fair_inc 1157934 prop_inc 178805 fast_inc 938380 eta_inc 1325013 multi_dec -2488843 quick_dec -12005 nack_dec -419150
+New: 131400 Rtx: 789 RTS: 0 Bounced: 0 ACKs: 130173 NACKs: 789 Pulls: 0 sleek_pkts: 0
+SPURIOUS_COUNT 0

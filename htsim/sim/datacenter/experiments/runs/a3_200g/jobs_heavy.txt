@@ -1,0 +1,9 @@
+connection_matrices/perm_8192n_8192c_100MB.cm 1os
+connection_matrices/perm_8192n_8192c_100MB.cm 4os
+connection_matrices/perm_8192n_8192c_100MB.cm 8os
+connection_matrices/perm_8192n_8192c_32MB.cm 1os
+connection_matrices/perm_8192n_8192c_32MB.cm 4os
+connection_matrices/perm_8192n_8192c_32MB.cm 8os
+connection_matrices/perm_8192n_8192c_64MB.cm 1os
+connection_matrices/perm_8192n_8192c_64MB.cm 4os
+connection_matrices/perm_8192n_8192c_64MB.cm 8os
