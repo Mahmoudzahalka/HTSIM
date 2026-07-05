@@ -303,8 +303,10 @@ string QueueLoggerSampling::event_to_str(RawLogEvent& event) {
         ss << " Type QUEUE_APPROX";
         ss << " ID " << event._id;
         assert(event._ev == QueueLogger::CUM_TRAFFIC);
-        ss << " Ev CUM_TRAFFIC CumArr " << (int)event._val1
-           << " CumIdle " << (int)event._val2 << " CumDrop " << (int)event._val3;
+        // CumArr/CumIdle/CumDrop are seconds-of-link-time (double, typically 1e-6..1);
+        // integer cast truncates them all to 0. Keep full precision.
+        ss << " Ev CUM_TRAFFIC CumArr " << event._val1
+           << " CumIdle " << event._val2 << " CumDrop " << event._val3;
         if (event._name!="") ss << " Name " << event._name;
         break;
     default:

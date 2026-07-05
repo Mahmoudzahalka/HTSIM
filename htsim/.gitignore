@@ -1,0 +1,25 @@
+# Build artifacts
+sim/build/
+sim/datacenter/htsim_uec
+sim/datacenter/htsim_*.o
+sim/parse_output
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Local sweep ephemerals (regenerated on each run)
+**/experiments/runs/*/sweep.pid
+**/experiments/runs/*/jobs_light.txt
+**/experiments/runs/*/jobs_heavy.txt
+**/experiments/runs/*/work/
+
+# Very large regenerable matrices (regen via gen_all_matrices.sh)
+**/experiments/runs/*/matrices/allreduce_ring_1024n_*.cm
+**/experiments/runs/*/matrices/allreduce_butterfly_*.cm
+
+# htsim's default logfile if a run ever writes it in-tree
+sim/datacenter/logout.dat
+sim/datacenter/idmap.txt

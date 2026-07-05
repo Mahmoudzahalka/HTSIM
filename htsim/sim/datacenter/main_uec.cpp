@@ -1,10 +1,19 @@
 // -*- c-basic-offset: 4; indent-tabs-mode: nil -*-
 //#include "config.h"
 #include <cassert>
+#include <csignal>
 #include <cstdlib>
 #include <memory>
 #include <sstream>
 #include <string.h>
+
+// Watchdog-triggered clean shutdown. External watchdog counts "Flow ... finished
+// at ..." lines and sends SIGTERM when all Connections M flows are done. The
+// handler just sets a flag; the sim loop below checks between events and breaks
+// so main()'s epilogue (~Logfile transposeLog + stats summary print) runs
+// normally, producing a valid binary log + idmap.txt.
+static volatile sig_atomic_t g_stop_requested = 0;
+static void uec_handle_sigterm(int) { g_stop_requested = 1; }
 
 #include <math.h>
 #include <unistd.h>
@@ -1108,9 +1117,16 @@ int main(int argc, char **argv) {
     //logfile.write("# corelinkrate = " + ntoa(HOST_NIC*CORE_TO_HOST) + " pkt/sec");
     //logfile.write("# buffer = " + ntoa((double) (queues_na_ni[0][1]->_maxsize) / ((double) pktsize)) + " pkt");
     
+    // Install SIGTERM handler for watchdog-triggered clean shutdown.
+    signal(SIGTERM, uec_handle_sigterm);
+
     // GO!
     cout << "Starting simulation" << endl;
-    while (eventlist.doNextEvent()) {
+    while (!g_stop_requested && eventlist.doNextEvent()) {
+    }
+    if (g_stop_requested) {
+        cout << "Received SIGTERM at " << timeAsUs(eventlist.now())
+             << " us, shutting down cleanly." << endl;
     }
 
     cout << "Done" << endl;
