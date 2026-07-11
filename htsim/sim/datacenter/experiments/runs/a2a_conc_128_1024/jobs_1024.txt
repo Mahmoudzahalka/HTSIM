@@ -1,0 +1,9 @@
+/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/a2a_conc_128_1024/matrices/a2a_1024n_16MB.cm 1os
+/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/a2a_conc_128_1024/matrices/a2a_1024n_16MB.cm 4os
+/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/a2a_conc_128_1024/matrices/a2a_1024n_16MB.cm 8os
+/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/a2a_conc_128_1024/matrices/a2a_1024n_64MB.cm 1os
+/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/a2a_conc_128_1024/matrices/a2a_1024n_64MB.cm 4os
+/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/a2a_conc_128_1024/matrices/a2a_1024n_64MB.cm 8os
+/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/a2a_conc_128_1024/matrices/a2a_1024n_100MB.cm 1os
+/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/a2a_conc_128_1024/matrices/a2a_1024n_100MB.cm 4os
+/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/a2a_conc_128_1024/matrices/a2a_1024n_100MB.cm 8os
