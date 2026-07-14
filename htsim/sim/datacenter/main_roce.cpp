@@ -402,6 +402,13 @@ int main(int argc, char **argv) {
                     << topo_cfg->no_of_nodes() << " nodes)" << endl;
             exit(1);
         }
+        // The istream ctor (FatTreeTopologyCfg::read_cfg) seeds per-tier queue
+        // sizes from `queuesize`, but the following initialize(0u,...,0u,...)
+        // call zeroes them again via set_queue_sizes(0). main_uec restores them
+        // after load (main_uec.cpp:707); main_roce previously did not, so
+        // from-file topologies failed check_consistency ("Missing queue_up for
+        // tier 0"). Restore the intended queue sizes here.
+        topo_cfg->set_queue_sizes(queuesize);
     } else {
         topo_cfg = make_unique<FatTreeTopologyCfg>(tiers, no_of_nodes, linkspeed, queuesize, 
                                                    hop_latency, switch_latency, qt, snd_type);
