@@ -58,8 +58,12 @@ int main(int argc, char **argv) {
     int packet_size = 4000;
     uint32_t path_entropy_size = 10000000;
     uint32_t no_of_nodes = DEFAULT_NODES;
-    uint32_t tiers = 3; // we support 2 and 3 tier fattrees     
+    uint32_t tiers = 3; // we support 2 and 3 tier fattrees
     double logtime = 0.25; // ms;
+    // tor-queue utilization sampling period in us (QueueLoggerFactory sampling).
+    // Default 10us preserves prior behaviour; the IB sweep passes 1000 (1ms) to
+    // match the UEC study's util recording and keep util.bin sizes bounded.
+    double q_sample_us = 10.0;
     stringstream filename(ios_base::out);
     simtime_picosec hop_latency = timeFromUs((uint32_t)1);
     simtime_picosec switch_latency = timeFromUs((uint32_t)0);
@@ -189,8 +193,13 @@ int main(int argc, char **argv) {
             queuesize = atoi(argv[i+1]);
             i++;
         } else if (!strcmp(argv[i],"-logtime")){
-            logtime = atof(argv[i+1]);            
+            logtime = atof(argv[i+1]);
             cout << "logtime "<< logtime << " ms" << endl;
+            i++;
+        } else if (!strcmp(argv[i],"-logtime_us")){
+            // tor-queue utilization sampling period in us (see q_sample_us)
+            q_sample_us = atof(argv[i+1]);
+            cout << "q_sample_us "<< q_sample_us << " us" << endl;
             i++;
         } else if (!strcmp(argv[i],"-linkspeed")){
             // linkspeed specified is in Mbps
@@ -386,10 +395,10 @@ int main(int argc, char **argv) {
     QueueLoggerFactory *qlf = 0;
     if (log_tor_downqueue || log_tor_upqueue) {
         qlf = new QueueLoggerFactory(&logfile, QueueLoggerFactory::LOGGER_SAMPLING, eventlist);
-        qlf->set_sample_period(timeFromUs(10.0));
+        qlf->set_sample_period(timeFromUs(q_sample_us));
     } else if (log_queue_usage) {
         qlf = new QueueLoggerFactory(&logfile, QueueLoggerFactory::LOGGER_EMPTY, eventlist);
-        qlf->set_sample_period(timeFromUs(10.0));
+        qlf->set_sample_period(timeFromUs(q_sample_us));
     }
 #ifdef FAT_TREE
     unique_ptr<FatTreeTopology> top;
