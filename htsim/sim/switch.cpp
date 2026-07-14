@@ -33,8 +33,12 @@ void Switch::sendPause(LosslessQueue* problem, unsigned int wait){
 
 void Switch::configureLossless(){
     for (size_t i = 0;i < _ports.size();i++){
-        LosslessQueue* q = (LosslessQueue*)_ports.at(i);    
-        q->setSwitch(this);
+        LosslessQueue* q = (LosslessQueue*)_ports.at(i);
+        // addPort() already called q->setSwitch(this); calling it again here
+        // trips the `assert(!_switch)` in BaseQueue::setSwitch and aborts. This
+        // LOSSLESS path was previously unexercised (UEC uses composite/trimming
+        // queues). The switch is already set, so only (re)init thresholds.
+        // q->setSwitch(this);
         q->initThresholds();
     }
 };
