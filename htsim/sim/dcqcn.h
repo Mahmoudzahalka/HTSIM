@@ -41,18 +41,25 @@ public:
     uint32_t _cnps_received;    
 
     static simtime_picosec _cc_update_period;
-    static double _alpha, _g;
+    // BUGFIX(#1): _alpha is per-flow DCQCN state (EWMA of congestion), NOT a
+    // global constant -> moved to the instance section below. _g stays static.
+    //static double _alpha, _g;
+    static double _g;
     static uint32_t _F;
-    static linkspeed_bps _RAI, _RHAI;
+    // BUGFIX(#7): _RAI/_RHAI derive from each source's link rate -> instance.
+    //static linkspeed_bps _RAI, _RHAI;
     static uint64_t _B;
 
 private:
     simtime_picosec _last_cc_update, _last_alpha_update;
     linkspeed_bps _RC, _RT, _link;
-    
+    linkspeed_bps _RAI, _RHAI;   // BUGFIX(#7): per-instance (were static)
+    double _alpha;               // BUGFIX(#1): per-instance (was static/shared)
+    linkspeed_bps _min_rate;     // BUGFIX(#2): rate floor so _RC never hits 0
+
     enum increase_state {invalid = 0, fast_recovery=1,active_increase=2};
     //increase_state _ai_state;
-    uint16_t _T,_BC;
+    uint32_t _T,_BC;             // BUGFIX(#8): widened from uint16_t (_T wrapped ~3.6s)
     uint64_t _byte_counter, _old_highest_sent;
 
 };
