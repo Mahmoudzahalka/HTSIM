@@ -123,7 +123,8 @@ string DCQCNSinkLoggerSampling::event_to_str(RawLogEvent& event) {
     stringstream ss;
     ss << fixed << setprecision(9) << event._time;
     switch(event._type) {
-    case Logger::HPCC_SINK:
+    //case Logger::HPCC_SINK:   // BUGFIX(#9): records are written as DCQCN_SINK (see ctor), so parse must match
+    case Logger::DCQCN_SINK:
         assert(event._ev == RoceLogger::RATE);
         ss << " Type DCQCN_SINK ID " << event._id << " Ev RATE"
            << " CAck " << (uint64_t)event._val1 << " Rate " << (uint64_t)event._val3;

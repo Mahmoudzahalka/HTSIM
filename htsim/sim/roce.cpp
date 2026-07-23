@@ -225,7 +225,8 @@ void RoceSrc::processPause(const EthPausePacket& p) {
         //we are allowed to send!
         //assert(_state_send != READY);
         _state_send = READY;
-        cout << "Source " << str() << " RESUME " << timeAsUs(eventlist().now()) << endl;
+        if (_log_me)   // BUGFIX(#10): gate PFC RESUME spam
+            cout << "Source " << str() << " RESUME " << timeAsUs(eventlist().now()) << endl;
         eventlist().sourceIsPendingRel(*this,0);
     }
 }
@@ -243,8 +244,10 @@ void RoceSrc::receivePacket(Packet& pkt)
         _stop_time = 0;
     }
 
-    if (_done)
+    if (_done) {
+        pkt.free();   // BUGFIX(#6): free the stray post-completion packet instead of leaking it
         return;
+    }
 
     switch (pkt.type()) {
     case ETH_PAUSE:
@@ -313,21 +316,33 @@ void RoceSrc::doNextEvent() {
       return;
     }
 
+    // BUGFIX(#5): flow finished -> stop here so the source stops rescheduling
+    // itself. The send-path reschedule at the bottom of this function would
+    // otherwise tick forever (the stop-guard below used packets-vs-bytes and
+    // never tripped), so the eventlist never drained and the run relied on the
+    // external watchdog SIGTERM. Returning here lets it drain naturally.
+    if (_done)
+        return;
+
     assert(_flow_started);
-    if (_log_me) 
+    if (_log_me)
         cout << "Src " << get_id() << " do next event\n";
-        
+
 
     if (_state_send==PAUSED) {
-        if (_log_me) 
+        if (_log_me)
             cout << "Src " << get_id() << " paused\n";
 
-        cout << "PAUSE" << endl;
+        //cout << "PAUSE" << endl;   // BUGFIX(#10): ungated per-tick spam (209k lines on a 128-node incast); redundant with the gated line above
         return;
     }
 
-    if (_flow_size && _highest_sent >= _flow_size) { 
-        if (_log_me) 
+    // BUGFIX(#5): _highest_sent is a packet count but _flow_size is in bytes;
+    // the original compared them directly so it never tripped. Convert packets
+    // to bytes (matches the correct check in send_packet()).
+    //if (_flow_size && _highest_sent >= _flow_size) {
+    if (_flow_size && _highest_sent * _mss >= _flow_size) {
+        if (_log_me)
             cout << "Src " << get_id()  << " stopping send coz highest_sent is " << _highest_sent << endl;
         return;
     }

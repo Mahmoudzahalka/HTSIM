@@ -19,13 +19,13 @@ using namespace std;
 simtime_picosec DCQCNSink::_cnp_interval = timeFromUs(50.0);
 simtime_picosec DCQCNSrc::_cc_update_period = timeFromUs(55.0);
 
-double DCQCNSrc::_alpha = 1;
+//double DCQCNSrc::_alpha = 1;      // BUGFIX(#1): _alpha is now a per-instance member (init in ctor)
 double DCQCNSrc::_g = .00390625; // g = 1/256
-uint64_t DCQCNSrc::_B = 10000000; // number of bytes to go until we fire the byte counter
+uint64_t DCQCNSrc::_B = 10000000; // number of bytes to go until we fire the byte counter (10MB ~= 7 timer periods at 200G)
 
 uint32_t DCQCNSrc::_F = 5;
-linkspeed_bps DCQCNSrc::_RAI = 0;
-linkspeed_bps DCQCNSrc::_RHAI = 0;
+//linkspeed_bps DCQCNSrc::_RAI = 0;   // BUGFIX(#7): _RAI/_RHAI are now per-instance members (set in ctor)
+//linkspeed_bps DCQCNSrc::_RHAI = 0;
 
 DCQCNSrc::DCQCNSrc(RoceLogger* logger, TrafficLogger* pktlogger, EventList &eventlist, linkspeed_bps rate)
     : RoceSrc(logger,pktlogger,eventlist,rate)
@@ -42,6 +42,13 @@ DCQCNSrc::DCQCNSrc(RoceLogger* logger, TrafficLogger* pktlogger, EventList &even
     _RAI = rate / 20;
     _RHAI = rate / 10;
 
+    _alpha = 1;                    // BUGFIX(#1): per-instance alpha, was a shared static
+    // BUGFIX(#2): rate floor. Kept well below any per-flow fair share (e.g. an
+    // 8191->1 incast fair share is ~24Mbps at 200G) so it only prevents _RC from
+    // truncating to 0 (uint64) -> div-by-zero in update_spacing. Tunable.
+    _min_rate = rate / 100000;     // ~2 Mbps at 200G
+    if (_min_rate == 0) _min_rate = 1;
+
     _last_cc_update = 0;
     _last_alpha_update = 0;
 
@@ -54,6 +61,8 @@ DCQCNSrc::DCQCNSrc(RoceLogger* logger, TrafficLogger* pktlogger, EventList &even
 void DCQCNSrc::processCNP(const CNPPacket& cnp){
     _RT = _RC;
     _RC = _RC * (1-_alpha/2);
+    if (_RC < _min_rate)          // BUGFIX(#2): floor the rate so it can't truncate to 0
+        _RC = _min_rate;          // (uint64 _RC * (1-alpha/2) -> 0 -> div-by-zero in update_spacing)
     _alpha = (1-_g)*_alpha + _g;
 
     //_ai_state = increase_state::fast_recovery;
@@ -123,7 +132,11 @@ void DCQCNSrc::doNextEvent(){
     if (_log_me)
         cout << "Adding " << (_highest_sent - _old_highest_sent) << " to sent bytes " << _byte_counter << " " << _highest_sent << endl;
 
-    _byte_counter += (_highest_sent - _old_highest_sent);
+    // BUGFIX(#3): _highest_sent is a packet count; convert to bytes so it is
+    // comparable to _B (bytes). Without *_mss the counter needed ~40GB to fire,
+    // so the byte-counter increase (and BC-driven hyper-increase) never ran.
+    //_byte_counter += (_highest_sent - _old_highest_sent);
+    _byte_counter += (_highest_sent - _old_highest_sent) * _mss;
     _old_highest_sent = _highest_sent;
 
     if (_byte_counter >= _B){
@@ -136,8 +149,9 @@ void DCQCNSrc::doNextEvent(){
 
     if (eventlist().now()-_last_alpha_update >= _cc_update_period){
         _alpha = (1-_g)*_alpha;
+        _last_alpha_update = eventlist().now();   // BUGFIX(#4): advance the timer so alpha decays once per period, not every tick
         reschedule = true;
-    }    
+    }
 
 
     if (eventlist().now()-_last_cc_update >= _cc_update_period){
@@ -165,11 +179,13 @@ void DCQCNSrc::receivePacket(Packet& pkt)
         _stop_time = 0;
     }
 
-    if (_done)
+    if (_done) {
+        pkt.free();   // BUGFIX(#6): free the stray post-completion packet instead of leaking it
         return;
+    }
 
     switch (pkt.type()) {
-    case ETH_PAUSE:    
+    case ETH_PAUSE:
         processPause((const EthPausePacket&)pkt);
         pkt.free();
         return;
