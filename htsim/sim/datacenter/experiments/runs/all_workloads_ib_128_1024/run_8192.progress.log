@@ -1,0 +1,48 @@
+[Wed 15 Jul 2026 16:37:17 IDT] 8192 sweep: 45 jobs @ -P1  WORKROOT=/media/mahmoud_murad_allaah/Data/ib_sweep_work  TIMEOUT=14400s
+[skip 16:37:17] perm_random_8192n_16MB.1os already done
+[skip 16:37:17] perm_random_8192n_16MB.4os already done
+[skip 16:37:17] perm_random_8192n_16MB.8os already done
+[skip 16:37:17] perm_fullbis_8192n_16MB.1os already done
+[skip 16:37:17] perm_fullbis_8192n_16MB.4os already done
+[skip 16:37:17] perm_fullbis_8192n_16MB.8os already done
+[skip 16:37:17] incast_remote_8192n_16MB.1os already done
+[skip 16:37:17] incast_remote_8192n_16MB.4os already done
+[skip 16:37:17] incast_remote_8192n_16MB.8os already done
+[skip 16:37:17] outcast_incast_8192n_16MB.1os already done
+[skip 16:37:17] outcast_incast_8192n_16MB.4os already done
+[skip 16:37:17] outcast_incast_8192n_16MB.8os already done
+[done 18:40:05] incast_random_8192n_16MB.1os status=ok wall=7326s flows=8191/8191 makespan_us=5327460.0 overflow=0
+[done 20:27:56] incast_random_8192n_16MB.4os status=ok wall=6443s flows=8191/8191 makespan_us=5327460.0 overflow=0
+[done 22:08:06] incast_random_8192n_16MB.8os status=ok wall=5985s flows=8191/8191 makespan_us=5327470.0 overflow=0
+[done 23:00:59] perm_random_8192n_64MB.1os status=ok wall=3168s flows=8192/8192 makespan_us=21468.9 overflow=0
+[done 23:45:00] perm_random_8192n_64MB.4os status=ok wall=2635s flows=8192/8192 makespan_us=49823.8 overflow=0
+[done 00:28:08] perm_random_8192n_64MB.8os status=ok wall=2580s flows=8192/8192 makespan_us=59578.8 overflow=0
+[done 01:22:07] perm_fullbis_8192n_64MB.1os status=ok wall=3235s flows=8192/8192 makespan_us=16820.0 overflow=0
+[done 02:05:46] perm_fullbis_8192n_64MB.4os status=ok wall=2614s flows=8192/8192 makespan_us=38220.6 overflow=0
+[done 02:47:49] perm_fullbis_8192n_64MB.8os status=ok wall=2517s flows=8192/8192 makespan_us=49978.6 overflow=0
+[done 04:25:57] incast_remote_8192n_64MB.1os status=ok wall=5843s flows=4096/4096 makespan_us=10654400.0 overflow=0
+[done 05:51:25] incast_remote_8192n_64MB.4os status=ok wall=5100s flows=4096/4096 makespan_us=10654300.0 overflow=0
+[done 07:08:48] incast_remote_8192n_64MB.8os status=ok wall=4617s flows=4096/4096 makespan_us=10654300.0 overflow=0
+[done 07:38:46] outcast_incast_8192n_64MB.1os status=ok wall=1785s flows=4093/4093 makespan_us=2665740.0 overflow=0
+[done 08:07:16] outcast_incast_8192n_64MB.4os status=ok wall=1700s flows=4093/4093 makespan_us=2668660.0 overflow=0
+[done 08:37:50] outcast_incast_8192n_64MB.8os status=ok wall=1824s flows=4093/4093 makespan_us=2667160.0 overflow=0
+[done 12:38:22] incast_random_8192n_64MB.1os status=timeout wall=14430s flows=4935/8191 makespan_us=18398100.0 overflow=0
+[done 16:38:44] incast_random_8192n_64MB.4os status=timeout wall=14420s flows=5213/8191 makespan_us=19039600.0 overflow=0
+[done 20:39:05] incast_random_8192n_64MB.8os status=timeout wall=14419s flows=5301/8191 makespan_us=19386700.0 overflow=0
+[done 22:01:39] perm_random_8192n_100MB.1os status=ok wall=4945s flows=8192/8192 makespan_us=33568.6 overflow=0
+[done 23:10:26] perm_random_8192n_100MB.4os status=ok wall=4117s flows=8192/8192 makespan_us=77589.7 overflow=0
+[done 00:17:43] perm_random_8192n_100MB.8os status=ok wall=4026s flows=8192/8192 makespan_us=93489.6 overflow=0
+[done 01:42:39] perm_fullbis_8192n_100MB.1os status=ok wall=5089s flows=8192/8192 makespan_us=28480.7 overflow=0
+[done 02:50:50] perm_fullbis_8192n_100MB.4os status=ok wall=4082s flows=8192/8192 makespan_us=60699.6 overflow=0
+[done 03:56:38] perm_fullbis_8192n_100MB.8os status=ok wall=3939s flows=8192/8192 makespan_us=75778.2 overflow=0
+[done 06:29:25] incast_remote_8192n_100MB.1os status=ok wall=9095s flows=4096/4096 makespan_us=16647100.0 overflow=0
+[done 08:42:53] incast_remote_8192n_100MB.4os status=ok wall=7962s flows=4096/4096 makespan_us=16646900.0 overflow=0
+[done 10:44:04] incast_remote_8192n_100MB.8os status=ok wall=7228s flows=4096/4096 makespan_us=16647000.0 overflow=0
+[done 11:32:49] outcast_incast_8192n_100MB.1os status=ok wall=2904s flows=4093/4093 makespan_us=4165190.0 overflow=0
+[done 12:18:50] outcast_incast_8192n_100MB.4os status=ok wall=2745s flows=4093/4093 makespan_us=4170100.0 overflow=0
+[done 13:06:29] outcast_incast_8192n_100MB.8os status=ok wall=2844s flows=4093/4093 makespan_us=4167790.0 overflow=0
+[done 17:07:13] incast_random_8192n_100MB.1os status=timeout wall=14441s flows=3684/8191 makespan_us=26055600.0 overflow=0
+[done 21:07:43] incast_random_8192n_100MB.4os status=timeout wall=14428s flows=3760/8191 makespan_us=27151900.0 overflow=0
+[done 01:08:12] incast_random_8192n_100MB.8os status=timeout wall=14427s flows=3669/8191 makespan_us=27526100.0 overflow=0
+[Sat 18 Jul 2026 01:08:12 IDT] 8192 sweep done
+[Sat 18 Jul 2026 01:08:12 IDT] 8192 rows: 45/45
