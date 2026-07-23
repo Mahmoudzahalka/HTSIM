@@ -1,0 +1,103 @@
+[Tue 14 Jul 2026 17:17:09 IDT] LIGHT (128-node)=45 jobs @ -P5
+[Tue 14 Jul 2026 17:17:09 IDT] HEAVY (1024-node)=45 jobs @ -P2
+[done 17:17:12] incast_random_128n_16MB.4os status=ok wall=3s flows=127/127 makespan_us=82609.0 overflow=0
+[done 17:17:13] incast_random_128n_16MB.1os status=ok wall=3s flows=127/127 makespan_us=82609.1 overflow=0
+[done 17:17:16] incast_random_128n_16MB.8os status=ok wall=4s flows=127/127 makespan_us=82682.6 overflow=0
+[done 17:17:28] incast_random_128n_100MB.8os status=ok wall=18s flows=127/127 makespan_us=516670.0 overflow=0
+[done 17:17:28] incast_random_128n_64MB.1os status=ok wall=14s flows=127/127 makespan_us=330398.0 overflow=0
+[done 17:17:30] incast_random_128n_64MB.4os status=ok wall=13s flows=127/127 makespan_us=330351.0 overflow=0
+[done 17:17:31] incast_random_128n_100MB.4os status=ok wall=20s flows=127/127 makespan_us=516157.0 overflow=0
+[done 17:17:32] incast_random_128n_100MB.1os status=ok wall=22s flows=127/127 makespan_us=516165.0 overflow=0
+[done 17:17:34] incast_remote_128n_16MB.1os status=ok wall=2s flows=64/64 makespan_us=41646.5 overflow=0
+[done 17:17:36] incast_remote_128n_16MB.4os status=ok wall=2s flows=64/64 makespan_us=41639.9 overflow=0
+[done 17:17:37] incast_remote_128n_16MB.8os status=ok wall=1s flows=64/64 makespan_us=41638.4 overflow=0
+[done 17:17:37] incast_remote_128n_100MB.1os status=ok wall=9s flows=64/64 makespan_us=260151.0 overflow=0
+[done 17:17:38] incast_remote_128n_100MB.8os status=ok wall=7s flows=64/64 makespan_us=260120.0 overflow=0
+[done 17:17:39] incast_remote_128n_100MB.4os status=ok wall=8s flows=64/64 makespan_us=260120.0 overflow=0
+[done 17:17:40] incast_random_128n_64MB.8os status=ok wall=12s flows=127/127 makespan_us=330684.0 overflow=0
+[done 17:17:43] incast_remote_128n_64MB.1os status=ok wall=6s flows=64/64 makespan_us=166509.0 overflow=0
+[done 17:17:43] incast_remote_128n_64MB.4os status=ok wall=6s flows=64/64 makespan_us=166486.0 overflow=0
+[done 17:17:43] incast_remote_128n_64MB.8os status=ok wall=5s flows=64/64 makespan_us=166486.0 overflow=0
+[done 17:17:45] outcast_incast_128n_16MB.1os status=ok wall=2s flows=61/61 makespan_us=10719.4 overflow=0
+[done 17:17:45] outcast_incast_128n_16MB.4os status=ok wall=2s flows=61/61 makespan_us=10971.9 overflow=0
+[done 17:17:46] outcast_incast_128n_16MB.8os status=ok wall=1s flows=61/61 makespan_us=17945.0 overflow=0
+[done 17:17:48] outcast_incast_128n_100MB.1os status=ok wall=8s flows=61/61 makespan_us=67044.5 overflow=0
+[done 17:17:49] outcast_incast_128n_100MB.4os status=ok wall=8s flows=61/61 makespan_us=68578.4 overflow=0
+[done 17:17:50] outcast_incast_128n_64MB.1os status=ok wall=5s flows=61/61 makespan_us=42829.9 overflow=0
+[done 17:17:52] outcast_incast_128n_100MB.8os status=ok wall=9s flows=61/61 makespan_us=112336.0 overflow=0
+[done 17:17:52] outcast_incast_128n_64MB.4os status=ok wall=6s flows=61/61 makespan_us=43903.8 overflow=0
+[done 17:17:53] outcast_incast_128n_64MB.8os status=ok wall=5s flows=61/61 makespan_us=71798.2 overflow=0
+[done 17:17:56] perm_fullbis_128n_16MB.1os status=ok wall=4s flows=128/128 makespan_us=2406.2 overflow=0
+[done 17:17:57] perm_fullbis_128n_16MB.4os status=ok wall=4s flows=128/128 makespan_us=6578.1 overflow=0
+[done 17:17:59] perm_fullbis_128n_16MB.8os status=ok wall=3s flows=128/128 makespan_us=8540.0 overflow=0
+[done 17:18:10] perm_fullbis_128n_100MB.8os status=ok wall=17s flows=128/128 makespan_us=49103.4 overflow=0
+[done 17:18:10] perm_fullbis_128n_100MB.4os status=ok wall=20s flows=128/128 makespan_us=32782.6 overflow=0
+[done 17:18:11] perm_fullbis_128n_100MB.1os status=ok wall=22s flows=128/128 makespan_us=20589.6 overflow=0
+[done 17:18:12] perm_fullbis_128n_64MB.1os status=ok wall=14s flows=128/128 makespan_us=11554.4 overflow=0
+[done 17:18:12] perm_fullbis_128n_64MB.4os status=ok wall=13s flows=128/128 makespan_us=26311.4 overflow=0
+[done 17:18:15] perm_random_128n_16MB.1os status=ok wall=3s flows=128/128 makespan_us=3196.6 overflow=0
+[done 17:18:18] perm_random_128n_16MB.4os status=ok wall=3s flows=128/128 makespan_us=6338.9 overflow=0
+[done 17:18:21] perm_fullbis_128n_64MB.8os status=ok wall=11s flows=128/128 makespan_us=34032.1 overflow=0
+[done 17:18:22] perm_random_128n_16MB.8os status=ok wall=3s flows=128/128 makespan_us=9085.8 overflow=0
+[done 17:18:29] perm_random_128n_100MB.8os status=ok wall=17s flows=128/128 makespan_us=56932.4 overflow=0
+[done 17:18:30] perm_random_128n_100MB.4os status=ok wall=19s flows=128/128 makespan_us=39988.7 overflow=0
+[done 17:18:31] perm_random_128n_100MB.1os status=ok wall=21s flows=128/128 makespan_us=19948.3 overflow=0
+[done 17:18:33] perm_random_128n_64MB.4os status=ok wall=11s flows=128/128 makespan_us=25751.8 overflow=0
+[done 17:18:35] perm_random_128n_64MB.1os status=ok wall=14s flows=128/128 makespan_us=12750.4 overflow=0
+[done 17:18:40] perm_random_128n_64MB.8os status=ok wall=11s flows=128/128 makespan_us=36570.9 overflow=0
+[Tue 14 Jul 2026 17:18:40 IDT] light phase done
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/run_one_ib.sh: line 121: printf: write error: No space left on device
+[done 17:29:03] incast_random_1024n_100MB.4os status=ok wall=569s flows=1023/1023 makespan_us=4157950.0 overflow=0
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/run_one_ib.sh: line 71: 40516 Aborted                 ( cd "$work" || exit 1; exec timeout "$TIMEOUT" "$BIN" -tm "$matrix" -nodes "$n" -topo "$topo" -linkspeed 200000 -strat ecmp_host -paths "$PATHS" -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" -end "$END_US" -logtime_us "$LOGTIME_US" -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw_stdout" 2>&1
+[done 18:06:54] incast_random_1024n_100MB.8os status=incomplete wall=2270s flows=430/1023 makespan_us=3390920.0 overflow=0
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/run_one_ib.sh: line 71: 28717 Killed                  ( cd "$work" || exit 1; exec timeout "$TIMEOUT" "$BIN" -tm "$matrix" -nodes "$n" -topo "$topo" -linkspeed 200000 -strat ecmp_host -paths "$PATHS" -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" -end "$END_US" -logtime_us "$LOGTIME_US" -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw_stdout" 2>&1
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/run_one_ib.sh: line 71: 85214 Killed                  ( cd "$work" || exit 1; exec timeout "$TIMEOUT" "$BIN" -tm "$matrix" -nodes "$n" -topo "$topo" -linkspeed 200000 -strat ecmp_host -paths "$PATHS" -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" -end "$END_US" -logtime_us "$LOGTIME_US" -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw_stdout" 2>&1
+[done 18:06:55] incast_random_1024n_16MB.1os status=incomplete wall=1s flows=7/1023 makespan_us=9737.8 overflow=0
+[done 18:06:56] incast_random_1024n_100MB.1os status=incomplete wall=2895s flows=992/1023 makespan_us=4141480.0 overflow=0
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/run_one_ib.sh: line 71: 85293 Killed                  ( cd "$work" || exit 1; exec timeout "$TIMEOUT" "$BIN" -tm "$matrix" -nodes "$n" -topo "$topo" -linkspeed 200000 -strat ecmp_host -paths "$PATHS" -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" -end "$END_US" -logtime_us "$LOGTIME_US" -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw_stdout" 2>&1
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/run_one_ib.sh: line 71: 85339 Killed                  ( cd "$work" || exit 1; exec timeout "$TIMEOUT" "$BIN" -tm "$matrix" -nodes "$n" -topo "$topo" -linkspeed 200000 -strat ecmp_host -paths "$PATHS" -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" -end "$END_US" -logtime_us "$LOGTIME_US" -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw_stdout" 2>&1
+[done 18:07:45] incast_random_1024n_16MB.4os status=incomplete wall=50s flows=440/1023 makespan_us=542628.0 overflow=0
+[done 18:07:45] incast_random_1024n_16MB.8os status=incomplete wall=49s flows=458/1023 makespan_us=555861.0 overflow=0
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/run_one_ib.sh: line 71: 86408 Killed                  ( cd "$work" || exit 1; exec timeout "$TIMEOUT" "$BIN" -tm "$matrix" -nodes "$n" -topo "$topo" -linkspeed 200000 -strat ecmp_host -paths "$PATHS" -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" -end "$END_US" -logtime_us "$LOGTIME_US" -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw_stdout" 2>&1
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/run_one_ib.sh: line 71: 86389 Killed                  ( cd "$work" || exit 1; exec timeout "$TIMEOUT" "$BIN" -tm "$matrix" -nodes "$n" -topo "$topo" -linkspeed 200000 -strat ecmp_host -paths "$PATHS" -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" -end "$END_US" -logtime_us "$LOGTIME_US" -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw_stdout" 2>&1
+[done 18:07:55] incast_random_1024n_64MB.1os status=incomplete wall=10s flows=25/1023 makespan_us=289061.0 overflow=0
+[done 18:07:55] incast_random_1024n_64MB.4os status=incomplete wall=10s flows=20/1023 makespan_us=252048.0 overflow=0
+[done 18:11:10] incast_remote_1024n_100MB.1os status=ok wall=172s flows=512/512 makespan_us=2080910.0 overflow=0
+[done 18:13:53] incast_remote_1024n_100MB.4os status=ok wall=149s flows=512/512 makespan_us=2080980.0 overflow=0
+[done 18:14:09] incast_random_1024n_64MB.8os status=ok wall=342s flows=1023/1023 makespan_us=2660960.0 overflow=0
+[done 18:14:42] incast_remote_1024n_16MB.1os status=ok wall=29s flows=512/512 makespan_us=333029.0 overflow=0
+[done 18:15:08] incast_remote_1024n_16MB.4os status=ok wall=24s flows=512/512 makespan_us=333035.0 overflow=0
+[done 18:15:33] incast_remote_1024n_16MB.8os status=ok wall=23s flows=512/512 makespan_us=333026.0 overflow=0
+[done 18:16:26] incast_remote_1024n_100MB.8os status=ok wall=141s flows=512/512 makespan_us=2080940.0 overflow=0
+[done 18:17:38] incast_remote_1024n_64MB.1os status=ok wall=111s flows=512/512 makespan_us=1331820.0 overflow=0
+[done 18:18:11] incast_remote_1024n_64MB.4os status=ok wall=96s flows=512/512 makespan_us=1331860.0 overflow=0
+[done 18:19:21] incast_remote_1024n_64MB.8os status=ok wall=95s flows=512/512 makespan_us=1331840.0 overflow=0
+[done 18:20:13] outcast_incast_1024n_100MB.1os status=ok wall=116s flows=509/509 makespan_us=520808.0 overflow=0
+awk: cannot open /home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/work/outcast_incast_1024n_100MB.4os/htsim.stdout (No such file or directory)
+[done 23:15:02] outcast_incast_1024n_100MB.4os status=failed wall=17741s flows=0/509 makespan_us=0 overflow=
+[done 23:15:21] outcast_incast_1024n_16MB.1os status=ok wall=18s flows=509/509 makespan_us=83391.9 overflow=0
+[done 23:15:40] outcast_incast_1024n_16MB.4os status=ok wall=18s flows=509/509 makespan_us=84050.5 overflow=0
+[done 23:15:59] outcast_incast_1024n_16MB.8os status=ok wall=18s flows=509/509 makespan_us=84892.6 overflow=0
+[done 23:17:16] outcast_incast_1024n_64MB.1os status=ok wall=73s flows=509/509 makespan_us=333501.0 overflow=0
+[done 23:18:31] outcast_incast_1024n_64MB.4os status=ok wall=72s flows=509/509 makespan_us=336059.0 overflow=0
+[done 23:19:49] outcast_incast_1024n_64MB.8os status=ok wall=76s flows=509/509 makespan_us=339933.0 overflow=0
+awk: cannot open /home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/all_workloads_ib_128_1024/work/outcast_incast_1024n_100MB.8os/htsim.stdout (No such file or directory)
+[done 23:20:22] outcast_incast_1024n_100MB.8os status=failed wall=18009s flows=0/509 makespan_us=0 overflow=
+[done 23:25:34] perm_fullbis_1024n_100MB.4os status=ok wall=311s flows=1024/1024 makespan_us=43652.2 overflow=0
+[done 23:25:49] perm_fullbis_1024n_100MB.1os status=ok wall=359s flows=1024/1024 makespan_us=20901.4 overflow=0
+[done 23:26:46] perm_fullbis_1024n_16MB.1os status=ok wall=57s flows=1024/1024 makespan_us=4387.4 overflow=0
+[done 23:27:36] perm_fullbis_1024n_16MB.4os status=ok wall=49s flows=1024/1024 makespan_us=7301.4 overflow=0
+[done 23:28:24] perm_fullbis_1024n_16MB.8os status=ok wall=48s flows=1024/1024 makespan_us=10673.8 overflow=0
+[done 23:30:39] perm_fullbis_1024n_100MB.8os status=ok wall=304s flows=1024/1024 makespan_us=58045.9 overflow=0
+[done 23:32:09] perm_fullbis_1024n_64MB.1os status=ok wall=224s flows=1024/1024 makespan_us=15702.4 overflow=0
+[done 23:33:55] perm_fullbis_1024n_64MB.4os status=ok wall=195s flows=1024/1024 makespan_us=28826.5 overflow=0
+[done 23:35:20] perm_fullbis_1024n_64MB.8os status=ok wall=190s flows=1024/1024 makespan_us=40209.8 overflow=0
+[done 23:39:57] perm_random_1024n_100MB.1os status=ok wall=361s flows=1024/1024 makespan_us=30122.2 overflow=0
+[done 23:40:30] perm_random_1024n_100MB.4os status=ok wall=309s flows=1024/1024 makespan_us=56854.7 overflow=0
+[done 23:41:25] perm_random_1024n_16MB.1os status=ok wall=55s flows=1024/1024 makespan_us=4835.8 overflow=0
+[done 23:42:14] perm_random_1024n_16MB.4os status=ok wall=49s flows=1024/1024 makespan_us=9000.0 overflow=0
+[done 23:42:59] perm_random_1024n_16MB.8os status=ok wall=45s flows=1024/1024 makespan_us=12870.3 overflow=0
+[done 23:44:41] perm_random_1024n_100MB.8os status=ok wall=282s flows=1024/1024 makespan_us=80087.3 overflow=0
+[done 23:46:43] perm_random_1024n_64MB.1os status=ok wall=223s flows=1024/1024 makespan_us=19323.0 overflow=0
+[done 23:47:56] perm_random_1024n_64MB.4os status=ok wall=194s flows=1024/1024 makespan_us=36339.1 overflow=0
+[done 23:49:44] perm_random_1024n_64MB.8os status=ok wall=180s flows=1024/1024 makespan_us=51244.4 overflow=0

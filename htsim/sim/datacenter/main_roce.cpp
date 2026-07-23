@@ -1,6 +1,7 @@
 // -*- c-basic-offset: 4; indent-tabs-mode: nil -*-
 #include "config.h"
 #include <sstream>
+#include <csignal>
 
 #include <iostream>
 #include <string.h>
@@ -45,6 +46,15 @@ int DEFAULT_NODES = 432;
 #define FIRST_FIT_INTERVAL 100
 
 EventList eventlist;
+
+// Watchdog-triggered clean shutdown: an external watchdog greps the "finished
+// at ..." lines and sends SIGTERM when all Connections-M flows are done. The
+// handler just sets a flag; the sim loop below checks between events and breaks
+// so main()'s epilogue (~Logfile finalize + stats) runs, producing a readable
+// util.bin. (main_uec does the same; without it a hard SIGTERM leaves util.bin
+// unindexed and parse_output reads zero records.)
+static volatile sig_atomic_t g_roce_stop = 0;
+static void roce_handle_sigterm(int) { g_roce_stop = 1; }
 
 void exit_error(char* progr) {
     cout << "Usage " << progr << " [-nodes N]\n\t[-q queue_size]\n\t[-queue_type composite|random|lossless|lossless_input|]\n\t[-tm traffic_matrix_file]\n\t[-strat route_strategy (single,\n\tecmp_host,ecmp_ar,\n\tecmp_host_ar ar_thresh)]\n\t[-log log_level]\n\t[-seed random_seed]\n\t[-end end_time_in_usec]\n\t[-mtu MTU]\n\t[-hop_latency x] per hop wire latency in us,default 1\n\t[-switch_latency x] switching latency in us, default 0\n\t[-start_delta] time in us to randomly delay the start of connections\n\t[-pfc_thresholds low high]" << endl;
@@ -653,7 +663,12 @@ int main(int argc, char **argv) {
     
     // GO!
     cout << "Starting simulation" << endl;
-    while (eventlist.doNextEvent()) {
+    signal(SIGTERM, roce_handle_sigterm);
+    while (!g_roce_stop && eventlist.doNextEvent()) {
+    }
+    if (g_roce_stop) {
+        cout << "Received SIGTERM at " << timeAsUs(eventlist.now())
+             << " us, shutting down cleanly." << endl;
     }
 
     cout << "Done" << endl;
