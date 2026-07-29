@@ -39,9 +39,17 @@ public:
     static uint64_t _low_threshold;
     static uint64_t _high_threshold;
 
+    // --- IB congestion instrumentation (aggregated across all input queues) ---
+    // PFC backpressure fingerprint: how often ports paused, total port-time spent
+    // paused, and the high-water buffer occupancy (bytes). Reset per process run.
+    static uint64_t _total_pauses;         // number of PAUSE episodes (wait>0)
+    static simtime_picosec _total_pause_time; // summed (resume_time - pause_time)
+    static mem_b _max_occupancy;           // peak input-queue occupancy seen (bytes)
+
 private:
     int _state_recv;
     CallbackPipe* _wire;
+    simtime_picosec _pause_start;          // when this queue last entered PAUSED
 };
 
 #endif

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <math.h>
 #include <unistd.h>
+#include <csignal>
 #include "network.h"
 #include "randomqueue.h"
 #include "queue_lossless_input.h"
@@ -46,6 +47,15 @@ int DEFAULT_NODES = 432;
 
 EventList eventlist;
 
+// Watchdog-triggered clean shutdown: an external watchdog greps the "finished
+// at ..." lines and sends SIGTERM when all Connections-M flows are done. The
+// handler just sets a flag; the sim loop below checks between events and breaks
+// so main()'s epilogue (~Logfile finalize + stats) runs, producing a readable
+// util.bin. Without it a hard SIGTERM leaves util.bin unindexed and
+// parse_output reads zero records (all-zero utilization rows).
+static volatile sig_atomic_t g_roce_stop = 0;
+static void roce_handle_sigterm(int) { g_roce_stop = 1; }
+
 void exit_error(char* progr) {
     cout << "Usage " << progr << " [-nodes N]\n\t[-q queue_size]\n\t[-queue_type composite|random|lossless|lossless_input|]\n\t[-tm traffic_matrix_file]\n\t[-strat route_strategy (single,\n\tecmp_host,ecmp_ar,\n\tecmp_host_ar ar_thresh)]\n\t[-log log_level]\n\t[-seed random_seed]\n\t[-end end_time_in_usec]\n\t[-mtu MTU]\n\t[-hop_latency x] per hop wire latency in us,default 1\n\t[-switch_latency x] switching latency in us, default 0\n\t[-start_delta] time in us to randomly delay the start of connections\n\t[-pfc_thresholds low high]" << endl;
     exit(1);
@@ -60,6 +70,10 @@ int main(int argc, char **argv) {
     uint32_t no_of_nodes = DEFAULT_NODES;
     uint32_t tiers = 3; // we support 2 and 3 tier fattrees     
     double logtime = 0.25; // ms;
+    // tor-queue utilization sampling period in us (QueueLoggerFactory sampling).
+    // Default 10us preserves prior behaviour; the IB sweep passes a larger value
+    // (e.g. 1000/20000) to match util recording and keep util.bin bounded.
+    double q_sample_us = 10.0;
     stringstream filename(ios_base::out);
     simtime_picosec hop_latency = timeFromUs((uint32_t)1);
     simtime_picosec switch_latency = timeFromUs((uint32_t)0);
@@ -189,8 +203,13 @@ int main(int argc, char **argv) {
             queuesize = atoi(argv[i+1]);
             i++;
         } else if (!strcmp(argv[i],"-logtime")){
-            logtime = atof(argv[i+1]);            
+            logtime = atof(argv[i+1]);
             cout << "logtime "<< logtime << " ms" << endl;
+            i++;
+        } else if (!strcmp(argv[i],"-logtime_us")){
+            // tor-queue utilization sampling period in us (see q_sample_us)
+            q_sample_us = atof(argv[i+1]);
+            cout << "q_sample_us "<< q_sample_us << " us" << endl;
             i++;
         } else if (!strcmp(argv[i],"-linkspeed")){
             // linkspeed specified is in Mbps
@@ -386,10 +405,10 @@ int main(int argc, char **argv) {
     QueueLoggerFactory *qlf = 0;
     if (log_tor_downqueue || log_tor_upqueue) {
         qlf = new QueueLoggerFactory(&logfile, QueueLoggerFactory::LOGGER_SAMPLING, eventlist);
-        qlf->set_sample_period(timeFromUs(10.0));
+        qlf->set_sample_period(timeFromUs(q_sample_us));
     } else if (log_queue_usage) {
         qlf = new QueueLoggerFactory(&logfile, QueueLoggerFactory::LOGGER_EMPTY, eventlist);
-        qlf->set_sample_period(timeFromUs(10.0));
+        qlf->set_sample_period(timeFromUs(q_sample_us));
     }
 #ifdef FAT_TREE
     unique_ptr<FatTreeTopology> top;
@@ -644,7 +663,12 @@ int main(int argc, char **argv) {
     
     // GO!
     cout << "Starting simulation" << endl;
-    while (eventlist.doNextEvent()) {
+    signal(SIGTERM, roce_handle_sigterm);
+    while (!g_roce_stop && eventlist.doNextEvent()) {
+    }
+    if (g_roce_stop) {
+        cout << "Received SIGTERM at " << timeAsUs(eventlist.now())
+             << " us, shutting down cleanly." << endl;
     }
 
     cout << "Done" << endl;
@@ -654,6 +678,12 @@ int main(int argc, char **argv) {
         rtx_pkts += roce_srcs[ix]->_rtx_packets_sent;
     }
     cout << "New: " << new_pkts << " Rtx: " << rtx_pkts << endl;
+
+    // IB congestion fingerprint (PFC backpressure + peak buffer). Parsed by the
+    // sweep harness into per-run columns for the IB-vs-UET comparison.
+    cout << "PFC_PAUSES " << LosslessInputQueue::_total_pauses
+         << " PFC_PAUSE_US " << timeAsUs(LosslessInputQueue::_total_pause_time)
+         << " MAX_QUEUE_BYTES " << LosslessInputQueue::_max_occupancy << endl;
 
     /*list <const Route*>::iterator rt_i;
       int counts[10]; int hop;

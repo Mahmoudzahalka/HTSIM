@@ -8,6 +8,11 @@
 uint64_t LosslessInputQueue::_high_threshold = 0;
 uint64_t LosslessInputQueue::_low_threshold = 0;
 
+// IB congestion instrumentation (see header). Aggregated across all input queues.
+uint64_t LosslessInputQueue::_total_pauses = 0;
+simtime_picosec LosslessInputQueue::_total_pause_time = 0;
+mem_b LosslessInputQueue::_max_occupancy = 0;
+
 LosslessInputQueue::LosslessInputQueue(EventList& eventlist)
     : Queue(speedFromGbps(1),Packet::data_packet_size()*2000,eventlist,NULL),
       VirtualQueue(),
@@ -65,10 +70,15 @@ LosslessInputQueue::receivePacket(Packet& pkt)
     /* normal packet, enqueue it */
     _queuesize += pkt.size();
 
+    if (_queuesize > _max_occupancy)   // IB metric: peak PFC-buffer high-water mark
+        _max_occupancy = _queuesize;
+
     //send PAUSE notifications if that is the case!
     assert(_queuesize > 0);
     if ((uint64_t)_queuesize > _high_threshold && _state_recv!=PAUSED){
         _state_recv = PAUSED;
+        _pause_start = eventlist().now();   // IB metric: start of this pause episode
+        _total_pauses++;
         sendPause(1000);
     }
 
@@ -99,6 +109,7 @@ void LosslessInputQueue::completedService(Packet& pkt){
     assert(_queuesize >= 0);
     if ((uint64_t)_queuesize < _low_threshold && _state_recv == PAUSED) {
         _state_recv = READY;
+        _total_pause_time += eventlist().now() - _pause_start;   // IB metric: pause episode duration
         sendPause(0);
     }
 }

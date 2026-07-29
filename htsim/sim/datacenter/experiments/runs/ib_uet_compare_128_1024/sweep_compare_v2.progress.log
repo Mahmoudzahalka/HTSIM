@@ -1,0 +1,105 @@
+[Fri 24 Jul 2026 23:18:50 IDT] IB-vs-UET sweep K=8 MTU=4000  light=45 heavy=45 a2a128=9
+[Fri 24 Jul 2026 23:18:50 IDT] === Phase 1: light (128-node all_workloads) @ -P6 ===
+[skip 23:18:50] perm_random_128n_16MB.4os already done
+[skip 23:18:50] perm_random_128n_16MB.8os already done
+[skip 23:18:50] perm_random_128n_16MB.1os already done
+[skip 23:18:50] perm_fullbis_128n_16MB.1os already done
+[skip 23:18:50] perm_fullbis_128n_16MB.4os already done
+[skip 23:18:50] perm_fullbis_128n_16MB.8os already done
+[skip 23:18:50] incast_remote_128n_16MB.8os already done
+[skip 23:18:50] incast_remote_128n_16MB.1os already done
+[skip 23:18:50] incast_remote_128n_16MB.4os already done
+[skip 23:18:50] outcast_incast_128n_16MB.1os already done
+[skip 23:18:50] outcast_incast_128n_16MB.8os already done
+[skip 23:18:50] outcast_incast_128n_16MB.4os already done
+[skip 23:18:50] incast_random_128n_16MB.4os already done
+[skip 23:18:50] incast_random_128n_16MB.1os already done
+[skip 23:18:50] perm_random_128n_64MB.4os already done
+[skip 23:18:50] perm_random_128n_64MB.1os already done
+[skip 23:18:50] perm_random_128n_64MB.8os already done
+[skip 23:18:50] incast_random_128n_16MB.8os already done
+[skip 23:18:51] perm_fullbis_128n_64MB.1os already done
+[skip 23:18:51] perm_fullbis_128n_64MB.4os already done
+[skip 23:18:51] perm_fullbis_128n_64MB.8os already done
+[skip 23:18:51] incast_remote_128n_64MB.1os already done
+[skip 23:18:51] incast_remote_128n_64MB.8os already done
+[skip 23:18:51] incast_remote_128n_64MB.4os already done
+[skip 23:18:51] incast_random_128n_64MB.1os already done
+[skip 23:18:51] outcast_incast_128n_64MB.8os already done
+[skip 23:18:51] outcast_incast_128n_64MB.4os already done
+[skip 23:18:51] outcast_incast_128n_64MB.1os already done
+[skip 23:18:51] incast_random_128n_64MB.8os already done
+[skip 23:18:51] incast_random_128n_64MB.4os already done
+[skip 23:18:51] perm_random_128n_100MB.8os already done
+[skip 23:18:51] perm_random_128n_100MB.1os already done
+[skip 23:18:51] perm_fullbis_128n_100MB.4os already done
+[skip 23:18:51] perm_fullbis_128n_100MB.8os already done
+[skip 23:18:51] perm_random_128n_100MB.4os already done
+[skip 23:18:51] perm_fullbis_128n_100MB.1os already done
+[skip 23:18:51] incast_remote_128n_100MB.1os already done
+[skip 23:18:51] incast_remote_128n_100MB.4os already done
+[skip 23:18:51] outcast_incast_128n_100MB.8os already done
+[skip 23:18:51] incast_remote_128n_100MB.8os already done
+[skip 23:18:51] outcast_incast_128n_100MB.4os already done
+[skip 23:18:51] outcast_incast_128n_100MB.1os already done
+[skip 23:18:51] incast_random_128n_100MB.1os already done
+[skip 23:18:51] incast_random_128n_100MB.4os already done
+[skip 23:18:51] incast_random_128n_100MB.8os already done
+[Fri 24 Jul 2026 23:18:51 IDT] === Phase 2: heavy (1024-node all_workloads) @ -P2 ===
+[done 23:20:08] perm_random_1024n_16MB.1os status=ok flows=1024/1024 mk=5472.2us pauses=12569 pause_us=80415.8 maxq=117696 slow99=7.7150 fair=0.7994
+[done 23:20:16] perm_random_1024n_16MB.4os status=ok flows=1024/1024 mk=11871.4us pauses=12669 pause_us=150502.0 maxq=117376 slow99=16.4661 fair=0.8073
+[done 23:21:31] perm_fullbis_1024n_16MB.1os status=ok flows=1024/1024 mk=6284.1us pauses=6356 pause_us=35072.9 maxq=117632 slow99=7.3245 fair=0.7214
+[done 23:21:47] perm_random_1024n_16MB.8os status=ok flows=1024/1024 mk=16910.7us pauses=13773 pause_us=253560.0 maxq=117408 slow99=24.6895 fair=0.6479
+[done 23:22:54] perm_fullbis_1024n_16MB.4os status=ok flows=1024/1024 mk=10813.7us pauses=9429 pause_us=96090.4 maxq=117184 slow99=15.2569 fair=0.8682
+[done 23:23:11] incast_remote_1024n_16MB.1os status=ok flows=512/512 mk=337258.0us pauses=368320 pause_us=286591000.0 maxq=113792 slow99=526.4672 fair=0.9051
+[done 23:23:28] incast_remote_1024n_16MB.4os status=ok flows=512/512 mk=336741.0us pauses=373686 pause_us=191476000.0 maxq=113792 slow99=525.5781 fair=0.9161
+[done 23:23:30] perm_fullbis_1024n_16MB.8os status=ok flows=1024/1024 mk=15379.5us pauses=12589 pause_us=171803.0 maxq=117888 slow99=22.4459 fair=0.9176
+[done 23:23:43] incast_remote_1024n_16MB.8os status=ok flows=512/512 mk=337057.0us pauses=387312 pause_us=185959000.0 maxq=113792 slow99=526.1109 fair=0.9327
+[done 23:24:02] outcast_incast_1024n_16MB.1os status=ok flows=509/509 mk=96591.1us pauses=56667 pause_us=4422650.0 maxq=117504 slow99=150.6484 fair=0.6563
+[done 23:24:11] outcast_incast_1024n_16MB.4os status=ok flows=509/509 mk=102627.0us pauses=59876 pause_us=1977140.0 maxq=116864 slow99=159.9734 fair=0.5593
+[done 23:24:27] outcast_incast_1024n_16MB.8os status=ok flows=509/509 mk=102733.0us pauses=82172 pause_us=2539280.0 maxq=115712 slow99=160.2406 fair=0.4643
+[done 23:25:11] incast_random_1024n_16MB.1os status=ok flows=1023/1023 mk=669152.0us pauses=721420 pause_us=1080710000.0 maxq=113792 slow99=1044.8016 fair=0.7365
+[done 23:27:38] incast_random_1024n_16MB.4os status=ok flows=1023/1023 mk=670410.0us pauses=693865 pause_us=716482000.0 maxq=113792 slow99=1046.1031 fair=0.8907
+[done 23:29:47] incast_random_1024n_16MB.8os status=ok flows=1023/1023 mk=669114.0us pauses=712216 pause_us=692832000.0 maxq=113792 slow99=1044.4141 fair=0.9073
+[done 23:35:12] perm_random_1024n_64MB.1os status=ok flows=1024/1024 mk=18334.1us pauses=12578 pause_us=80439.9 maxq=117696 slow99=6.7568 fair=0.8463
+[done 23:39:35] perm_random_1024n_64MB.4os status=ok flows=1024/1024 mk=41173.6us pauses=12942 pause_us=151942.0 maxq=117376 slow99=14.4665 fair=0.8209
+[done 23:46:35] perm_fullbis_1024n_64MB.1os status=ok flows=1024/1024 mk=20946.3us pauses=6386 pause_us=34482.8 maxq=117632 slow99=7.0493 fair=0.7709
+[done 23:48:01] perm_random_1024n_64MB.8os status=ok flows=1024/1024 mk=59973.9us pauses=15294 pause_us=259754.0 maxq=117408 slow99=21.0118 fair=0.6522
+[done 23:56:05] perm_fullbis_1024n_64MB.4os status=ok flows=1024/1024 mk=31181.4us pauses=10095 pause_us=102192.0 maxq=117344 slow99=11.8700 fair=0.8488
+[done 23:57:22] incast_remote_1024n_64MB.1os status=ok flows=512/512 mk=1349300.0us pauses=1467296 pause_us=1141530000.0 maxq=113792 slow99=526.8750 fair=0.9033
+[done 23:58:32] incast_remote_1024n_64MB.4os status=ok flows=512/512 mk=1350090.0us pauses=1480099 pause_us=756721000.0 maxq=113792 slow99=527.2656 fair=0.9121
+[done 23:59:36] incast_remote_1024n_64MB.8os status=ok flows=512/512 mk=1351270.0us pauses=1525024 pause_us=740321000.0 maxq=113792 slow99=527.6172 fair=0.9312
+[done 00:01:08] perm_fullbis_1024n_64MB.8os status=ok flows=1024/1024 mk=50688.0us pauses=16683 pause_us=193207.0 maxq=117120 slow99=18.7220 fair=0.9073
+[done 00:01:44] outcast_incast_1024n_64MB.1os status=ok flows=509/509 mk=383260.0us pauses=227970 pause_us=19146000.0 maxq=117504 slow99=149.4727 fair=0.6205
+[done 00:03:20] outcast_incast_1024n_64MB.4os status=ok flows=509/509 mk=399400.0us pauses=245026 pause_us=8749020.0 maxq=116736 slow99=155.9504 fair=0.5308
+[done 00:03:47] outcast_incast_1024n_64MB.8os status=ok flows=509/509 mk=403284.0us pauses=326071 pause_us=9990830.0 maxq=117248 slow99=157.2914 fair=0.3937
+[done 00:13:38] incast_random_1024n_64MB.1os status=ok flows=1023/1023 mk=2675930.0us pauses=2871314 pause_us=4332650000.0 maxq=113792 slow99=1044.8086 fair=0.7266
+[done 00:48:05] incast_random_1024n_64MB.4os status=ok flows=1023/1023 mk=2684300.0us pauses=2758107 pause_us=2860160000.0 maxq=113792 slow99=1047.8789 fair=0.8894
+[done 00:59:00] incast_random_1024n_64MB.8os status=ok flows=1023/1023 mk=2678610.0us pauses=2840889 pause_us=2768690000.0 maxq=113792 slow99=1045.8906 fair=0.9063
+[done 01:01:55] perm_random_1024n_100MB.1os status=ok flows=1024/1024 mk=26989.0us pauses=12583 pause_us=80448.8 maxq=117696 slow99=6.3682 fair=0.8551
+[done 01:18:47] perm_random_1024n_100MB.4os status=ok flows=1024/1024 mk=61054.4us pauses=13093 pause_us=152441.0 maxq=117376 slow99=13.3799 fair=0.8259
+[done 01:28:33] perm_random_1024n_100MB.8os status=ok flows=1024/1024 mk=92528.9us pauses=17015 pause_us=267549.0 maxq=117408 slow99=20.5603 fair=0.6555
+[done 01:31:27] perm_fullbis_1024n_100MB.1os status=ok flows=1024/1024 mk=23204.0us pauses=5896 pause_us=30151.9 maxq=117376 slow99=5.4769 fair=0.8012
+[done 01:47:24] perm_fullbis_1024n_100MB.4os status=ok flows=1024/1024 mk=46832.1us pauses=9969 pause_us=99550.3 maxq=117056 slow99=10.4769 fair=0.8611
+[done 01:49:40] incast_remote_1024n_100MB.1os status=ok flows=512/512 mk=2107340.0us pauses=2289895 pause_us=1786430000.0 maxq=113792 slow99=526.6025 fair=0.9034
+[done 01:51:31] incast_remote_1024n_100MB.4os status=ok flows=512/512 mk=2110110.0us pauses=2310507 pause_us=1180980000.0 maxq=113792 slow99=527.3375 fair=0.9118
+[done 01:53:12] incast_remote_1024n_100MB.8os status=ok flows=512/512 mk=2112030.0us pauses=2392705 pause_us=1157470000.0 maxq=113792 slow99=527.8625 fair=0.9299
+[done 01:56:56] outcast_incast_1024n_100MB.1os status=ok flows=509/509 mk=598319.0us pauses=347871 pause_us=28351400.0 maxq=117504 slow99=149.4180 fair=0.6196
+[done 01:59:27] perm_fullbis_1024n_100MB.8os status=ok flows=1024/1024 mk=73099.7us pauses=22396 pause_us=215510.0 maxq=117120 slow99=17.9282 fair=0.8872
+[done 02:00:59] outcast_incast_1024n_100MB.4os status=ok flows=509/509 mk=623470.0us pauses=391795 pause_us=13763800.0 maxq=117248 slow99=155.7640 fair=0.5119
+[done 02:03:09] outcast_incast_1024n_100MB.8os status=ok flows=509/509 mk=627471.0us pauses=517100 pause_us=15869900.0 maxq=116608 slow99=156.7022 fair=0.3775
+[done 02:25:13] incast_random_1024n_100MB.1os status=ok flows=1023/1023 mk=4181200.0us pauses=4482962 pause_us=6770770000.0 maxq=113792 slow99=1044.4925 fair=0.7221
+[done 03:15:24] incast_random_1024n_100MB.4os status=ok flows=1023/1023 mk=4193160.0us pauses=4319933 pause_us=4469730000.0 maxq=113792 slow99=1047.6950 fair=0.8892
+[done 04:04:22] incast_random_1024n_100MB.8os status=ok flows=1023/1023 mk=4185310.0us pauses=4437579 pause_us=4324610000.0 maxq=113792 slow99=1045.7625 fair=0.9060
+[Sat 25 Jul 2026 04:04:25 IDT] === Phase 3: a2a-128 @ -P2 (memory-heavy) ===
+[skip 04:04:25] a2a_128n_16MB.4os already done
+[skip 04:04:25] a2a_128n_16MB.1os already done
+[skip 04:04:25] a2a_128n_16MB.8os already done
+[done 06:06:54] a2a_128n_64MB.1os status=ok flows=16256/16256 mk=463698.0us pauses=3111015 pause_us=11651700.0 maxq=117312 slow99=176.1242 fair=0.9891
+[done 06:23:14] a2a_128n_64MB.4os status=ok flows=16256/16256 mk=1341220.0us pauses=13264761 pause_us=164100000.0 maxq=118080 slow99=515.7500 fair=0.9963
+[done 08:31:55] a2a_128n_64MB.8os status=ok flows=16256/16256 mk=2534990.0us pauses=18428736 pause_us=313924000.0 maxq=118016 slow99=989.9805 fair=0.9999
+[done 09:39:16] a2a_128n_100MB.1os status=ok flows=16256/16256 mk=725748.0us pauses=4889415 pause_us=18191300.0 maxq=117568 slow99=176.3000 fair=0.9897
+[done 12:14:47] a2a_128n_100MB.4os status=ok flows=16256/16256 mk=2097440.0us pauses=20734405 pause_us=256470000.0 maxq=118080 slow99=516.1650 fair=0.9963
+[done 13:25:12] a2a_128n_100MB.8os status=ok flows=16256/16256 mk=3959400.0us pauses=28797880 pause_us=490550000.0 maxq=118016 slow99=989.7300 fair=0.9999
+[Sat 25 Jul 2026 13:25:13 IDT] all phases done
+[Sat 25 Jul 2026 13:25:13 IDT] COMPLETE  results=99 rows  util=99  ok=99
