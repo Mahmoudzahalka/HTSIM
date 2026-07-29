@@ -1,0 +1,54 @@
+[Fri 24 Jul 2026 21:48:46 IDT] IB-vs-UET sweep K=8 MTU=4000  light=54 heavy=45 a2a1024=9
+[Fri 24 Jul 2026 21:48:46 IDT] === Phase 1: light (128-node all_workloads + a2a-128) @ -P6 ===
+[done 21:48:51] perm_fullbis_128n_16MB.1os status=ok flows=128/128 mk=3634.9us pauses=733 pause_us=3445.8 maxq=115648 slow99=5.6793 fair=0.7466
+[done 21:48:52] perm_random_128n_16MB.4os status=ok flows=128/128 mk=8312.4us pauses=2044 pause_us=19886.2 maxq=117728 slow99=12.9499 fair=0.5906
+[done 21:48:52] perm_random_128n_16MB.1os status=ok flows=128/128 mk=4449.0us pauses=1523 pause_us=8382.8 maxq=116672 slow99=6.7878 fair=0.7610
+[done 21:48:52] perm_fullbis_128n_16MB.4os status=ok flows=128/128 mk=9423.5us pauses=1731 pause_us=14722.9 maxq=117632 slow99=14.7231 fair=0.6950
+[done 21:48:53] perm_random_128n_16MB.8os status=ok flows=128/128 mk=11679.0us pauses=1833 pause_us=25766.3 maxq=117504 slow99=18.2348 fair=0.4575
+[done 21:48:54] perm_fullbis_128n_16MB.8os status=ok flows=128/128 mk=12771.8us pauses=1662 pause_us=20200.7 maxq=116992 slow99=19.7737 fair=0.9398
+[done 21:48:56] outcast_incast_128n_16MB.1os status=ok flows=61/61 mk=14904.4us pauses=969 pause_us=8968.0 maxq=113792 slow99=23.2881 fair=0.7032
+[done 21:48:58] outcast_incast_128n_16MB.4os status=ok flows=61/61 mk=15171.7us pauses=870 pause_us=9545.8 maxq=113856 slow99=23.7058 fair=0.6923
+[skip 21:48:59] incast_random_128n_16MB.1os already done
+[done 21:48:59] outcast_incast_128n_16MB.8os status=ok flows=61/61 mk=24563.2us pauses=705 pause_us=6807.8 maxq=113792 slow99=38.3800 fair=0.6290
+[done 21:49:02] incast_remote_128n_16MB.8os status=ok flows=64/64 mk=64581.6us pauses=14129 pause_us=227726.0 maxq=113792 slow99=100.9087 fair=0.9993
+[done 21:49:05] incast_remote_128n_16MB.1os status=ok flows=64/64 mk=63332.0us pauses=12830 pause_us=339951.0 maxq=113792 slow99=98.9562 fair=0.9991
+[done 21:49:05] incast_remote_128n_16MB.4os status=ok flows=64/64 mk=65100.1us pauses=16090 pause_us=300514.0 maxq=113792 slow99=101.7189 fair=0.9995
+[done 21:49:10] incast_random_128n_16MB.8os status=ok flows=127/127 mk=98207.4us pauses=54735 pause_us=2699610.0 maxq=113792 slow99=153.4009 fair=0.9962
+[done 21:49:10] incast_random_128n_16MB.4os status=ok flows=127/127 mk=94646.7us pauses=66970 pause_us=4125930.0 maxq=113792 slow99=147.7416 fair=0.9975
+[done 21:49:38] perm_random_128n_64MB.1os status=ok flows=128/128 mk=14847.3us pauses=1525 pause_us=8388.6 maxq=116672 slow99=5.7760 fair=0.8108
+[done 21:49:53] perm_random_128n_64MB.4os status=ok flows=128/128 mk=27744.3us pauses=2070 pause_us=19953.5 maxq=117728 slow99=10.6869 fair=0.6534
+[done 21:50:10] perm_fullbis_128n_64MB.1os status=ok flows=128/128 mk=14667.3us pauses=731 pause_us=3620.2 maxq=117248 slow99=5.7023 fair=0.7906
+[done 21:50:11] perm_random_128n_64MB.8os status=ok flows=128/128 mk=41044.0us pauses=2116 pause_us=26786.6 maxq=117504 slow99=15.9426 fair=0.5453
+[done 21:50:41] perm_fullbis_128n_64MB.4os status=ok flows=128/128 mk=34901.3us pauses=2241 pause_us=17502.0 maxq=117824 slow99=13.6180 fair=0.6842
+[done 21:51:23] perm_fullbis_128n_64MB.8os status=ok flows=128/128 mk=44009.5us pauses=3129 pause_us=26588.9 maxq=117376 slow99=17.0616 fair=0.9128
+[done 21:52:15] incast_remote_128n_64MB.8os status=ok flows=64/64 mk=251059.0us pauses=60061 pause_us=931465.0 maxq=113792 slow99=98.0699 fair=0.9999
+[done 21:52:34] incast_remote_128n_64MB.4os status=ok flows=64/64 mk=254309.0us pauses=71741 pause_us=1308100.0 maxq=113792 slow99=99.3395 fair=0.9996
+[done 21:52:37] outcast_incast_128n_64MB.1os status=ok flows=61/61 mk=52185.3us pauses=1553 pause_us=11094.3 maxq=113792 slow99=20.3849 fair=0.7117
+[done 21:52:59] outcast_incast_128n_64MB.8os status=ok flows=61/61 mk=93562.1us pauses=3843 pause_us=19803.2 maxq=113792 slow99=36.5477 fair=0.5689
+[done 21:53:06] incast_remote_128n_64MB.1os status=ok flows=64/64 mk=250168.0us pauses=52680 pause_us=1197250.0 maxq=113792 slow99=97.7219 fair=0.9996
+[done 21:53:11] outcast_incast_128n_64MB.4os status=ok flows=61/61 mk=52105.3us pauses=1338 pause_us=11526.9 maxq=113856 slow99=20.3536 fair=0.6908
+[done 21:54:01] incast_random_128n_64MB.1os status=ok flows=127/127 mk=372423.0us pauses=227138 pause_us=15770200.0 maxq=113792 slow99=145.4316 fair=0.9978
+[done 21:54:58] incast_random_128n_64MB.4os status=ok flows=127/127 mk=373000.0us pauses=273631 pause_us=17272900.0 maxq=113792 slow99=145.6937 fair=0.9991
+[done 21:55:19] incast_random_128n_64MB.8os status=ok flows=127/127 mk=386638.0us pauses=228148 pause_us=11603100.0 maxq=113792 slow99=150.9371 fair=0.9977
+[done 22:20:11] a2a_128n_16MB.1os status=ok flows=16256/16256 mk=116025.0us pauses=754874 pause_us=2940550.0 maxq=117152 slow99=175.3625 fair=0.9890
+[done 22:21:15] perm_random_128n_100MB.1os status=ok flows=128/128 mk=22075.4us pauses=1527 pause_us=8393.2 maxq=116672 slow99=5.4588 fair=0.8222
+[done 22:22:45] perm_random_128n_100MB.4os status=ok flows=128/128 mk=41507.2us pauses=2122 pause_us=20104.0 maxq=117728 slow99=10.2960 fair=0.6650
+[done 22:24:54] perm_random_128n_100MB.8os status=ok flows=128/128 mk=61764.9us pauses=2613 pause_us=28778.7 maxq=117504 slow99=15.3799 fair=0.5545
+[done 22:25:55] perm_fullbis_128n_100MB.1os status=ok flows=128/128 mk=26479.8us pauses=755 pause_us=4040.8 maxq=116224 slow99=6.6056 fair=0.7798
+[done 22:26:05] a2a_128n_16MB.4os status=ok flows=16256/16256 mk=334566.0us pauses=3306786 pause_us=40937600.0 maxq=118080 slow99=514.5797 fair=0.9965
+[done 22:27:31] perm_fullbis_128n_100MB.4os status=ok flows=128/128 mk=41536.0us pauses=2034 pause_us=15515.0 maxq=116992 slow99=10.3835 fair=0.8160
+[done 22:27:56] a2a_128n_16MB.8os status=ok flows=16256/16256 mk=633918.0us pauses=4607750 pause_us=78477200.0 maxq=118016 slow99=990.1891 fair=0.9999
+[done 22:28:36] perm_fullbis_128n_100MB.8os status=ok flows=128/128 mk=61360.4us pauses=3687 pause_us=30984.0 maxq=116608 slow99=15.3314 fair=0.9191
+[done 22:30:11] incast_remote_128n_100MB.8os status=ok flows=64/64 mk=390663.0us pauses=93822 pause_us=1438210.0 maxq=113792 slow99=97.6658 fair=0.9999
+[done 22:31:02] outcast_incast_128n_100MB.1os status=ok flows=61/61 mk=79970.8us pauses=1765 pause_us=11770.8 maxq=113792 slow99=19.9927 fair=0.7117
+[done 22:31:55] incast_remote_128n_100MB.4os status=ok flows=64/64 mk=396402.0us pauses=114938 pause_us=2117530.0 maxq=113792 slow99=99.1005 fair=0.9996
+[done 22:32:22] outcast_incast_128n_100MB.4os status=ok flows=61/61 mk=79850.6us pauses=2315 pause_us=16102.6 maxq=113856 slow99=19.9627 fair=0.6953
+[done 22:32:29] outcast_incast_128n_100MB.8os status=ok flows=61/61 mk=144581.0us pauses=6607 pause_us=30986.2 maxq=113792 slow99=36.1452 fair=0.5628
+[done 22:34:11] incast_remote_128n_100MB.1os status=ok flows=64/64 mk=390726.0us pauses=81130 pause_us=1770080.0 maxq=113792 slow99=97.6815 fair=0.9997
+[done 22:34:20] incast_random_128n_100MB.1os status=ok flows=127/127 mk=579901.0us pauses=357005 pause_us=24808600.0 maxq=113792 slow99=144.9607 fair=0.9979
+[done 22:36:49] incast_random_128n_100MB.4os status=ok flows=127/127 mk=580984.0us pauses=428770 pause_us=27228200.0 maxq=113792 slow99=145.1640 fair=0.9992
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/ib_uet_compare_128_1024/run_one_compare.sh: line 76: 1133035 Killed                  ( cd "$work" || exit 1; exec timeout "$TIMEOUT" "$BIN" -tm "$matrix" -nodes "$n" -topo "$topo" -linkspeed 200000 -strat ecmp_host -paths "$PATHS" -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" -dcqcn "$DCQCN_K" -end "$END_US" -logtime_us "$LOGTIME_US" -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw_stdout" 2>&1
+[done 22:38:20] a2a_128n_100MB.1os status=failed flows=0/16256 mk=0us pauses=0 pause_us=0 maxq=0 slow99=0 fair=0
+[done 22:39:26] incast_random_128n_100MB.8os status=ok flows=127/127 mk=603029.0us pauses=354891 pause_us=18026500.0 maxq=113792 slow99=150.7510 fair=0.9977
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/ib_uet_compare_128_1024/run_one_compare.sh: line 76: 1142060 Killed                  ( cd "$work" || exit 1; exec timeout "$TIMEOUT" "$BIN" -tm "$matrix" -nodes "$n" -topo "$topo" -linkspeed 200000 -strat ecmp_host -paths "$PATHS" -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" -dcqcn "$DCQCN_K" -end "$END_US" -logtime_us "$LOGTIME_US" -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw_stdout" 2>&1
+[done 22:43:15] a2a_128n_100MB.4os status=failed flows=0/16256 mk=0us pauses=0 pause_us=0 maxq=0 slow99=0 fair=0
