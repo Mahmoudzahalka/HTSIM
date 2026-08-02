@@ -3,7 +3,7 @@
 Everything you need to compare the two stacks and build a presentation: where each
 dataset lives, how it's produced, where the graphs are, and how to line them up.
 
-Two stacks, **same matrices / topology / link speed** (200G, `a3_200g` fat-trees):
+Two stacks, **same matrices / topology / link speed** (200G, `shared/topos_200g` fat-trees):
 - **UET** = `htsim_uec -sender_cc_only` — lossy, per-packet spray + trimming, NSCC congestion control. MTU 4150.
 - **IB** = `htsim_roce -queue_type lossless_input -pfc_thresholds 12 15 -dcqcn 8` — lossless PFC fabric, per-flow ECMP, DCQCN. MTU 4000.
   (MTU difference is deliberate & documented — see `IB_DCQCN_README.md`.)
@@ -20,11 +20,11 @@ branches. So both datasets are readable no matter which branch is checked out.
 | | UET | IB |
 |---|---|---|
 | home branch | `study/a3-uec-network-metrics` | `dev/ib-dcqcn-fix` |
-| dirs | `all_workloads_128_1024/` (90), `a2a_128_1024/` (serial, 10), `a2a_conc_128_1024/` (concurrent, 11), `allreduce_ring_128_1024/` (9) | `ib_uet_compare_128_1024/` (99) |
-| per-run rows | `<dir>/rows/*.row` (committed) | `ib_uet_compare_128_1024/rows/*.row` (untracked) |
-| combined CSV | `<dir>/results_combined.csv` (ignored) | `ib_uet_compare_128_1024/results_ib.csv` (ignored) |
-| utilization CSV | `<dir>/utilization_combined.csv` | `ib_uet_compare_128_1024/utilization_ib.csv` |
-| graphs | `graphs/` (fig1–8) | `ib_uet_compare_128_1024/graphs_ib/` (fig1–8) |
+| dirs | `uet/perm_incast_128_1024/` (90), `uet/a2a_serial_128_1024/` (serial, 10), `uet/a2a_concurrent_128_1024/` (concurrent, 11), `uet/allreduce_ring_128/` (9) | `ib_dcqcn/perm_incast_a2a_128_1024/` (99) |
+| per-run rows | `<dir>/rows/*.row` (committed) | `ib_dcqcn/perm_incast_a2a_128_1024/rows/*.row` (untracked) |
+| combined CSV | `<dir>/results_combined.csv` (ignored) | `ib_dcqcn/perm_incast_a2a_128_1024/results_ib.csv` (ignored) |
+| utilization CSV | `<dir>/utilization_combined.csv` | `ib_dcqcn/perm_incast_a2a_128_1024/utilization_ib.csv` |
+| graphs | `graphs/` (fig1–8) | `ib_dcqcn/graphs/` (fig1–8) |
 
 **Comparable subset** (both stacks ran it): **all_workloads 128+1024** (5 patterns ×
 3 sizes × 3 OS) **+ a2a-concurrent 128**. IB did **not** run serial-a2a, allreduce,
@@ -55,7 +55,7 @@ sweep_compare.sh -> run_one_compare.sh (per matrix,fabric) -> htsim_roce
   flow_metrics.py: slowdown p50/p99/max + Jain fairness (from per-flow "finished at")
   extract_util.py: per-tier utilization (parse_output on util.bin)
   -> rows/*.row (+util_rows/*.urow) -> results_ib.csv + utilization_ib.csv
-make_graphs_ib.py -> graphs_ib/fig1-8.png
+make_graphs_ib.py -> ib_dcqcn/graphs/fig1-8.png
 ```
 - **Schema (29 cols):** base 22 (RTS/Bounced/ACKs/Pulls/sleek/spurious = 0, lossless;
   `Rtx`=0; `NACKs` = lossless-overflow count = 0) + **`pfc_pauses,pfc_pause_us,
@@ -73,10 +73,10 @@ up/down) × {n,mean,p50,p95,p99,max}. `overall_max` = hot-link peak.
 **Join key:** `(basename(matrix without .cm), fabric)` — the matrix path prefixes
 differ (`/csl/...` for UET vs `/home/...` for IB) but the basename+fabric are identical.
 
-**Ready-made script:** `ib_uet_compare_128_1024/compare_ib_uet.py`
+**Ready-made script:** `ib_dcqcn/perm_incast_a2a_128_1024/compare_ib_uet.py`
 ```bash
 cd .../experiments/runs
-python3 ib_uet_compare_128_1024/compare_ib_uet.py
+python3 ib_dcqcn/perm_incast_a2a_128_1024/compare_ib_uet.py
 ```
 It reads `results_ib.csv` + the UET `results_combined.csv`(s) + both utilization CSVs
 and prints: (1) completion mismatches, (2) makespan ratio IB/UET by pattern, (3) the
@@ -112,7 +112,7 @@ Headline: a clean **speed-vs-robustness tradeoff**.
    (overflow 2³¹)** at 4os/8os a2a — each packet sent ~8× under 8× oversub — but
    saturates links (~100% util).
 
-Suggested figure flow (UET `graphs/` + IB `graphs_ib/` are numbered to pair up):
+Suggested figure flow (UET `graphs/` + IB `ib_dcqcn/graphs/` are numbered to pair up):
 - **Setup:** one slide, the two stacks + the matched knobs (table above).
 - **Speed:** IB fig1/fig2 (makespan vs OS) beside UET fig1/fig5.
 - **Robustness:** the completion-mismatch list from `compare_ib_uet.py` §1.
@@ -126,15 +126,15 @@ Suggested figure flow (UET `graphs/` + IB `graphs_ib/` are numbered to pair up):
 ## 5. Reproduce everything
 ```bash
 # UET combined CSVs (from committed rows):
-for d in all_workloads_128_1024 a2a_128_1024 a2a_conc_128_1024 allreduce_ring_128_1024; do
+for d in uet/perm_incast_128_1024 uet/a2a_serial_128_1024 uet/a2a_concurrent_128_1024 uet/allreduce_ring_128; do
   bash $d/rederive_results.sh; done
-python3 make_graphs.py && python3 make_graphs_scale.py      # -> graphs/
+python3 make_graphs.py && python3 make_graphs_scale.py   # -> uet/graphs/
 
 # IB combined CSVs already assembled by the sweep; regenerate graphs:
-python3 ib_uet_compare_128_1024/make_graphs_ib.py           # -> graphs_ib/
+python3 ib_dcqcn/perm_incast_a2a_128_1024/make_graphs_ib.py           # -> ib_dcqcn/graphs/
 
 # the numeric comparison:
-python3 ib_uet_compare_128_1024/compare_ib_uet.py
+python3 ib_dcqcn/perm_incast_a2a_128_1024/compare_ib_uet.py
 ```
 To (re)run either sweep from scratch, see `IB_DCQCN_README.md` (IB) and each UET dir's
 `NOTES.md` / `run_one.sh` / `sweep.sh`.
@@ -143,6 +143,6 @@ To (re)run either sweep from scratch, see `IB_DCQCN_README.md` (IB) and each UET
 - **MTU 4000 (IB) vs 4150 (UET)** — deliberate, ~few % proportional effect, documented.
 - **a2a-1024 infeasible for both** (UET timeout; IB OOM at 1M flows).
 - **UET Rtx/NACK overflow 2³¹** at 4os/8os → use `rtx_corr`/`nacks_corr`, not raw.
-- **IB lacks serial-a2a, allreduce, a2a-1024 runs** — so those UET figures have no IB
+- **IB now has serial-a2a + allreduce at 128** (`ib_dcqcn/allreduce_a2a_serial_128`, 18 runs). Only a2a-1024 has no IB
   counterpart yet (would need extra IB sweeps).
 - Fairness recorded for IB only; to compare it, recompute UET fairness from its per-flow logs.

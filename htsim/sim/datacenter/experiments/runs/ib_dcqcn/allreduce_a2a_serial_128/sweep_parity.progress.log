@@ -1,0 +1,23 @@
+[Sat 01 Aug 2026 13:07:05 IDT] IB workload parity  allreduce=9  a2a_serial=9  K=8
+[Sat 01 Aug 2026 13:07:05 IDT] === Phase 1: ring all-reduce @ -P4 ===
+[done 13:32:08] allreduce_ring_128n_16MB.4os status=ok flows=32640/32640 mk=1432240.0us pauses=253217 pause_us=1027930.0 maxq=117568 slow99=2178.7344 fair=0.0327
+[done 13:33:08] allreduce_ring_128n_16MB.1os status=ok flows=32640/32640 mk=796414.0us pauses=226016 pause_us=829244.0 maxq=117376 slow99=1194.0391 fair=0.0509
+[done 13:33:26] allreduce_ring_128n_16MB.8os status=ok flows=32640/32640 mk=2437370.0us pauses=285854 pause_us=1200880.0 maxq=117632 slow99=3728.9688 fair=0.0409
+[done 15:45:55] allreduce_ring_128n_64MB.1os status=ok flows=32640/32640 mk=2627660.0us pauses=435686 pause_us=1601000.0 maxq=117568 slow99=993.3398 fair=0.0576
+[done 16:36:04] allreduce_ring_128n_64MB.4os status=ok flows=32640/32640 mk=4713760.0us pauses=461054 pause_us=1919030.0 maxq=117952 slow99=1786.8320 fair=0.0363
+[done 17:04:20] allreduce_ring_128n_64MB.8os status=ok flows=32640/32640 mk=8030710.0us pauses=651632 pause_us=2889140.0 maxq=117632 slow99=3068.0898 fair=0.0409
+[done 18:28:35] allreduce_ring_128n_100MB.1os status=ok flows=32640/32640 mk=3862530.0us pauses=723197 pause_us=2723820.0 maxq=117376 slow99=937.0650 fair=0.0591
+[done 21:44:46] allreduce_ring_128n_100MB.4os status=ok flows=32640/32640 mk=6875670.0us pauses=611862 pause_us=2587560.0 maxq=117952 slow99=1679.2275 fair=0.0373
+[done 23:24:09] allreduce_ring_128n_100MB.8os status=ok flows=32640/32640 mk=12002400.0us pauses=939753 pause_us=4127940.0 maxq=117568 slow99=2936.6750 fair=0.0398
+[Sat 01 Aug 2026 23:24:13 IDT] === Phase 2: serial all-to-all @ -P4 (TAG_PREFIX=serial_) ===
+[done 23:37:35] serial_a2a_128n_16MB.1os status=ok flows=16256/16256 mk=491031.0us pauses=118026 pause_us=461940.0 maxq=117376 slow99=696.1172 fair=0.0828
+[done 23:38:16] serial_a2a_128n_16MB.4os status=ok flows=16256/16256 mk=682693.0us pauses=124397 pause_us=532866.0 maxq=117824 slow99=1037.0859 fair=0.0619
+[done 23:39:44] serial_a2a_128n_16MB.8os status=ok flows=16256/16256 mk=1113220.0us pauses=142796 pause_us=638799.0 maxq=117760 slow99=1700.6250 fair=0.0680
+[done 00:52:38] serial_a2a_128n_64MB.1os status=ok flows=16256/16256 mk=1297360.0us pauses=156625 pause_us=602772.0 maxq=117376 slow99=489.6602 fair=0.0914
+[done 01:33:18] serial_a2a_128n_64MB.4os status=ok flows=16256/16256 mk=2230810.0us pauses=202990 pause_us=903314.0 maxq=117824 slow99=850.1836 fair=0.0680
+[done 02:15:48] serial_a2a_128n_64MB.8os status=ok flows=16256/16256 mk=3775300.0us pauses=264647 pause_us=1227370.0 maxq=117824 slow99=1434.2734 fair=0.0697
+[done 02:31:47] serial_a2a_128n_100MB.1os status=ok flows=16256/16256 mk=1962920.0us pauses=200653 pause_us=790723.0 maxq=117376 slow99=465.8750 fair=0.0920
+[done 04:51:47] serial_a2a_128n_100MB.4os status=ok flows=16256/16256 mk=3363320.0us pauses=268436 pause_us=1232640.0 maxq=117952 slow99=810.5150 fair=0.0692
+[done 07:07:37] serial_a2a_128n_100MB.8os status=ok flows=16256/16256 mk=5657940.0us pauses=352454 pause_us=1648260.0 maxq=117888 slow99=1361.9650 fair=0.0683
+[Sun 02 Aug 2026 07:07:39 IDT] all phases done
+[Sun 02 Aug 2026 07:07:39 IDT] COMPLETE  results=18/18  util=18  ok=18

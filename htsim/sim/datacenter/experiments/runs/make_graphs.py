@@ -10,10 +10,13 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 
 RUNS = "/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs"
-OUT  = os.path.join(RUNS, "graphs"); os.makedirs(OUT, exist_ok=True)
-SWEEPS = ["all_workloads_128_1024","a2a_128_1024","a2a_conc_128_1024","allreduce_ring_128_1024"]
+OUT  = os.path.join(RUNS, "uet", "graphs"); os.makedirs(OUT, exist_ok=True)
+SWEEPS = ["uet/perm_incast_128_1024","uet/a2a_serial_128_1024","uet/a2a_concurrent_128_1024","uet/allreduce_ring_128"]
 
 def label(sweep, wl):
+    # NB: `sweep` is the value stored in the CSV's `sweep` column (the original
+    # sweep name), NOT the directory path in SWEEPS above -- the dirs were
+    # reorganised under uet/ but the recorded data keeps the original names.
     if sweep == "a2a_128_1024": return "a2a (serial)"
     if sweep == "a2a_conc_128_1024": return "a2a (concurrent)"
     if wl == "allreduce_ring": return "ring AllReduce"

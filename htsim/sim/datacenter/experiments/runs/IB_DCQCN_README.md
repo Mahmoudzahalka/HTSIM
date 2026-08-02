@@ -22,7 +22,7 @@ The "IB-like" stack = `htsim_roce` run with:
 -dcqcn <K>                                          # DCQCN: ECN mark @ egress when queue > K packets
 -strat ecmp_host -paths 128                         # per-flow ECMP (single path/flow, in-order; RoCE needs it)
 ```
-It is the RoCE analogue of the UET/UEC runs (`all_workloads_128_1024`, `a2a_conc_128_1024`),
+It is the RoCE analogue of the UET/UEC runs (`uet/perm_incast_128_1024`, `uet/a2a_concurrent_128_1024`),
 using the **same matrices, topology, and link speed** so results are comparable.
 
 **Headline result** (see §6): a clean **speed-vs-robustness tradeoff**. UET is ~2–4× faster on
@@ -75,18 +75,18 @@ all-zero utilization), and the `-logtime_us` util-sampling flag.
 
 ## 3. The runs / sweeps
 
-All under `datacenter/experiments/runs/`. Matrices are reused from `all_workloads_128_1024/matrices/`
-(transport-independent `.cm` files); topologies from `a3_200g/topos_200g/fat_tree_${n}_${fabric}.topo`.
+All under `datacenter/experiments/runs/`. Matrices are reused from `uet/perm_incast_128_1024/matrices/`
+(transport-independent `.cm` files); topologies from `shared/topos_200g/fat_tree_${n}_${fabric}.topo`.
 
 | dir | what | status |
 |-----|------|--------|
-| **`ib_uet_compare_128_1024/`** | **FINAL instrumented IB sweep** (DCQCN K=8, MTU 4000, 29-col schema). all_workloads 128+1024 + a2a-128. | ✅ 99/99 ok — **use this** |
-| `all_workloads_ib_dcqcn_k8_128_1024/` | first DCQCN K=8 sweep (no PFC/fairness metrics) | superseded by the above |
-| `all_workloads_ib_128_1024/` | PFC-only baseline (no DCQCN) — only run because DCQCN wasn't fixed yet | 90/90 ok, of historical interest |
-| `all_workloads_128_1024/` | **UET** all_workloads sweep (compare target) | 45×128 ok, 42×1024 ok, 3×1024 incomplete |
-| `a2a_conc_128_1024/` | **UET** concurrent all-to-all sweep (compare target) | 9×128 ok, 2×1024 timeout |
+| **`ib_dcqcn/perm_incast_a2a_128_1024/`** | **FINAL instrumented IB sweep** (DCQCN K=8, MTU 4000, 29-col schema). all_workloads 128+1024 + a2a-128. | ✅ 99/99 ok — **use this** |
+| `older_runs/ib_dcqcn_k8_22col_superseded/` | first DCQCN K=8 sweep (no PFC/fairness metrics) | superseded by the above |
+| `older_runs/pfc_only_no_dcqcn_128_1024_8192/` | PFC-only baseline (no DCQCN) — only run because DCQCN wasn't fixed yet | 90/90 ok, of historical interest |
+| `uet/perm_incast_128_1024/` | **UET** all_workloads sweep (compare target) | 45×128 ok, 42×1024 ok, 3×1024 incomplete |
+| `uet/a2a_concurrent_128_1024/` | **UET** concurrent all-to-all sweep (compare target) | 9×128 ok, 2×1024 timeout |
 
-**Config for the IB runs** (from `ib_uet_compare_128_1024/run_one_compare.sh`):
+**Config for the IB runs** (from `ib_dcqcn/perm_incast_a2a_128_1024/run_one_compare.sh`):
 ```
 htsim_roce -tm <matrix> -nodes <n> -topo <topo> -linkspeed 200000 \
   -strat ecmp_host -paths 128 \
@@ -108,7 +108,7 @@ in its own `-P2` phase. **a2a-1024 (1M flows) is infeasible** (OOM); UET timed o
 
 ## 4. Results & schema
 
-**`ib_uet_compare_128_1024/results_ib.csv`** — 99 rows, **29 columns**:
+**`ib_dcqcn/perm_incast_a2a_128_1024/results_ib.csv`** — 99 rows, **29 columns**:
 ```
 matrix,nodes,conns,fabric,status,wall_s,flows_fin,makespan_us,fct_min_us,fct_p50_us,
 fct_p99_us,fct_max_us,total_GB,New,Rtx,RTS,Bounced,ACKs,NACKs,Pulls,sleek,spurious,
@@ -118,11 +118,11 @@ pfc_pauses,pfc_pause_us,max_queue_bytes,slowdown_p50,slowdown_p99,slowdown_max,f
   for RoCE; `NACKs` carries the lossless overflow count, should be 0; `Rtx`=0 since lossless).
 - cols 23–29 = the new IB metrics (§2).
 
-**`ib_uet_compare_128_1024/utilization_ib.csv`** — 99 rows, 44 cols: per-tier link utilization
+**`ib_dcqcn/perm_incast_a2a_128_1024/utilization_ib.csv`** — 99 rows, 44 cols: per-tier link utilization
 (`overall` + tier0/1/2 up/down) × {n,mean,p50,p95,p99,max}. `overall_max` (col 8) = hot-link peak.
 
-**UET results:** `all_workloads_128_1024/results_combined.csv` (+`utilization_combined.csv`) and
-`a2a_conc_128_1024/results_combined.csv`. Same 22-col base + UET's own metadata cols. Their
+**UET results:** `uet/perm_incast_128_1024/results_combined.csv` (+`utilization_combined.csv`) and
+`uet/a2a_concurrent_128_1024/results_combined.csv`. Same 22-col base + UET's own metadata cols. Their
 `Rtx`/`NACKs` columns are the UET congestion fingerprint (⚠ they **overflow 2³¹** at 4os/8os a2a).
 
 ---
@@ -136,14 +136,14 @@ cd htsim/sim/build && make htsim_roce      # -> htsim/sim/datacenter/htsim_roce 
 
 **One run** (through the instrumented harness):
 ```bash
-cd htsim/sim/datacenter/experiments/runs/ib_uet_compare_128_1024
-M=../all_workloads_128_1024/matrices/incast_random_128n_16MB.cm
+cd htsim/sim/datacenter/experiments/runs/ib_dcqcn/perm_incast_a2a_128_1024
+M=../../uet/perm_incast_128_1024/matrices/incast_random_128n_16MB.cm
 bash run_one_compare.sh "$M" 1os          # -> rows/<tag>.row (29 cols) + util_rows/<tag>.urow
 ```
 
 **Full sweep** (detached; ~many hours — the 1024 incasts + a2a-100MB are slow):
 ```bash
-cd .../ib_uet_compare_128_1024
+cd .../ib_dcqcn/perm_incast_a2a_128_1024
 nohup bash sweep_compare.sh > sweep.log 2>&1 &
 # phases: light(128 all_workloads)@-P6 -> heavy(1024)@-P2 -> a2a-128@-P2
 # resume-aware (skips rows already ok+util); results assembled into results_ib.csv on completion
@@ -166,7 +166,7 @@ util.bin). Requires the SIGTERM handler (commit `0167684`) or util.bin comes out
 
 ## 6. Key findings (IB vs UET)
 
-Run the comparison: `python3 ib_uet_compare_128_1024/compare_ib_uet.py`
+Run the comparison: `python3 ib_dcqcn/perm_incast_a2a_128_1024/compare_ib_uet.py`
 
 1. **Robustness — IB completes everything; UET doesn't.** IB finished all 99. UET was *incomplete*
    on all 3 `incast_random_1024n` @ 8os. a2a-1024: both fail.
@@ -190,5 +190,5 @@ gap partly reflects IB's single-path ECMP vs UET spray (intrinsic to each stack 
 - **Symmetric fairness** — recompute UET Jain fairness from its per-flow logs for a like-for-like column.
 - **UET counter overflow** — widen UET Rtx/NACK counters to uint64 for exact magnitudes at 4os/8os.
 - **Adaptive routing for IB** (`-strat ecmp_ar`) — would close much of the permutation gap; worth a run.
-- The **PFC-only baseline** (`all_workloads_ib_128_1024`) predates the DCQCN fixes and MTU/metrics; it
+- The **PFC-only baseline** (`older_runs/pfc_only_no_dcqcn_128_1024_8192`) predates the DCQCN fixes and MTU/metrics; it
   is not the comparison of record.
