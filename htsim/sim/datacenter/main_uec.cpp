@@ -803,8 +803,10 @@ int main(int argc, char **argv) {
     map<flowid_t, pair<UecSrc*, UecSink*>> flowmap;
     map<flowid_t, UecPdcSes*> flow_pdc_map;
     if(planes != 1){
-        cout << "We are taking the plane 0 to calculate the network rtt; If all the planes have the same tiers, you can remove this check." << endl;
-        assert(false);
+        cout << "We are taking the plane 0 to calculate the network rtt; all planes load the same topology so they have identical tiers." << endl;
+        // assert(false);   // EXPERIMENT(multi-plane/rail): planes are built from the
+        // same topo file, so plane 0's RTT/BDP is representative. Guard lifted to
+        // evaluate rail-optimized (multi-plane) UET runs.
     }
 
     // ATLAHS

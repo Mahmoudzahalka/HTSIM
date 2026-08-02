@@ -10,8 +10,8 @@ from matplotlib.lines import Line2D
 from matplotlib.ticker import ScalarFormatter
 
 RUNS="/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs"
-OUT=os.path.join(RUNS,"graphs"); os.makedirs(OUT,exist_ok=True)
-SWEEPS=["all_workloads_128_1024"]  # only sweep with both 128 & 1024
+OUT=os.path.join(RUNS,"uet","graphs"); os.makedirs(OUT,exist_ok=True)
+SWEEPS=["uet/perm_incast_128_1024"]  # only sweep with both 128 & 1024
 
 res=[]; util=[]
 for s in SWEEPS:

@@ -1,0 +1,36 @@
+# GPU-clustered fat-tree (normal form, non-blocking fabric) -- LOCALITY model.
+# 1024 GPUs = 128 servers x 8 GPUs. Tier 0 = the 8-GPU server switch: 8 GPUs on
+# one low-latency (NVLink-class, 100ns) local switch, so intra-server traffic is
+# a single fast local hop that never enters the datacenter fabric. Tiers 1-2 =
+# the 200G fabric, NON-blocking among servers (no swept oversubscription).
+# NOTE: htsim's fat-tree parser sizes the fabric to the leaf link speed, so a
+# faster-than-fabric NVLink *bandwidth* tier can't be expressed here without
+# inflating the fabric; this model captures locality + low intra-server latency.
+# The NVLink bandwidth boost would need oversubscribed_fat_tree / multihomed.
+Nodes 1024
+Tiers 3
+Podsize 64
+
+Tier 0
+Oversubscribed 1
+Downlink_speed_Gbps 200
+Radix_Down 8
+Radix_Up 8
+Downlink_Latency_ns 100
+Switch_Latency_ns 0
+
+Tier 1
+Oversubscribed 1
+Downlink_speed_Gbps 200
+Radix_Down 8
+Radix_Up 8
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+Bundle 1
+
+Tier 2
+Downlink_speed_Gbps 200
+Radix_Down 16
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+Bundle 1

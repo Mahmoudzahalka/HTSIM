@@ -1,0 +1,9 @@
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/allreduce_ring_128_1024/matrices/allreduce_ring_128n_16MB.cm 1os
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/allreduce_ring_128_1024/matrices/allreduce_ring_128n_16MB.cm 4os
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/allreduce_ring_128_1024/matrices/allreduce_ring_128n_16MB.cm 8os
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/allreduce_ring_128_1024/matrices/allreduce_ring_128n_64MB.cm 1os
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/allreduce_ring_128_1024/matrices/allreduce_ring_128n_64MB.cm 4os
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/allreduce_ring_128_1024/matrices/allreduce_ring_128n_64MB.cm 8os
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/allreduce_ring_128_1024/matrices/allreduce_ring_128n_100MB.cm 1os
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/allreduce_ring_128_1024/matrices/allreduce_ring_128n_100MB.cm 4os
+/home/mahmoud_murad_allaah/HTSIM/htsim/sim/datacenter/experiments/runs/allreduce_ring_128_1024/matrices/allreduce_ring_128n_100MB.cm 8os
