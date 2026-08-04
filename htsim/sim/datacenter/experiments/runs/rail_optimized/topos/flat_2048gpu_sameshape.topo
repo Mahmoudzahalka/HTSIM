@@ -1,0 +1,22 @@
+# CONTROL for 2048: identical shape (64 leaves x 64 ports, 32 spines) but CLASSIC
+# CONSECUTIVE host->leaf attachment. Differs from rail_2048gpu_8rail.topo ONLY by
+# the missing "Rails 8" line.
+Nodes 2048
+Tiers 2
+Podsize 2048
+# (no Rails -> consecutive attachment: control)
+
+Tier 0
+Oversubscribed 1
+Downlink_speed_Gbps 200
+Radix_Down 32
+Radix_Up 32
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+
+Tier 1
+Downlink_speed_Gbps 200
+Radix_Down 64
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+Bundle 1

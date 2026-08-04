@@ -1,0 +1,35 @@
+# Rail-optimized 1024-GPU compute fabric (DGX SuperPOD-class), 2-tier leaf-spine.
+#
+#   1024 GPUs = 128 servers x 8 GPUs; each GPU has its own 200G NIC -> its own rail.
+#   8 rails; rail r is served by 4 leaf switches, each covering 32 servers
+#   (32 downlinks = GPU r of servers 32j..32j+31) + 32 uplinks  => 64-port leaf.
+#   32 leaves total (8 rails x 4), 32 spines of radix 32, NON-BLOCKING.
+#
+#   "Rails 8" switches the host->leaf attachment from consecutive to rail-strided:
+#       GPU g -> rail (g%8), server (g/8), leaf = rail*4 + (g/8)/32
+#   so a leaf holds one GPU from each of 32 servers (a real rail), NOT 4 whole
+#   servers. Everything else (routing, route construction) follows automatically.
+#
+#   NOTE: NVLink is NOT modelled. Intra-server traffic (same server, different
+#   rail) therefore takes the rail->spine->rail path, i.e. the most expensive one,
+#   which is inverted vs reality. Negligible for scattered patterns (~0.7% of a2a
+#   flows) but pessimistic for ring collectives. See notes/.
+Nodes 1024
+Tiers 2
+Podsize 1024
+Rails 8
+
+Tier 0
+Oversubscribed 1
+Downlink_speed_Gbps 200
+Radix_Down 32
+Radix_Up 32
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+
+Tier 1
+Downlink_speed_Gbps 200
+Radix_Down 32
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+Bundle 1
