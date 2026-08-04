@@ -1,0 +1,27 @@
+# CONTROL topology: identical shape to rail_1024gpu_8rail.topo (32 leaves x 64 ports,
+# 32 spines, 2-tier, non-blocking) but with CLASSIC CONSECUTIVE host->leaf attachment:
+# leaf t owns hosts [32t, 32t+32) = 4 whole 8-GPU servers.
+# Purpose: isolates the effect of the rail ASSIGNMENT from the effect of the
+# leaf/spine SHAPE, by holding the shape constant. Diff this against
+# rail_1024gpu_8rail.topo -- the only difference is the "Rails 8" line.
+#   which is inverted vs reality. Negligible for scattered patterns (~0.7% of a2a
+#   flows) but pessimistic for ring collectives. See notes/.
+Nodes 1024
+Tiers 2
+Podsize 1024
+# (no Rails line -> consecutive attachment: leaf = 4 whole servers)
+
+Tier 0
+Oversubscribed 1
+Downlink_speed_Gbps 200
+Radix_Down 32
+Radix_Up 32
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+
+Tier 1
+Downlink_speed_Gbps 200
+Radix_Down 32
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+Bundle 1

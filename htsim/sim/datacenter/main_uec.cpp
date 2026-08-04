@@ -140,6 +140,19 @@ int main(int argc, char **argv) {
 
     char* tm_file = NULL;
     char* topo_file = NULL;
+    // --- NVLink (intra-server) plane -------------------------------------
+    // Second topology + a SEPARATE UecNIC per node modelling the 8-GPU NVSwitch
+    // domain. Flows whose src/dst share a server (src/rails == dst/rails) are
+    // built against these, so they get NVLink bandwidth and an egress engine
+    // independent of the rail NIC -- matching real hardware, and needing no
+    // changes to UecNIC itself.
+    char* nvlink_topo_file = NULL;
+    linkspeed_bps nvlink_linkspeed = 0;
+    // GPUs per server. This is a HOST property (how many GPUs share an NVSwitch),
+    // independent of how the fabric attaches them, so it must be settable even on
+    // a topology without "Rails N" (e.g. the flat control). Defaults to the main
+    // topology's rails() when that is set.
+    uint32_t gpus_per_server = 0;
     int8_t qa_gate = -1;
     bool conn_reuse = false;
 
@@ -338,6 +351,18 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[i],"-topo")){
             topo_file = argv[i+1];
             cout << "FatTree topology input file: "<< topo_file << endl;
+            i++;
+        } else if (!strcmp(argv[i],"-nvlink_topo")) {
+            nvlink_topo_file = argv[i+1];
+            cout << "NVLink (intra-server) topology: " << nvlink_topo_file << endl;
+            i++;
+        } else if (!strcmp(argv[i],"-gpus_per_server")) {
+            gpus_per_server = atoi(argv[i+1]);
+            cout << "gpus_per_server " << gpus_per_server << endl;
+            i++;
+        } else if (!strcmp(argv[i],"-nvlink_linkspeed")) {
+            nvlink_linkspeed = speedFromMbps(atof(argv[i+1]));
+            cout << "NVLink linkspeed " << argv[i+1] << " Mbps" << endl;
             i++;
         } else if (!strcmp(argv[i],"-q")){
             param_queuesize_set = true;
@@ -606,6 +631,7 @@ int main(int argc, char **argv) {
     logfile.setStartTime(timeFromSec(0));
 
     vector<unique_ptr<UecNIC>> nics;
+    vector<unique_ptr<UecNIC>> nvlink_nics;   // NVLink egress engine, one per node
 
     UecSinkLoggerSampling* sink_logger = NULL;
     if (log_sink) {
@@ -747,6 +773,30 @@ int main(int argc, char **argv) {
             topo[p]->add_switch_loggers(logfile, logtime);
         }
     }
+    // NVLink plane: independent topology whose leaves are the 8-GPU servers.
+    // Only intra-server flows attach to it, so traffic never leaves a leaf.
+    unique_ptr<FatTreeTopology> topo_nvlink;
+    unique_ptr<FatTreeTopologyCfg> nvlink_cfg;
+    if (nvlink_topo_file) {
+        nvlink_cfg = FatTreeTopologyCfg::load(nvlink_topo_file, memFromPkt(queuesize_pkt), qt, snd_type);
+        if (nvlink_cfg->no_of_nodes() != no_of_nodes) {
+            cerr << "NVLink topology node count (" << nvlink_cfg->no_of_nodes()
+                 << ") != connection matrix (" << no_of_nodes << ")" << endl;
+            exit(1);
+        }
+        nvlink_cfg->set_queue_sizes(queuesize);
+        topo_nvlink = make_unique<FatTreeTopology>(nvlink_cfg.get(), qlf, &eventlist, nullptr);
+        if (gpus_per_server == 0) gpus_per_server = topo_cfg->rails();
+        if (gpus_per_server <= 1) {
+            cerr << "-nvlink_topo needs the server size: set \"Rails N\" in the topology "
+                 << "or pass -gpus_per_server N" << endl;
+            exit(1);
+        }
+        if (nvlink_linkspeed == 0) nvlink_linkspeed = linkspeed;
+        cout << "NVLink plane enabled: intra-server flows (servers of "
+             << gpus_per_server << " GPUs) at " << speedAsGbps(nvlink_linkspeed) << " Gbps" << endl;
+    }
+
     cout << "network_max_unloaded_rtt " << timeAsUs(network_max_unloaded_rtt) << endl;
 
     if (UecSink::_oversubscribed_cc)
@@ -789,6 +839,9 @@ int main(int argc, char **argv) {
 
         auto &nic = nics.emplace_back(make_unique<UecNIC>(ix, eventlist,
                                                           linkspeed, ports));
+        if (nvlink_topo_file) {
+            nvlink_nics.emplace_back(make_unique<UecNIC>(ix, eventlist, nvlink_linkspeed, ports));
+        }
         if (log_nic) {
             nic_logger->monitorNic(nic.get());
         }
@@ -923,7 +976,15 @@ int main(int argc, char **argv) {
                 abort();
             }
 
-            uec_src = new UecSrc(traffic_logger, eventlist, move(mp), *nics.at(src), ports);
+            // --- NVLink vs rail selection (connect time) ------------------
+            // A flow's destination is fixed, so pick the egress engine + topology
+            // once. Same server -> NVLink NIC/topology; else the rail ones.
+            bool same_server = topo_nvlink &&
+                (src / (int)gpus_per_server == dest / (int)gpus_per_server);
+            UecNIC& src_nic  = same_server ? *nvlink_nics.at(src)  : *nics.at(src);
+            UecNIC& dst_nic  = same_server ? *nvlink_nics.at(dest) : *nics.at(dest);
+
+            uec_src = new UecSrc(traffic_logger, eventlist, move(mp), src_nic, ports);
 
             if (crt->flowid) {
                 uec_src->setFlowId(crt->flowid);
@@ -939,10 +1000,10 @@ int main(int argc, char **argv) {
             }
 
             if (receiver_driven)
-                uec_snk = new UecSink(NULL, pacers[dest].get(), *nics.at(dest),
+                uec_snk = new UecSink(NULL, pacers[dest].get(), dst_nic,
                                       ports);
             else //each connection has its own pacer, so receiver driven mode does not kick in! 
-                uec_snk = new UecSink(NULL,linkspeed,1.1,UecBasePacket::unquantize(UecSink::_credit_per_pull),eventlist,*nics.at(dest), ports);
+                uec_snk = new UecSink(NULL,linkspeed,1.1,UecBasePacket::unquantize(UecSink::_credit_per_pull),eventlist,dst_nic, ports);
 
             flowmap[uec_src->flowId()] = { uec_src, uec_snk };
 
@@ -1047,25 +1108,27 @@ int main(int argc, char **argv) {
                 case ECMP_FIB_ECN:
                 case REACTIVE_ECN:
                     {
+                        FatTreeTopology*    ftop = same_server ? topo_nvlink.get() : topo[p].get();
+                        FatTreeTopologyCfg* fcfg = same_server ? nvlink_cfg.get()  : topo_cfg.get();
                         Route* srctotor = new Route();
-                        srctotor->push_back(topo[p]->queues_ns_nlp[src][topo_cfg->HOST_POD_SWITCH(src)][0]);
-                        srctotor->push_back(topo[p]->pipes_ns_nlp[src][topo_cfg->HOST_POD_SWITCH(src)][0]);
-                        srctotor->push_back(topo[p]->queues_ns_nlp[src][topo_cfg->HOST_POD_SWITCH(src)][0]->getRemoteEndpoint());
+                        srctotor->push_back(ftop->queues_ns_nlp[src][fcfg->HOST_POD_SWITCH(src)][0]);
+                        srctotor->push_back(ftop->pipes_ns_nlp[src][fcfg->HOST_POD_SWITCH(src)][0]);
+                        srctotor->push_back(ftop->queues_ns_nlp[src][fcfg->HOST_POD_SWITCH(src)][0]->getRemoteEndpoint());
 
                         Route* dsttotor = new Route();
-                        dsttotor->push_back(topo[p]->queues_ns_nlp[dest][topo_cfg->HOST_POD_SWITCH(dest)][0]);
-                        dsttotor->push_back(topo[p]->pipes_ns_nlp[dest][topo_cfg->HOST_POD_SWITCH(dest)][0]);
-                        dsttotor->push_back(topo[p]->queues_ns_nlp[dest][topo_cfg->HOST_POD_SWITCH(dest)][0]->getRemoteEndpoint());
+                        dsttotor->push_back(ftop->queues_ns_nlp[dest][fcfg->HOST_POD_SWITCH(dest)][0]);
+                        dsttotor->push_back(ftop->pipes_ns_nlp[dest][fcfg->HOST_POD_SWITCH(dest)][0]);
+                        dsttotor->push_back(ftop->queues_ns_nlp[dest][fcfg->HOST_POD_SWITCH(dest)][0]->getRemoteEndpoint());
 
                         uec_src->connectPort(p, *srctotor, *dsttotor, *uec_snk, crt->start);
                         //uec_src->setPaths(path_entropy_size);
                         //uec_snk->setPaths(path_entropy_size);
 
                         //register src and snk to receive packets from their respective TORs. 
-                        assert(topo[p]->switches_lp[topo_cfg->HOST_POD_SWITCH(src)]);
-                        assert(topo[p]->switches_lp[topo_cfg->HOST_POD_SWITCH(src)]);
-                        topo[p]->switches_lp[topo_cfg->HOST_POD_SWITCH(src)]->addHostPort(src,uec_snk->flowId(),uec_src->getPort(p));
-                        topo[p]->switches_lp[topo_cfg->HOST_POD_SWITCH(dest)]->addHostPort(dest,uec_src->flowId(),uec_snk->getPort(p));
+                        assert(ftop->switches_lp[fcfg->HOST_POD_SWITCH(src)]);
+                        assert(ftop->switches_lp[fcfg->HOST_POD_SWITCH(src)]);
+                        ftop->switches_lp[fcfg->HOST_POD_SWITCH(src)]->addHostPort(src,uec_snk->flowId(),uec_src->getPort(p));
+                        ftop->switches_lp[fcfg->HOST_POD_SWITCH(dest)]->addHostPort(dest,uec_src->flowId(),uec_snk->getPort(p));
                         break;
                     }
                 default:

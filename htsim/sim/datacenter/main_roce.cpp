@@ -103,6 +103,19 @@ int main(int argc, char **argv) {
 
     char* tm_file = NULL;
     char* topo_file = NULL;
+    // --- NVLink (intra-server) plane -------------------------------------
+    // Optional second topology modelling the 8-GPU NVSwitch domain. When given,
+    // a flow whose src and dst are on the SAME server (src/rails == dst/rails,
+    // rails from the main topology's "Rails N") is attached to this topology and
+    // its source is created at -nvlink_linkspeed instead of -linkspeed. RoceSrc
+    // takes its rate as a ctor arg, so per-flow rates need no transport changes.
+    char* nvlink_topo_file = NULL;
+    linkspeed_bps nvlink_linkspeed = 0;
+    // GPUs per server. This is a HOST property (how many GPUs share an NVSwitch),
+    // independent of how the fabric attaches them, so it must be settable even on
+    // a topology without "Rails N" (e.g. the flat control). Defaults to the main
+    // topology's rails() when that is set.
+    uint32_t gpus_per_server = 0;
 
     while (i<argc) {
         if (!strcmp(argv[i],"-o")) {
@@ -198,6 +211,19 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[i],"-topo")){
             topo_file = argv[i+1];
             cout << "FatTree topology input file: "<< topo_file << endl;
+            i++;
+        } else if (!strcmp(argv[i],"-nvlink_topo")) {
+            nvlink_topo_file = argv[i+1];
+            cout << "NVLink (intra-server) topology input file: "<< nvlink_topo_file << endl;
+            i++;
+        } else if (!strcmp(argv[i],"-gpus_per_server")) {
+            gpus_per_server = atoi(argv[i+1]);
+            cout << "gpus_per_server " << gpus_per_server << endl;
+            i++;
+        } else if (!strcmp(argv[i],"-nvlink_linkspeed")) {
+            // in Mbps, like -linkspeed
+            nvlink_linkspeed = speedFromMbps(atof(argv[i+1]));
+            cout << "NVLink linkspeed "<< argv[i+1] << " Mbps" << endl;
             i++;
         } else if (!strcmp(argv[i],"-q")){
             queuesize = atoi(argv[i+1]);
@@ -438,6 +464,32 @@ int main(int argc, char **argv) {
     }
 
     top = make_unique<FatTreeTopology>(topo_cfg.get(), qlf, &eventlist, nullptr);
+
+    // Optional NVLink plane: a second, independent topology whose leaves are the
+    // 8-GPU servers. Only intra-server flows are attached to it, so traffic never
+    // leaves a leaf and the (inert) upper tier does not matter.
+    unique_ptr<FatTreeTopology> top_nvlink;
+    unique_ptr<FatTreeTopologyCfg> nvlink_cfg;
+    if (nvlink_topo_file) {
+        nvlink_cfg = FatTreeTopologyCfg::load(nvlink_topo_file, queuesize, qt, snd_type);
+        if (nvlink_cfg->no_of_nodes() != no_of_nodes) {
+            cerr << "NVLink topology node count (" << nvlink_cfg->no_of_nodes()
+                 << ") != connection matrix (" << no_of_nodes << ")" << endl;
+            exit(1);
+        }
+        nvlink_cfg->set_queue_sizes(queuesize);
+        top_nvlink = make_unique<FatTreeTopology>(nvlink_cfg.get(), qlf, &eventlist, nullptr);
+        if (gpus_per_server == 0) gpus_per_server = topo_cfg->rails();
+        if (gpus_per_server <= 1) {
+            cerr << "-nvlink_topo needs the server size: set \"Rails N\" in the topology "
+                 << "or pass -gpus_per_server N" << endl;
+            exit(1);
+        }
+        if (nvlink_linkspeed == 0) nvlink_linkspeed = linkspeed;
+        cout << "NVLink plane enabled: intra-server flows (same server of "
+             << gpus_per_server << " GPUs) use the NVLink topology at "
+             << speedAsGbps(nvlink_linkspeed) << " Gbps" << endl;
+    }
 #endif
 
 #ifdef OV_FAT_TREE
@@ -539,10 +591,19 @@ int main(int argc, char **argv) {
         int dest = crt->dst;
         cout << "Connection " << crt->src << "->" <<crt->dst << " starting at " << timeAsUs(crt->start) << " size " << crt->size << endl;
 
+        // --- NVLink vs rail selection (connect time) ----------------------
+        // A flow has a fixed destination, so the attachment is decided once here
+        // rather than per packet. Same server -> NVLink plane at NVLink rate;
+        // otherwise the rail/fabric topology at the normal host rate.
+        bool same_server = top_nvlink && (src / (int)gpus_per_server == dest / (int)gpus_per_server);
+        FatTreeTopology*    ftop  = same_server ? top_nvlink.get() : top.get();
+        FatTreeTopologyCfg* fcfg  = same_server ? nvlink_cfg.get() : topo_cfg.get();
+        linkspeed_bps       frate = same_server ? nvlink_linkspeed : linkspeed;
+
         if (dcqcn)
-            roceSrc = new DCQCNSrc(NULL, NULL, eventlist,linkspeed);
+            roceSrc = new DCQCNSrc(NULL, NULL, eventlist,frate);
         else
-            roceSrc = new RoceSrc(NULL, NULL, eventlist,linkspeed);
+            roceSrc = new RoceSrc(NULL, NULL, eventlist,frate);
 
         roce_srcs.push_back(roceSrc);
         roceSrc->set_dst(dest);
@@ -581,21 +642,21 @@ int main(int argc, char **argv) {
         roceSnk->setName("Roce_sink_" + ntoa(src) + "_" + ntoa(dest));
         logfile.writeName(*roceSnk);
                         
-        ((HostQueue*)top->queues_ns_nlp[src][topo_cfg->HOST_POD_SWITCH(src)][0])->addHostSender(roceSrc);
+        ((HostQueue*)ftop->queues_ns_nlp[src][fcfg->HOST_POD_SWITCH(src)][0])->addHostSender(roceSrc);
 
         if (route_strategy!=SINGLE_PATH && route_strategy!=ECMP_FIB){
             abort();
         } else if (route_strategy==ECMP_FIB) {
             Route* srctotor = new Route();
             
-            srctotor->push_back(top->queues_ns_nlp[src][topo_cfg->HOST_POD_SWITCH(src)][0]);
-            srctotor->push_back(top->pipes_ns_nlp[src][topo_cfg->HOST_POD_SWITCH(src)][0]);
-            srctotor->push_back(top->queues_ns_nlp[src][topo_cfg->HOST_POD_SWITCH(src)][0]->getRemoteEndpoint());
+            srctotor->push_back(ftop->queues_ns_nlp[src][fcfg->HOST_POD_SWITCH(src)][0]);
+            srctotor->push_back(ftop->pipes_ns_nlp[src][fcfg->HOST_POD_SWITCH(src)][0]);
+            srctotor->push_back(ftop->queues_ns_nlp[src][fcfg->HOST_POD_SWITCH(src)][0]->getRemoteEndpoint());
 
             Route* dsttotor = new Route();
-            dsttotor->push_back(top->queues_ns_nlp[dest][topo_cfg->HOST_POD_SWITCH(dest)][0]);
-            dsttotor->push_back(top->pipes_ns_nlp[dest][topo_cfg->HOST_POD_SWITCH(dest)][0]);
-            dsttotor->push_back(top->queues_ns_nlp[dest][topo_cfg->HOST_POD_SWITCH(dest)][0]->getRemoteEndpoint());
+            dsttotor->push_back(ftop->queues_ns_nlp[dest][fcfg->HOST_POD_SWITCH(dest)][0]);
+            dsttotor->push_back(ftop->pipes_ns_nlp[dest][fcfg->HOST_POD_SWITCH(dest)][0]);
+            dsttotor->push_back(ftop->queues_ns_nlp[dest][fcfg->HOST_POD_SWITCH(dest)][0]->getRemoteEndpoint());
 
 
             if (crt->start != TRIGGER_START && start_delta > 0){
@@ -605,10 +666,10 @@ int main(int argc, char **argv) {
             roceSrc->connect(srctotor, dsttotor, *roceSnk, crt->start);
 
             //register src and snk to receive packets from their respective TORs. 
-            assert(top->switches_lp[topo_cfg->HOST_POD_SWITCH(src)]);
-            assert(top->switches_lp[topo_cfg->HOST_POD_SWITCH(src)]);
-            top->switches_lp[topo_cfg->HOST_POD_SWITCH(src)]->addHostPort(src,roceSrc->flow_id(),roceSrc);
-            top->switches_lp[topo_cfg->HOST_POD_SWITCH(dest)]->addHostPort(dest,roceSrc->flow_id(),roceSnk);
+            assert(ftop->switches_lp[fcfg->HOST_POD_SWITCH(src)]);
+            assert(ftop->switches_lp[fcfg->HOST_POD_SWITCH(src)]);
+            ftop->switches_lp[fcfg->HOST_POD_SWITCH(src)]->addHostPort(src,roceSrc->flow_id(),roceSrc);
+            ftop->switches_lp[fcfg->HOST_POD_SWITCH(dest)]->addHostPort(dest,roceSrc->flow_id(),roceSnk);
         } else {
             int choice = rand()%net_paths[src][dest]->size();
             routeout = new Route(*(net_paths[src][dest]->at(choice)));

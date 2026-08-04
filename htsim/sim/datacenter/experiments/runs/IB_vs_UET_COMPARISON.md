@@ -146,3 +146,35 @@ To (re)run either sweep from scratch, see `IB_DCQCN_README.md` (IB) and each UET
 - **IB now has serial-a2a + allreduce at 128** (`ib_dcqcn/allreduce_a2a_serial_128`, 18 runs). Only a2a-1024 has no IB
   counterpart yet (would need extra IB sweeps).
 - Fairness recorded for IB only; to compare it, recompute UET fairness from its per-flow logs.
+
+---
+
+## 7. Part 2 — rail-optimized cluster + NVLink (added later)
+
+A second study on a **1024-GPU rail-optimized fabric** (128 servers x 8 GPUs, 8 rails,
+32 leaves, 32 spines) with a modelled **NVLink** intra-server domain, plus rail-aware
+collectives. Everything lives in `rail_optimized/`:
+
+| | |
+|---|---|
+| results | `rail_optimized/results_rail.csv` (24 runs x 33 cols), `utilization_rail.csv` |
+| topologies | `topos/{rail,flat_sameshape,nvlink}_1024gpu*.topo` |
+| workloads | `matrices/rail_{allreduce,alltoall_moe}_1024gpu_{16,64,100}MB.cm` |
+| generators | `connection_matrices/gen_rail_aware_{allreduce,alltoall}.py` |
+| harness | `rail_optimized/run_one_rail.sh`, `sweep_rail.sh` (`PARALLEL` env, default 1) |
+| figures | `rail_optimized/graphs/fig1-3` (`make_graphs_rail.py`) |
+| design + validation | `rail_optimized/notes/DESIGN_AND_VALIDATION.md` |
+
+Schema is a **superset of both stacks** (33 cols): the common metrics, UET's
+Rtx/NACKs/spurious, IB's pfc_pauses/pause_us/max_queue_bytes, plus slowdown and
+fairness. NVLink is enabled in **all 24 runs** (rail and flat alike), so rail-vs-flat
+isolates only the host->leaf assignment.
+
+Headline results: rails help **IB on every run (-7%..-33%)** but leave **UET
+indifferent**; on **MoE all-to-all the two stacks converge and IB wins at 100 MB
+(0.89x)**; and rail locality does **not** reduce UET's retransmits, pointing at
+receiver-side incast as the real bottleneck. See §8 of the design note.
+
+**Caveat:** `slowdown_*` and `fairness_jain` are recorded but NOT meaningful for these
+two workloads — both are trigger-staged, so a flow's finish time includes waiting for
+its trigger. Makespan / FCT / utilization / congestion counters are the valid ones.

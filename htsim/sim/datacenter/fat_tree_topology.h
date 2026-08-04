@@ -92,7 +92,33 @@ public:
     void set_params(uint32_t no_of_nodes);
     void set_custom_params(uint32_t no_of_nodes);
 
+    // --- Rail-optimized support -------------------------------------------
+    // Default (rails <= 1): hosts attach to leaves CONSECUTIVELY -- leaf t owns
+    // hosts [t*radix_down, (t+1)*radix_down).
+    //
+    // Rail-optimized (rails = GPUs per server, e.g. 8): host g is GPU (g%rails)
+    // of server (g/rails), and attaches to the leaf of ITS OWN RAIL. Rail r is
+    // served by `leaves_per_rail` leaf switches, each covering
+    // `servers_per_leaf = radix_down[TOR]` consecutive servers:
+    //     rail   = g % rails            (GPU position inside the server)
+    //     server = g / rails
+    //     leaf   = rail*leaves_per_rail + server/servers_per_leaf
+    // This is the exact inverse of the wiring loop in fat_tree_topology.cpp
+    // (see "rail-optimized" there) -- the two MUST be changed together.
+    // Everything else (switch routing, route construction in main_uec/main_roce)
+    // dispatches through this function, so it follows automatically.
+    uint32_t rails() const { return _rails; }
+    uint32_t servers_per_leaf() const { return _radix_down[TOR_TIER]; }
+    uint32_t leaves_per_rail() const {
+        return (_no_of_nodes / _rails) / _radix_down[TOR_TIER];
+    }
+
     uint32_t HOST_POD_SWITCH(uint32_t src) const {
+        if (_rails > 1) {
+            uint32_t rail   = src % _rails;
+            uint32_t server = src / _rails;
+            return rail * leaves_per_rail() + server / servers_per_leaf();
+        }
         return src/_radix_down[TOR_TIER];
     }
 
@@ -210,7 +236,10 @@ private:
     mem_b _queue_up[2];
 
     // number of hosts in a pod.  
-    uint32_t _hosts_per_pod; 
+    uint32_t _hosts_per_pod;
+    // Rail-optimized: GPUs per server (= number of rails). 0/1 = disabled, i.e.
+    // classic consecutive host->leaf attachment. Set by "Rails N" in the .topo.
+    uint32_t _rails = 1; 
 
     //ecn parameters
     bool _enable_ecn;

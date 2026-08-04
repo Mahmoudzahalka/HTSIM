@@ -304,6 +304,32 @@ void FatTreeTopologyCfg::set_custom_params(uint32_t no_of_nodes) {
     }
     _tor_switches_per_pod = _hosts_per_pod / _radix_down[TOR_TIER];
 
+    // Rail-optimized sanity: the strided host->leaf mapping (HOST_POD_SWITCH)
+    // and its inverse in the wiring loop only line up if the divisions below are
+    // exact. Fail loudly rather than silently mis-attaching hosts to leaves.
+    if (_rails > 1) {
+        if (no_of_nodes % _rails != 0) {
+            cerr << "Rails " << _rails << ": no_of_nodes " << no_of_nodes
+                 << " is not a multiple of the number of rails (GPUs per server)" << endl;
+            exit(1);
+        }
+        uint32_t servers = no_of_nodes / _rails;
+        if (servers % _radix_down[TOR_TIER] != 0) {
+            cerr << "Rails " << _rails << ": " << servers << " servers is not a multiple of the leaf down-radix "
+                 << _radix_down[TOR_TIER] << " (servers per rail-leaf)" << endl;
+            exit(1);
+        }
+        uint32_t leaves = _rails * (servers / _radix_down[TOR_TIER]);
+        if (leaves != _tor_switches_per_pod * no_of_pods) {
+            cerr << "Rails " << _rails << ": rail layout needs " << leaves << " leaves but topology has "
+                 << _tor_switches_per_pod * no_of_pods << endl;
+            exit(1);
+        }
+        cout << "Rail-optimized: " << _rails << " rails x " << (servers / _radix_down[TOR_TIER])
+             << " leaves/rail = " << leaves << " leaves, " << _radix_down[TOR_TIER]
+             << " servers per leaf (" << servers << " servers, " << _rails << " GPUs each)" << endl;
+    }
+
     assert((no_of_nodes * _downlink_speeds[TOR_TIER]) % (_downlink_speeds[AGG_TIER] * _oversub[TOR_TIER]) == 0);
     no_of_tor_uplinks = (no_of_nodes * _downlink_speeds[TOR_TIER]) / (_downlink_speeds[AGG_TIER] *  _oversub[TOR_TIER]);
     cout << "no_of_tor_uplinks: " << no_of_tor_uplinks << endl;
@@ -598,6 +624,10 @@ void FatTreeTopologyCfg::read_cfg(istream& file, mem_b queuesize) {
             _tiers = stoi(tokens[1]);
         } else if (tokens[0] == "podsize") {
             _hosts_per_pod = stoi(tokens[1]);
+        } else if (tokens[0] == "rails") {
+            // Rail-optimized: GPUs per server. Host g attaches to the leaf of
+            // rail (g % rails) rather than to the leaf owning consecutive hosts.
+            _rails = stoi(tokens[1]);
         } else if (tokens[0] == "tier") {
             // we're done with the header
             break;
@@ -839,7 +869,22 @@ FatTreeTopology::FatTreeTopology(const FatTreeTopologyCfg* cfg,
     for (uint32_t tor = 0; tor < _cfg->NTOR; tor++) {
         uint32_t link_bundles = _cfg->_radix_down[TOR_TIER]/_cfg->_bundlesize[TOR_TIER];
         for (uint32_t l = 0; l < link_bundles; l++) {
-            uint32_t srv = tor * link_bundles + l;
+            // Which host hangs off downlink l of leaf `tor`?
+            // Default: consecutive. Rail-optimized: leaf `tor` belongs to rail
+            // (tor/leaves_per_rail) and covers servers [j*spl, (j+1)*spl) where
+            // j = tor%leaves_per_rail, taking each server's GPU at position
+            // `rail`. This is the exact inverse of HOST_POD_SWITCH() in
+            // fat_tree_topology.h -- change the two together.
+            uint32_t srv;
+            if (_cfg->rails() > 1) {
+                uint32_t spl  = _cfg->servers_per_leaf();
+                uint32_t lpr  = _cfg->leaves_per_rail();
+                uint32_t rail = tor / lpr;
+                uint32_t j    = tor % lpr;
+                srv = (j * spl + l) * _cfg->rails() + rail;
+            } else {
+                srv = tor * link_bundles + l;
+            }
             for (uint32_t b = 0; b < _cfg->_bundlesize[TOR_TIER]; b++) {
                 // Downlink
                 if (_logger_factory) {
@@ -944,8 +989,15 @@ FatTreeTopology::FatTreeTopology(const FatTreeTopologyCfg* cfg,
                 //cout << queues_nlp_nup[tor][agg][b]->str() << endl;
                 //if (logfile) logfile->writeName(*(queues_nlp_nup[tor][agg]));
 
-                assert(switches_lp[tor]->addPort(queues_nlp_nup[tor][agg][b]) < 128);
-                assert(switches_up[agg]->addPort(queues_nup_nlp[agg][tor][b]) < 128);
+                // Sanity caps on switch radix. In a 2-tier leaf-spine EVERY spine
+                // connects to EVERY leaf, so a spine's radix == number of leaves.
+                // The NVLink plane has one leaf per server, so it hits 128 exactly
+                // at 1024 GPUs and exceeds it at 2048 -- even though that tier is
+                // inert there (intra-server traffic never leaves its leaf).
+                // These are advisory guards, not array bounds (_ports is a vector),
+                // so raise them rather than cap the modellable scale.
+                assert(switches_lp[tor]->addPort(queues_nlp_nup[tor][agg][b]) < 1024);
+                assert(switches_up[agg]->addPort(queues_nup_nlp[agg][tor][b]) < 1024);
                 queues_nlp_nup[tor][agg][b]->setRemoteEndpoint(switches_up[agg]);
                 queues_nup_nlp[agg][tor][b]->setRemoteEndpoint(switches_lp[tor]);
 

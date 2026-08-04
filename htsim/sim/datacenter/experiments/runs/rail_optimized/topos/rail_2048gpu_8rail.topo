@@ -1,0 +1,24 @@
+# Rail-optimized 2048-GPU fabric (8 Scalable Units), 2-tier leaf-spine.
+# 256 servers x 8 GPUs; 8 rails, each served by 8 leaves (32 servers each)
+# => 64 leaves of 32 down + 32 up (64-port, Quantum-2 class), 32 spines of radix 64.
+# This is the LARGEST rail cluster still buildable in 2 tiers with 64-port switches
+# (64 leaves x 32 downlinks = 2048 endpoints is the hard ceiling).
+Nodes 2048
+Tiers 2
+Podsize 2048
+Rails 8
+
+Tier 0
+Oversubscribed 1
+Downlink_speed_Gbps 200
+Radix_Down 32
+Radix_Up 32
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+
+Tier 1
+Downlink_speed_Gbps 200
+Radix_Down 64
+Downlink_Latency_ns 1000
+Switch_Latency_ns 0
+Bundle 1
