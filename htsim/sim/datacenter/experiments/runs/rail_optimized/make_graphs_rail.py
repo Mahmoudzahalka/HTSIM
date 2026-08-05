@@ -114,7 +114,12 @@ ax.text(0.02, 0.02, "IB faster ↓", transform=ax.transAxes, fontsize=8, color="
 ax.set_xticks(x); ax.set_xticklabels([f"{s} MB" for s in SIZES])
 ax.set_ylabel("makespan ratio  IB / UET"); ax.set_ylim(0, 4.4)
 ax.set_title("MoE closes the gap, but IB's 100 MB win\nat 1024 does not survive to 2048", fontsize=11)
-ax.legend(fontsize=8.5, frameon=False); clean(ax)
+# handlelength must exceed the marker width or the ms=8 marker covers the whole
+# handle and every entry looks solid -- which hides the 1024/2048 dash coding.
+# Park the legend in the empty mid band (y ~ 1.6-3.0) so it clears both the data
+# and the "IB faster" annotation in the lower-left.
+ax.legend(fontsize=8.5, frameon=False, loc="center left", handlelength=3.6,
+          markerscale=0.85, labelspacing=0.7); clean(ax)
 fig.tight_layout(); fig.savefig(f"{OUT}/fig4_ib_uet_ratio.png", bbox_inches="tight"); plt.close(fig)
 
 print("wrote:")
