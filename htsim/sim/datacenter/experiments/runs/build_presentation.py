@@ -224,8 +224,8 @@ content("Why rail-optimized? (the real hardware)",[
  "Purpose: make the traffic that collectives generate either stay inside the server (NVLink, very fast) or stay inside a rail (one leaf, no spine).",
 ], accent=RAILC)
 
-content("The topology we built (1024 GPUs, DGX SuperPOD-class)",[
- "128 servers x 8 GPUs = 1024 GPUs; each GPU has its own 200G NIC on its own rail.",
+content("The topology we built (1024 and 2048 GPUs, DGX SuperPOD-class)",[
+ "128 servers x 8 GPUs = 1024 GPUs; each GPU has its own 200G NIC on its own rail. We also built the 2048-GPU version (256 servers, 64 leaves, 64 spines) — 8 Scalable Units, the ceiling for 2-tier with 64-port switches.",
  "8 rails; each rail is served by 4 leaf switches (32 servers each) => 32 leaves total, each 32 down + 32 up = 64 ports (real Quantum-2-class radix).",
  "32 spines, 2-tier leaf-spine, fully NON-BLOCKING, diameter 4.",
  "Host->leaf mapping (this is the whole difference):",
@@ -255,22 +255,35 @@ content("The workloads: rail-AWARE collectives",[
  "Both generators assert the key property: every flow is either intra-server or same-rail — 0 flows cross a spine.",
 ], accent=RAILC)
 
-imageslide("Rail results — makespan vs the shape-matched control",os.path.join(RG,"fig1_rail_vs_flat.png"),
- "Same switch layout in both; only the host->leaf assignment differs. IB (blue) gains on every configuration; UET (orange) barely moves.",RAILC)
-imageslide("Rail benefit, and the IB/UET ratio",os.path.join(RG,"fig2_rail_benefit_and_ratio.png"),
- "Left: rails help IB by 7-33% on all six runs, UET within noise. Right: on MoE all-to-all the stacks converge — and at 100 MB IB is 11% FASTER.",RAILC)
-imageslide("What each stack pays on the rail fabric",os.path.join(RG,"fig3_rail_congestion_cost.png"),
- "Two different currencies: IB burns time in PFC back-pressure (up to ~9.7 s of pause), UET burns bandwidth in retransmissions (up to 3.8 M packets).",RAILC)
+content("The sweep: 48 runs, 48/48 clean",[
+ "2 rail-aware workloads x {1024, 2048} GPUs x {16, 64, 100} MB x {rail, flat control} x {IB, UET} = 48 runs. NVLink enabled in ALL of them, so rail-vs-flat isolates the host->leaf assignment alone.",
+ "Every run completed every flow. All 24 IB runs recorded ZERO lossless overflow (-q 8000 at 2048) — the lossless invariant genuinely held.",
+ "33-column superset schema: common metrics (makespan, FCT, per-tier utilization) + UET-native (Rtx/NACKs/spurious) + IB-native (PFC pauses, pause time, peak buffer).",
+ "The three heaviest cells (MoE / 2048 / 100 MB) needed ~32 GB RAM each and were run on a larger machine.",
+ "Caveat: slowdown and Jain fairness are recorded but NOT meaningful here — both workloads are trigger-staged, so a flow's completion includes waiting for its trigger.",
+], accent=RAILC)
 
-content("Analysis — three findings",[
- "1. Rail-optimization is an IB optimization.",
- ("Rails helped IB on all six runs (-7% to -33%); UET stayed within noise (+9% to -8%).",1),
- ("Why: rails are a LOCALITY optimization. IB pins each flow to one path, so keeping traffic on one leaf matters. UET sprays across all paths and has spare bandwidth on a non-blocking fabric, so it is largely indifferent to where traffic goes.",1),
- "2. On MoE all-to-all the two stacks converge — IB even wins at 100 MB (0.89x).",
- ("Versus UET's usual 3-4x lead on all-reduce. This is the sharpest reversal in the study.",1),
- "3. The mechanism: rail locality does NOT reduce UET's retransmits (~0% change vs flat).",
- ("MoE all-to-all makes every GPU receive from its 127 rail peers, so the bottleneck is receiver-side INCAST at the endpoint — not congestion in the fabric.",1),
- ("An endpoint bottleneck cannot be fixed by locality, and cannot be fixed by spray either. That single fact explains all three findings — and why IB's losslessness edges ahead where UET's retransmissions become pure overhead.",1),
+imageslide("Rail results — makespan vs the shape-matched control",os.path.join(RG,"fig1_rail_vs_flat.png"),
+ "Same switch layout in both; only the host->leaf assignment differs. IB (blue) gains on every configuration, at both scales.",RAILC)
+imageslide("How much do rails buy?",os.path.join(RG,"fig2_rail_benefit.png"),
+ "Rails help IB on all 24 IB runs (-7% to -33%). UET is indifferent on all-reduce — but on MoE its gain GROWS with scale, reaching -16% at 2048.",RAILC)
+imageslide("IB vs UET on the rail fabric",os.path.join(RG,"fig4_ib_uet_ratio.png"),
+ "On all-reduce UET keeps its 3-4x lead. On MoE the stacks converge; IB wins at 1024/100 MB (0.89x) — but that reversal does NOT survive to 2048.",RAILC)
+imageslide("What each stack pays on the rail fabric",os.path.join(RG,"fig3_rail_congestion_cost.png"),
+ "Two different currencies: IB burns time in PFC back-pressure, UET burns bandwidth in retransmissions. Both explode with scale.",RAILC)
+
+content("Analysis — four findings",[
+ "1. Rail-optimization helps IB everywhere — and helps UET too, but only on MoE and only at scale.",
+ ("Rails helped IB on all 24 IB runs (-7% to -33%). UET stayed within noise on all-reduce (+9% to -5%), but on MoE its benefit grew with size AND scale: -3%..-8% at 1024, up to -16% at 2048/100 MB.",1),
+ ("The 1024-only data had made rails look like an IB-only optimization. Doubling the fabric showed that was a scale artifact — a caution about generalizing from one scale.",1),
+ "2. On MoE all-to-all the two stacks converge — but IB's win does not survive scaling.",
+ ("IB is 11% FASTER at 1024/100 MB (0.89x), versus UET's usual 3-4x lead on all-reduce. At 2048 the same cell is 1.31x — IB slower again.",1),
+ ("Doubling the GPU count doubles each receiver's incast fan-in, which hurts the stack that must PAUSE more than the one that drops and keeps the pipe full.",1),
+ "3. The mechanism: rail locality does NOT reduce UET's retransmits — 0.3% to 2.9% change vs flat, on every MoE cell.",
+ ("Yet rails still cut makespan up to 16%. Loss and time are decoupled: loss is generated at the RECEIVING ENDPOINT (every GPU takes traffic from 127 rail peers at once), while time improves because rails cut spine transit.",1),
+ ("Flat loss with moving makespan is the cleanest evidence in the study that MoE all-to-all is ENDPOINT-bound, not fabric-bound. No topology change can relieve an endpoint bottleneck.",1),
+ "4. Congestion cost is super-linear in scale.",
+ ("Doubling GPUs raised IB's pause time 6.2x (8.3 s -> 51.9 s) and UET's retransmits 4.7x (3.7 M -> 17.6 M) at 100 MB. This is what makes MoE the workload worth studying.",1),
 ], accent=RAILC)
 
 # ================= CONCLUSIONS =================
@@ -280,9 +293,11 @@ content("Conclusions",[
  ("IB (lossless PFC + DCQCN) is slower but never drops a packet, completes every workload UET cannot, and has a better tail on the heavy 1024-node incasts — paying in back-pressure and buffering.",1),
  "Part 2 — rail-optimized + NVLink: the picture changes.",
  ("Rails+NVLink must be adopted together: rails alone are 2.2x WORSE than a flat fabric, because they scatter each server's GPUs across 8 leaves.",1),
- ("Rail-optimization is an IB optimization (-7% to -33% on every run); UET is indifferent, because spray already makes it insensitive to locality.",1),
- ("On MoE all-to-all the two stacks converge and IB overtakes UET at 100 MB — the workload is bound by receiver-side incast at the endpoint, which neither locality nor spray can relieve.",1),
- "Overall: which transport wins is workload- and topology-dependent, not absolute. UET's advantage comes from path diversity, so it shrinks exactly where the bottleneck stops being the fabric.",
+ ("Rails help IB on all 24 IB runs (-7% to -33%). They help UET too, but only on MoE and only at scale (up to -16% at 2048) — spray makes UET insensitive to locality until the fabric itself gets big enough to matter.",1),
+ ("On MoE all-to-all the two stacks converge — IB even overtakes UET at 1024/100 MB — because the workload is bound by receiver-side incast at the ENDPOINT, which neither locality nor spray can relieve.",1),
+ ("But that overtake does not survive to 2048: more GPUs means more fan-in per receiver, which punishes back-pressure more than it punishes drop-and-retransmit.",1),
+ "Overall: which transport wins is workload-, topology- AND scale-dependent, not absolute. UET's advantage comes from path diversity, so it shrinks exactly where the bottleneck stops being the fabric — and returns as scale re-loads the endpoints.",
+ "Methodological note: two conclusions we drew confidently from the 1024 grid were overturned by running 2048. Single-scale results generalize poorly.",
 ], accent=DARK)
 
 content("Future work",[
@@ -291,7 +306,8 @@ content("Future work",[
  "Adaptive routing for IB (ecmp_ar): would give IB some path diversity and likely close part of the permutation gap.",
  "Rail-aware workloads beyond these two: all-gather / reduce-scatter (FSDP, ZeRO-3) and pipeline-parallel point-to-point.",
  "Sensitivity to the NVLink rate, and to rail count / servers-per-leaf (the sweep fixed 8 rails x 4 leaves).",
- "Larger scale (8192 GPUs) and real AI communication traces (GOAL / ATLAHS).",
+ "A third scale (4096+ GPUs) to test the trend the 1024->2048 step revealed: IB's MoE advantage eroding as receiver fan-in grows. Two scales establish a direction, not a curve. (4096 needs 3 tiers, and ~64+ GB of RAM per run.)",
+ "Real AI communication traces (GOAL / ATLAHS) instead of synthetic collectives.",
  "Symmetric fairness metrics: per-flow fairness for trigger-staged workloads needs per-flow start times (currently an artifact for staged collectives).",
 ], accent=DARK)
 

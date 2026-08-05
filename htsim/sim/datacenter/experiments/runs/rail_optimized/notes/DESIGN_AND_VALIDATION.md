@@ -1,7 +1,7 @@
 # Rail-optimized topology — design, simulator interactions, validation
 
 Status: **COMPLETE — rail topology + NVLink plane implemented and validated on both stacks;
-24-run sweep finished 24/24 ok (see §8 for results).**
+full sweep finished 48/48 ok at 1024 and 2048 GPUs (see §8 for results).**
 
 ## 1. What was built
 
@@ -159,9 +159,11 @@ Three findings:
    8 GPUs across 8 leaves, so the intra-server phases must cross the spine; on the
    flat fabric those GPUs share a leaf. **Rail-optimization only pays off together
    with NVLink** — which is why real deployments ship them as a pair.
-3. **Rail-optimization is an IB optimization; UET barely notices it.** With NVLink,
-   rails buy IB ~12% (1139 vs 1297) but buy UET nothing at all (357 vs 356 — flat is
-   marginally faster, i.e. noise). Rails are a *locality* optimization: they put
+3. **Rail-optimization is an IB optimization; UET barely notices it** — *in this cell*.
+   With NVLink, rails buy IB ~12% (1139 vs 1297) but buy UET nothing at all (357 vs
+   356 — flat is marginally faster, i.e. noise). **Do not generalize this**: §8 shows
+   it holds for all-reduce at both scales, but on MoE all-to-all at 2048 GPUs rails
+   buy UET up to 16%. Rails are a *locality* optimization: they put
    communicating peers on one leaf to avoid the spine. IB pins each flow to a single
    path, so locality matters to it. UET sprays across all paths and has spare
    bandwidth on a non-blocking fabric, so it is largely indifferent to whether
@@ -170,51 +172,100 @@ Three findings:
 Implication for the sweeps: **keep the flat control** — "rails help IB but not UET"
 is only demonstrable by running both topologies on both stacks.
 
-## 8. Rail sweep results (24 runs, 24/24 ok)
+## 8. Rail sweep results (48 runs, 48/48 ok)
 
 `results_rail.csv` (33 cols) + `utilization_rail.csv`. 2 rail-aware workloads x
-{16,64,100} MB x {rail, flat control} x {IB, UET}, NVLink on throughout.
+{1024, 2048} GPUs x {16, 64, 100} MB x {rail, flat control} x {IB, UET}, NVLink on
+throughout. All 48 complete every flow; all 24 IB runs have **zero** lossless
+overflow (`-q 8000` at 2048).
 
-### Makespan: rail vs flat control
+> The last three cells (MoE / 2048 / 100 MB: `ib.rail`, `ib.flat`, `uet.flat`) were
+> run on a larger-memory machine -- they need ~32 GB each at `-q 8000` and were
+> OOM-killed on the 31 GB box. See `RUN_ON_BIGGER_BOX.md`.
 
-| workload | size | IB rail vs flat | UET rail vs flat |
-|---|---|---|---|
-| all-reduce | 16 / 64 / 100 MB | **-12% / -15% / -21%** | 0% / -5% / +9% |
-| MoE a2a | 16 / 64 / 100 MB | **-33% / -16% / -7%** | -3% / -8% / -5% |
+### Makespan: rail vs flat control (negative = rails faster)
 
-**Rails help IB on every single run (-7% to -33%); UET is flat (+9%..-8%, i.e. noise).**
-Note the size trend is NOT consistent: the benefit grows with size for all-reduce but
-*shrinks* for MoE, so "rails help more for bigger messages" is not supported.
+| workload | GPUs | 16 MB | 64 MB | 100 MB |
+|---|---|---|---|---|
+| all-reduce | 1024 | **-12%** | **-15%** | **-21%** |
+| all-reduce | 2048 | **-11%** | **-15%** | **-15%** |
+| MoE a2a | 1024 | **-33%** | **-16%** | **-7%** |
+| MoE a2a | 2048 | **-17%** | **-22%** | **-21%** |
 
-### IB vs UET on the rail fabric
+| workload | GPUs | 16 MB | 64 MB | 100 MB |
+|---|---|---|---|---|
+| UET all-reduce | 1024 | 0% | -5% | +9% |
+| UET all-reduce | 2048 | 0% | +2% | +7% |
+| UET MoE a2a | 1024 | -3% | -8% | -5% |
+| UET MoE a2a | 2048 | **-6%** | **-10%** | **-16%** |
 
-| workload | 16 MB | 64 MB | 100 MB |
-|---|---|---|---|
-| all-reduce | 3.19x | 3.87x | 3.42x |
-| MoE a2a | 1.06x | **1.00x** | **0.89x** |
+**Rails help IB on all 24 IB runs (-7% to -33%).** That holds at both scales.
 
-On all-reduce UET keeps its usual ~3-4x lead. **On MoE all-to-all the two stacks
-converge completely -- and at 100 MB IB is 11% FASTER.** This is the sharpest
-reversal we have seen anywhere in the study.
+**The "UET is indifferent to rails" claim does NOT survive to 2048.** It is still
+true for all-reduce (0%..+9%, i.e. noise or slightly worse), but on MoE all-to-all
+UET's rail benefit is consistent and *grows with both size and scale*, reaching
+**-16% at 2048/100 MB** -- the largest UET rail gain in the grid. The 1024-only
+data set had made rails look like an IB-only optimization; the 2048 data shows that
+was a scale artifact.
+
+### IB vs UET on the rail fabric (ratio; <1 = IB faster)
+
+| workload | GPUs | 16 MB | 64 MB | 100 MB |
+|---|---|---|---|---|
+| all-reduce | 1024 | 3.19x | 3.87x | 3.42x |
+| all-reduce | 2048 | 3.30x | 4.13x | 3.78x |
+| MoE a2a | 1024 | 1.06x | **1.00x** | **0.89x** |
+| MoE a2a | 2048 | 1.39x | 1.19x | 1.31x |
+
+On all-reduce UET keeps its usual ~3-4x lead at both scales. On MoE the stacks come
+close at both scales, but **IB's 100 MB win does not survive the scale doubling**:
+0.89x at 1024 becomes 1.31x at 2048. The convergence is real and reproducible; the
+*reversal* was specific to 1024. Doubling the GPU count roughly doubles each
+receiver's incast fan-in, and that hurts IB (which must pause) more than UET (which
+drops, retransmits, and keeps the pipe full).
 
 ### Congestion cost (rail topology)
 
-| workload | size | IB pauses | IB pause (ms) | UET Rtx |
-|---|---|---|---|---|
-| all-reduce | 100 MB | 11,118 | 44 | 25,069 |
-| MoE a2a | 16 MB | 173,597 | 1,693 | 766,293 |
-| MoE a2a | 64 MB | 896,004 | 9,729 | 3,834,662 |
-| MoE a2a | 100 MB | 993,134 | 8,338 | 3,729,592 |
+| workload | GPUs | size | IB pauses | IB pause (ms) | UET Rtx | UET rtx% |
+|---|---|---|---|---|---|---|
+| all-reduce | 1024 | 100 MB | 11,118 | 44 | 25,069 | 0.1% |
+| all-reduce | 2048 | 100 MB | 31,204 | 124 | 44,253 | 0.0% |
+| MoE a2a | 1024 | 16 MB | 173,597 | 1,693 | 766,293 | 9.2% |
+| MoE a2a | 1024 | 64 MB | 896,004 | 9,729 | 3,834,662 | 11.3% |
+| MoE a2a | 1024 | 100 MB | 993,134 | 8,338 | 3,729,592 | 7.4% |
+| MoE a2a | 2048 | 16 MB | 319,079 | 3,083 | 1,171,865 | 7.1% |
+| MoE a2a | 2048 | 64 MB | 1,889,201 | 33,864 | 16,368,685 | 21.3% |
+| MoE a2a | 2048 | 100 MB | 2,925,156 | 51,874 | 17,640,897 | 15.8% |
 
-### Why rails do nothing for UET
+All-reduce is essentially congestion-free on both stacks (rtx% ~ 0). MoE is where
+both stacks pay, and **the cost explodes with scale**: doubling GPUs raises IB's
+pause-time 6.2x (8.3 s -> 51.9 s at 100 MB) and UET's retransmits 4.7x
+(3.7 M -> 17.6 M). This is the super-linear term that makes MoE the interesting
+workload.
 
-Rail locality does **not** reduce UET's retransmissions (rail vs flat Rtx differs by
-0-14%, mostly ~0%). So UET's dominant cost is untouched by locality -- which is
-exactly why the topology change buys it nothing.
+### Why rails help UET's *time* without touching its *loss*
 
-The likely mechanism: MoE all-to-all makes every GPU receive from its 127 rail peers,
-so the bottleneck is **receiver-side incast at the endpoint**, not congestion in the
-fabric. Locality cannot help an endpoint bottleneck, and neither can spray -- which
-also explains why the two stacks converge on MoE, and why IB's losslessness edges
-ahead at the largest size (it is the regime where UET's retransmissions are pure
-overhead). Endpoint-bound, not fabric-bound.
+Rail locality does **not** reduce UET's retransmissions -- rail vs flat Rtx differs
+by only **0.3% to 2.9%** on every MoE cell, at both scales. Yet at 2048 rails still
+cut UET's makespan by up to 16%. So the two effects are decoupled:
+
+- **Loss is unchanged** because it is generated at the **receiving endpoint**
+  (each GPU takes traffic from 127 rail peers at once), and no topology change can
+  relieve an endpoint bottleneck.
+- **Time still improves** because rails cut *spine transit* -- fewer hops, less
+  spine contention, shorter RTT -- which speeds up the delivery of the packets that
+  are not lost, and shortens the retransmit feedback loop.
+
+That the loss count is flat while makespan moves is the cleanest evidence in the
+study that MoE all-to-all is **endpoint-bound, not fabric-bound**. It also explains
+why IB (which converts the same endpoint pressure into back-pressure rather than
+loss) tracks UET so closely on this workload, and why both stacks degrade together
+when the fan-in doubles.
+
+### Caveat on two columns
+
+`slowdown_p50/p99/max` and `fairness_jain` are recorded for all 48 runs but are
+**not meaningful here**: both workloads are trigger-staged, so a flow's measured
+completion includes the time it spent waiting for its trigger. They measure stage
+ordering, not congestion. Makespan, FCT, utilization and the congestion counters
+are the valid columns.

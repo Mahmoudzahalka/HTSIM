@@ -1,8 +1,24 @@
 # Runbook — the 3 outstanding rail runs (need a bigger-memory machine)
 
-**Status of the rail study: 45 of 48 runs complete and clean.** Only one cell is
-missing: **MoE all-to-all, 2048 GPUs, 100 MB**. It needs more RAM than this 31 GB
-box has.
+> ## ✅ DONE — all three runs completed on the larger box (2026-08-05, commit `5135e73`).
+> **The rail study is now 48/48 complete and clean**: every run finished all its
+> flows, and all 24 IB runs recorded zero lossless overflow.
+>
+> | run | makespan | check |
+> |---|---|---|
+> | `ib.rail`  | **40,940.6 us** | 536576/536576 flows, overflow 0, 2,925,156 PFC pauses |
+> | `ib.flat`  | **52,082.5 us** | 536576/536576 flows, overflow 0, 3,027,741 PFC pauses |
+> | `uet.flat` | **37,178.9 us** | 536576/536576 flows, Rtx 17,587,253 |
+>
+> Results are folded into `results_rail.csv` / `utilization_rail.csv`; figures and
+> §8 of `notes/DESIGN_AND_VALIDATION.md` are updated. **The rest of this file is
+> kept as the reproduction record** — it documents exactly how these three were run.
+
+---
+
+**(Historical, at the time of writing: 45 of 48 runs complete and clean.** Only one
+cell was missing: **MoE all-to-all, 2048 GPUs, 100 MB**. It needed more RAM than the
+31 GB box had.**)**
 
 ---
 
@@ -59,7 +75,8 @@ python3 connection_matrices/gen_rail_aware_alltoall.py \
 **Rebuild rather than copy binaries if the box differs** — and note the build must
 include our changes (`Rails N` support in `fat_tree_topology.*`, the `-nvlink_topo`
 / `-nvlink_linkspeed` / `-gpus_per_server` flags in `main_roce.cpp` / `main_uec.cpp`).
-Branch: `dev/ib-dcqcn-fix`.
+Branch: **`study/rail-optimized-nvlink`** — `dev/ib-dcqcn-fix` does *not* carry the
+rail/NVLink code (it is the flat-study branch).
 
 ## 4. The commands (portable — no harness paths)
 
