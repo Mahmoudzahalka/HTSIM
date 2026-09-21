@@ -1,0 +1,24 @@
+# NVLink / NVSwitch intra-server domain for the 2048-GPU rail cluster.
+# 256 servers x 8 GPUs; each leaf = one server's NVSwitch (8 GPUs on a 3600 Gbps
+# non-blocking crossbar, 100 ns links). Consecutive attachment (no "Rails"), so
+# leaf s owns GPUs 8s..8s+7 = exactly one server.
+# Only intra-server flows attach here, so traffic never leaves a leaf and Tier 1
+# is inert -- it exists solely because htsim requires >= 2 tiers.
+Nodes 2048
+Tiers 2
+Podsize 2048
+
+Tier 0
+Oversubscribed 8
+Downlink_speed_Gbps 3600
+Radix_Down 8
+Radix_Up 1
+Downlink_Latency_ns 100
+Switch_Latency_ns 0
+
+Tier 1
+Downlink_speed_Gbps 3600
+Radix_Down 256
+Downlink_Latency_ns 100
+Switch_Latency_ns 0
+Bundle 1

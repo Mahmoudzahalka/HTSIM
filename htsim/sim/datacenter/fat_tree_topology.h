@@ -109,6 +109,11 @@ public:
     // dispatches through this function, so it follows automatically.
     uint32_t rails() const { return _rails; }
     uint32_t servers_per_leaf() const { return _radix_down[TOR_TIER]; }
+    // NVLINK-SPEED-CHECK (added): read a tier's configured downlink rate, so
+    // main_roce/main_uec can verify that -nvlink_linkspeed (a SOURCE rate) agrees
+    // with the NVLink topology's LINK capacity. _downlink_speeds is private and
+    // there was no accessor; this adds one without touching existing members.
+    linkspeed_bps downlink_speed(int tier) const { return _downlink_speeds[tier]; }
     uint32_t leaves_per_rail() const {
         return (_no_of_nodes / _rails) / _radix_down[TOR_TIER];
     }

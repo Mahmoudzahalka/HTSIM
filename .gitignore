@@ -15,3 +15,6 @@ idmap.txt
 !example_validate.json
 build/
 *.bin
+# The project report is a 1.5 MB binary: it does not diff, so every revision
+# would store a whole new copy in history.
+HTSIM_Project_Report.docx

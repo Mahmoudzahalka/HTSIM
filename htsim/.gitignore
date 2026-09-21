@@ -23,3 +23,48 @@ sim/parse_output
 # htsim's default logfile if a run ever writes it in-tree
 sim/datacenter/logout.dat
 sim/datacenter/idmap.txt
+
+# ============================================================================
+# Added 2026-09-21, after `git add .` swept 1,556 MB into a commit. The rules
+# above were written for the workloads that existed then; the rail study and
+# fidelityRuns introduced patterns nothing covered.
+# ============================================================================
+
+# Per-run htsim logs: one line per finished flow, so a 536k-flow run produces a
+# ~125 MB file and the set totals ~1.3 GB. GitHub REJECTS any file over 100 MB,
+# so these cannot be pushed even if you wanted them. They are reproduced by
+# re-running, and the .row/.urow next to them hold the actual extracted results.
+**/experiments/runs/**/logs/*.log
+
+# Large regenerable connection matrices (218 MB). gen_rail_aware_allreduce.py and
+# gen_rail_aware_alltoall.py are deterministic and reproduce these BYTE-FOR-BYTE
+# (verified with cmp), so there is no reason to put them in history.
+# Regenerate with: fidelityRuns/bin/regen_matrices.sh
+**/experiments/runs/*/matrices/rail_*.cm
+
+# fidelityRuns stages COPIES of matrices that are either tracked at their original
+# location or regenerable. Never commit the copies.
+**/experiments/runs/fidelityRuns/matrices/
+
+# Sweep progress logs: scheduling noise, not data. Which runs finished, and with
+# what numbers, is recorded in the results CSVs next to them.
+**/experiments/runs/*/*.progress.log
+
+# fidelityRuns run-time ephemerals
+**/experiments/runs/fidelityRuns/work/
+**/experiments/runs/fidelityRuns/sweep_*
+**/experiments/runs/fidelityRuns/*.tar.gz
+
+# ...but these ARE deliverables, and the ROOT .gitignore's `*.csv` / `*.png`
+# would otherwise swallow them. A deeper .gitignore overrides a shallower one.
+!**/experiments/runs/fidelityRuns/MANIFEST.csv
+!**/experiments/runs/fidelityRuns/results/*.csv
+!**/experiments/runs/fidelityRuns/graphs/*.png
+
+# stray wget output
+sim/wget-log
+
+# The project report is a 1.5 MB binary: it does not diff, so every revision would
+# store a whole new copy in history.
+HTSIM_Project_Report.docx
+**/HTSIM_Project_Report.docx

@@ -485,6 +485,30 @@ int main(int argc, char **argv) {
                  << "or pass -gpus_per_server N" << endl;
             exit(1);
         }
+        // ---- NVLINK-SPEED-CHECK (added) --------------------------------
+        // -nvlink_linkspeed sets the intra-server SOURCE rate (it is handed to the
+        // RoceSrc/DCQCNSrc constructor), while the NVLink topology file sets the LINK CAPACITY of that
+        // plane. The fabric has an equivalent guard (FatTreeTopologyCfg::set_linkspeeds,
+        // which exits when -linkspeed disagrees with the topology) but the NVLink plane
+        // had none -- so a mismatch silently throttled at whichever of the two was
+        // lower, with no warning and a plausible-looking result.
+        {
+            linkspeed_bps nvl_topo_speed = nvlink_cfg->downlink_speed(TOR_TIER);
+            if (nvlink_linkspeed != 0 && nvl_topo_speed != 0 && nvlink_linkspeed != nvl_topo_speed) {
+                cerr << "NVLink speed mismatch: -nvlink_linkspeed says "
+                     << speedAsGbps(nvlink_linkspeed) << " Gbps but " << nvlink_topo_file
+                     << " declares " << speedAsGbps(nvl_topo_speed) << " Gbps." << endl
+                     << "  The flag sets the host source rate; the topology sets link capacity." << endl
+                     << "  They must agree, or the slower one silently throttles the faster." << endl;
+                exit(1);
+            }
+            // Default to the TOPOLOGY's rate when the flag is omitted.
+            if (nvlink_linkspeed == 0 && nvl_topo_speed != 0) nvlink_linkspeed = nvl_topo_speed;
+        }
+        // ---- end NVLINK-SPEED-CHECK ------------------------------------
+        // ORIGINAL (kept for easy revert): fell back to the FABRIC linkspeed, which
+        // is the wrong plane's rate -- superseded by NVLINK-SPEED-CHECK above.
+        // if (nvlink_linkspeed == 0) nvlink_linkspeed = linkspeed;
         if (nvlink_linkspeed == 0) nvlink_linkspeed = linkspeed;
         cout << "NVLink plane enabled: intra-server flows (same server of "
              << gpus_per_server << " GPUs) use the NVLink topology at "
