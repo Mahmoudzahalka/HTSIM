@@ -67,7 +67,9 @@ NVLINK_MBPS="${NVLINK_MBPS:-3600000}"   # NVLink4, unchanged from A100->H100 in 
 GPS="${GPS:-8}"
 PATHS="${PATHS:-128}"
 DCQCN_K="${DCQCN_K:-8}"
-BPUS="${BPUS:-25000}"                 # 200 Gbps in bytes/us, for slowdown ideal
+BPUS="${BPUS:-$((FABRIC_MBPS/8))}"   # link bytes/us for the slowdown ideal. DERIVED from
+                                      # FABRIC_MBPS so it tracks the fabric: 400000 Mbps -> 50000 B/us.
+                                      # Was hardcoded 25000 (200 Gbps), which understated slowdown 2x at 400 G.
 POLL="${POLL:-0.5}"
 # HARD PER-JOB MEMORY CAP. This box has 31 GB and a previous sweep exhausted
 # RAM+swap and made it unreachable over SSH. ulimit -v makes an oversized run
@@ -75,6 +77,23 @@ POLL="${POLL:-0.5}"
 # the run is then recorded as status=mem_capped and belongs on the big box.
 # Set MEM_CAP_GB=0 to disable (do that only on the 90 GB machine).
 MEM_CAP_GB="${MEM_CAP_GB:-13}"
+
+# LIGHT-PHASE FLOOR, raised mid-sweep 2026-09-25 from 10 -> 20 GB.
+# The driver bakes PHASE_MEM_GB into its environment at launch and cannot be
+# changed in flight, but this script is re-executed per job, so flooring the
+# value here takes effect on every subsequent run WITHOUT restarting the sweep.
+# Why: the ib allreduce_ring 100MB 8os cells were measured at 8242-8834 MB, i.e.
+# ~86% of the old 10 GB cap, and those runs are 30000-39000 s each -- tipping
+# over would cost ~11 h per job, not seconds. 20 GB gives >2x headroom over the
+# worst peak seen in 509 IB rows.
+# CAVEAT: this breaks the runbook invariant PARALLEL x LIGHT_MEM_GB <= RAM
+# (6 x 20 = 120 GB > 94 GB). It is safe only because ulimit -v caps ADDRESS
+# SPACE, not reservation, and no IB row in the study has exceeded 8.8 GB, so
+# realistic worst case is 6 x ~9 = 54 GB. bin/oom_guard.sh watches for the
+# case where that assumption fails. Does not touch the heavy phase (75 > 20).
+# FLOOR REMOVED 2026-09-28. It existed only to keep the uet_allreduce_ring 64/100MB
+# cells off the 10 GB wall; those cells were dropped from the study, so the floor now
+# just overrides whatever cap the caller asked for. MEM_CAP_GB is honoured as given.
 
 # Manifest matrix paths are relative to the bundle so it can move between machines.
 case "$matrix" in /*) ;; *) matrix="$FID/$matrix" ;; esac
@@ -89,6 +108,28 @@ done
 n=$(grep -m1 -oE "Nodes [0-9]+" "$matrix" | awk '{print $2}')
 c=$(grep -m1 -oE "Connections [0-9]+" "$matrix" | awk '{print $2}')
 base=$(basename "$matrix" .cm)
+
+# ---- 400 G QSIZE OVERRIDE (added 2026-09-26) -------------------------------
+# qsize_for() in build_manifest.py gives the 2048-GPU MoE cells -q 8000, a value
+# proven clean at 200 G (RUN_ON_BIGGER_BOX.md). At 400 G there is twice as much
+# in flight and that same "proven clean" assumption ALREADY FAILED one scale
+# down: the 1024-GPU MoE 100 MB cell overflowed at -q 1000 (ovf 2789-3738 flat,
+# 73473-78061 rail) despite being clean at 200 G. The 2048 cells are the 60 most
+# expensive jobs in the study, so they are not worth gambling on.
+# The driver bakes QSIZE into its job list at launch, so overriding here is the
+# only way to fix the RUNNING sweep without restarting it.
+# Safe: -q does not change the answer, only whether the lossless buffer is
+# honestly sized. Cost is ~2 GB more RAM, immaterial under the 75 GB heavy cap.
+# ALL rail MoE cells on IB. Narrowing this was a mistake: 1024/100MB was fixed
+# but 1024/16MB and 1024/64MB were left at q=1000 on the reasoning that they were
+# "clean so far" -- they had simply not run yet, and all 20 then overflowed
+# (ovf 65000-71000). Every MoE cell measured on IB at 400 G needs q>1000, so the
+# rule is now the whole workload, not a per-size list. allreduce cells are
+# genuinely clean at their documented q and stay untouched.
+case "$base" in
+  rail_alltoall_moe_*)
+    if [ "$stack" = ib ] && [ "${QSIZE:-0}" -lt 16000 ]; then QSIZE=16000; fi ;;
+esac
 
 # ---- workload label (kept identical to the original harnesses) --------------
 case "$base" in
@@ -226,7 +267,10 @@ if grep -qiE 'bad_alloc|Cannot allocate memory|out of memory|std::bad_alloc' "$r
   status=mem_capped
   echo "[MEM] $tag exceeded ${MEM_CAP_GB}GB cap -> reassign to the big box" >&2
 fi
-[ "$fin" -lt "$c" ] && [ "$rc" != 124 ] && { [ "$fin" = 0 ] && status=failed || status=incomplete; }
+# NB: must not clobber mem_capped. A memory-capped run ALWAYS has fin < c, so the
+# unguarded version of this line overwrote every mem_capped with "incomplete" --
+# which made status=mem_capped unreachable and bin/reassign_capped.py a no-op.
+[ "$status" != mem_capped ] && [ "$fin" -lt "$c" ] && [ "$rc" != 124 ] && { [ "$fin" = 0 ] && status=failed || status=incomplete; }
 # A lossless fabric that overflowed is MIS-CONFIGURED, not a result: htsim only
 # warns and keeps the packet, so timings silently reflect a bigger buffer.
 [ "$stack" = ib ] && [ "${ov:-0}" -gt 0 ] 2>/dev/null && status=lossless_overflow

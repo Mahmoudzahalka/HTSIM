@@ -35,7 +35,12 @@ MACHINE="${MACHINE:-bigbox}"
 PARALLEL="${PARALLEL:-6}"
 HEAVY_MB="${HEAVY_MB:-1500}"
 LIGHT_MEM_GB="${LIGHT_MEM_GB:-10}"
-HEAVY_MEM_GB="${HEAVY_MEM_GB:-40}"
+HEAVY_MEM_GB="${HEAVY_MEM_GB:-75}"
+# HEAVY_PARALLEL (added 2026-09-28): the heavy phase was hardcoded -P1. That is right
+# when a heavy job can reach 60+ GB, but the retry set's measured peaks are all under
+# 8 GB, so serialising it wasted hours. Invariant is the same as the light phase:
+#       HEAVY_PARALLEL x HEAVY_MEM_GB <= usable RAM
+HEAVY_PARALLEL="${HEAVY_PARALLEL:-1}"
 PROG="$FID/sweep_${MACHINE}.progress.log"
 
 [ -f "$MAN" ] || { echo "no manifest at $MAN -- run bin/build_manifest.py first" >&2; exit 1; }
@@ -55,7 +60,7 @@ nl=$(wc -l < "$light"); nh=$(wc -l < "$heavy")
 
 echo "=== fidelity sweep [$MACHINE] $(date '+%F %T') ===" | tee -a "$PROG"
 echo "    light: $nl jobs at -P$PARALLEL (cap ${LIGHT_MEM_GB}GB each = $((PARALLEL*LIGHT_MEM_GB))GB worst case)" | tee -a "$PROG"
-echo "    heavy: $nh jobs serial (cap ${HEAVY_MEM_GB}GB)  threshold ${HEAVY_MB}MB" | tee -a "$PROG"
+echo "    heavy: $nh jobs at -P$HEAVY_PARALLEL (cap ${HEAVY_MEM_GB}GB each = $((HEAVY_PARALLEL*HEAVY_MEM_GB))GB worst case)  threshold ${HEAVY_MB}MB" | tee -a "$PROG"
 echo "    RAM available: $(free -g | awk '/^Mem:/{print $7}') GB" | tee -a "$PROG"
 echo "    workroot: $WORKROOT" | tee -a "$PROG"
 echo "    htsim   : $HTSIM_ROOT" | tee -a "$PROG"
@@ -76,7 +81,7 @@ fi
 if [ "$nh" -gt 0 ]; then
   echo "--- heavy phase (serial) $(date '+%T') ---" | tee -a "$PROG"
   PHASE_MEM_GB="$HEAVY_MEM_GB" export PHASE_MEM_GB
-  xargs -P 1 -I{} bash -c 'echo "{}" | runner' < "$heavy" 2>&1 | tee -a "$PROG"
+  xargs -P "$HEAVY_PARALLEL" -I{} bash -c 'echo "{}" | runner' < "$heavy" 2>&1 | tee -a "$PROG"
 fi
 rm -f "$light" "$heavy"
 

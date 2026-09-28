@@ -61,6 +61,12 @@ sim/datacenter/idmap.txt
 !**/experiments/runs/fidelityRuns/results/*.csv
 !**/experiments/runs/fidelityRuns/graphs/*.png
 
+# The packaged result set is a deliverable too: 197 KB holding all 1305 .row +
+# 1305 .urow, so the analysis can be run from a single download instead of a
+# 2610-file clone. `tar czf` here is byte-reproducible from identical input
+# (verified by md5), so re-packaging unchanged data adds no new blob.
+!**/experiments/runs/fidelityRuns/fidelity_results.tar.gz
+
 # stray wget output
 sim/wget-log
 
@@ -68,3 +74,14 @@ sim/wget-log
 # store a whole new copy in history.
 HTSIM_Project_Report.docx
 **/HTSIM_Project_Report.docx
+
+# Local backups taken while patching the harness mid-sweep (2026-09-28). Every
+# patched file is tracked, so git history already holds each previous version --
+# these copies exist only for quick local revert and must not enter the repo.
+**/experiments/runs/fidelityRuns/**/*.orig
+**/experiments/runs/fidelityRuns/**/*.bak-*
+**/experiments/runs/fidelityRuns/MANIFEST.csv.pre-*
+
+# Guard runtime log: operational noise, same category as *.progress.log above.
+# What ran and with what result is in the .row files and the results CSVs.
+**/experiments/runs/fidelityRuns/oom_guard.log

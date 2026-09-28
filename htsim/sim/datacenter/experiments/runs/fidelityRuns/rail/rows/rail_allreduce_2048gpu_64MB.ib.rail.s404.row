@@ -1,0 +1,1 @@
+rail,/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/fidelityRuns/matrices/rail/rail_allreduce_2048gpu_64MB.cm,allreduce_rail_aware,64,2048,61440,ib,rail,404,5,ok,640,774,61440,3249.8,18.5,848.8,2711.6,3249.8,262.016,0,0,0,0,0,0,0,0,0,32361,112294.0,165696,15.0790,2876.3438,4559.4531,0.1657,0

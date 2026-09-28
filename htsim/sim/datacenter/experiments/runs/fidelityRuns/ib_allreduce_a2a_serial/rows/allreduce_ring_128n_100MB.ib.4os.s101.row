@@ -1,0 +1,1 @@
+ib_allreduce_a2a_serial,/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/fidelityRuns/matrices/allreduce_ring/allreduce_ring_128n_100MB.cm,allreduce_ring,100,128,32640,ib,4os,101,2,ok,35646,5374,32640,3828220.0,2343.5,1876580.0,3728770.0,3828220.0,3264.000,0,0,0,0,0,0,0,0,0,605144,1822420.0,167744,938.2950,1864.6300,1914.1100,0.0433,0
