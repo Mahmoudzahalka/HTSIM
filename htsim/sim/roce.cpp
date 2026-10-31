@@ -35,6 +35,7 @@ RoceSrc::RoceSrc(RoceLogger* logger, TrafficLogger* pktlogger, EventList &eventl
 {
     _mss = Packet::data_packet_size();
     _end_trigger = NULL;
+    _qp_member = false;   // MULTI-QP
 
     _stop_time = 0;
     _flow_started = false;
@@ -205,7 +206,14 @@ void RoceSrc::processAck(const RoceAck& ack) {
         cout << "Src " << get_id() << " ackno " << ackno << endl;
 
     if (ackno * _mss >= _flow_size){
-        cout << "Flow " << _name << " " << get_id() << " finished at " << timeAsUs(eventlist().now()) << " total bytes " << ackno << endl;
+        // ORIGINAL (kept for easy revert):
+        // cout << "Flow " << _name << " " << get_id() << " finished at " << timeAsUs(eventlist().now()) << " total bytes " << ackno << endl;
+        // MULTI-QP: a QP of a split flow must not print "finished at" (the
+        // watchdog/flow_metrics count those per flow); its group prints it.
+        if (_qp_member)
+            cout << "QP " << _name << " " << get_id() << " done at " << timeAsUs(eventlist().now()) << " total bytes " << ackno << endl;
+        else
+            cout << "Flow " << _name << " " << get_id() << " finished at " << timeAsUs(eventlist().now()) << " total bytes " << ackno << endl;
         _done = true;
         if (_end_trigger) {
             _end_trigger->activate();
@@ -231,11 +239,17 @@ void RoceSrc::processPause(const EthPausePacket& p) {
     }
 }
 
-void RoceSrc::receivePacket(Packet& pkt) 
+void RoceSrc::receivePacket(Packet& pkt)
 {
     if (!_flow_started){
         assert(pkt.type()==ETH_PAUSE);
-        return; 
+        // BUGFIX(#11): free the PFC pause instead of leaking it. The host NIC
+        // queue broadcasts every pause/resume to ALL senders registered on the
+        // host, including flows that have not started yet; each one leaked a
+        // packet (~1.8 MB/flow on the 128n ring at -qps 4). The pause is ignored
+        // here either way, so results are unchanged -- only memory.
+        pkt.free();
+        return;
     }
 
     if (_stop_time && eventlist().now() >= _stop_time) {

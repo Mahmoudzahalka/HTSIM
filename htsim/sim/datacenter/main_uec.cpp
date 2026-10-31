@@ -116,6 +116,9 @@ int main(int argc, char **argv) {
     uint32_t ecn_high = 0;
     uint32_t queue_size_bdp_factor = 0;
     uint32_t topo_num_failed = 0;
+    double topo_failed_ratio = 0.25;   // DEGRADED-LINKS
+    bool topo_failed_bidir = false;    // DEGRADED-LINKS
+    bool topo_failed_keep_queue = false; // DEGRADED-LINKS
 
     bool receiver_driven = false;
     bool sender_driven = true;
@@ -443,6 +446,16 @@ int main(int argc, char **argv) {
             // number of failed links (failed to 25% linkspeed)
             topo_num_failed = atoi(argv[i+1]);
             i++;
+        } else if (!strcmp(argv[i],"-failed_ratio")){
+            // DEGRADED-LINKS: fraction of linkspeed a -failed link keeps (default 0.25)
+            topo_failed_ratio = atof(argv[i+1]);
+            i++;
+        } else if (!strcmp(argv[i],"-failed_bidir")){
+            // DEGRADED-LINKS: 3-tier only -- degrade both directions of a -failed link
+            topo_failed_bidir = true;
+        } else if (!strcmp(argv[i],"-failed_keep_queue")){
+            // DEGRADED-LINKS: do not shrink a -failed link's buffer by the ratio
+            topo_failed_keep_queue = true;
         } else if (!strcmp(argv[i],"-linkspeed")){
             // linkspeed specified is in Mbps
             linkspeed = speedFromMbps(atof(argv[i+1]));
@@ -735,6 +748,12 @@ int main(int argc, char **argv) {
 
     if (topo_num_failed > 0) {
         topo_cfg->set_failed_links(topo_num_failed);
+        // DEGRADED-LINKS
+        topo_cfg->set_failed_link_ratio(topo_failed_ratio);
+        topo_cfg->set_failed_bidir(topo_failed_bidir);
+        topo_cfg->set_failed_keep_queue(topo_failed_keep_queue);
+        cout << "DEGRADED_LINKS failed=" << topo_num_failed << " ratio=" << topo_failed_ratio
+             << " bidir=" << topo_failed_bidir << " keep_queue=" << topo_failed_keep_queue << endl;
     }
 
     if (topo_cfg->get_oversubscription_ratio() > 1 && !UecSrc::_sender_based_cc && !force_disable_oversubscribed_cc) {

@@ -1,0 +1,76 @@
+\relax 
+\citation{pfc}
+\citation{dcqcn}
+\citation{uec-spec,uec-design}
+\citation{ndp}
+\citation{ndp}
+\citation{rdma-scale}
+\citation{dcqcn}
+\citation{hedera}
+\citation{uec-spec,uec-design}
+\citation{spray,reps}
+\citation{ndp}
+\citation{reps}
+\citation{ndp}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Background}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Methodology}{1}{}\protected@file@percent }
+\newlabel{sec:method}{{III}{1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Simulator and stacks}{1}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces The two transport stacks. All other parameters are identical.}}{2}{}\protected@file@percent }
+\newlabel{tab:stacks}{{I}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Topologies}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Workloads}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Metrics and statistics}{2}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The rail-optimized cluster with NVLink (two of 128/256 servers shown; one leaf drawn per rail, 4 or 8 in the real cluster). Every GPU has two egress planes. A flow between GPUs of the same server is routed over the server's NVLink switch; any other flow uses the rail fabric, where GPU $k$ of every server attaches to a leaf of rail\nobreakspace  {}$k$. The flat control keeps the same switches but attaches whole servers to consecutive leaves.}}{2}{}\protected@file@percent }
+\newlabel{fig:railtopo}{{1}{2}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Workloads. $N$ = number of nodes, $S$ = flow size.}}{2}{}\protected@file@percent }
+\newlabel{tab:workloads}{{II}{2}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Results}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Speed on the flat fabric}{2}{}\protected@file@percent }
+\newlabel{sec:flat}{{\mbox  {IV-A}}{2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces RoCE/DCQCN makespan divided by UET makespan on the flat fat-tree (mean of 5 seeds). Values above 1 mean UET is faster. ``IB'' in the figure denotes RoCE/DCQCN. All 99 comparisons are significant (Welch $p{<}0.05$).}}{3}{}\protected@file@percent }
+\newlabel{fig:ratio}{{2}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The two currencies of congestion. Left: UET trim rate (\% of all transmissions) at 128 nodes. Right: RoCE/DCQCN cumulative PFC pause time at 1024 nodes. Mean $\pm $ 95\% CI over 5 seeds.}}{3}{}\protected@file@percent }
+\newlabel{fig:cost}{{3}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}What each stack pays}{3}{}\protected@file@percent }
+\newlabel{sec:cost}{{\mbox  {IV-B}}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Makespan on the 1024- and 2048-GPU clusters with NVLink: rail-optimized placement (solid) versus the shape-matched flat control (hatched), for both stacks. Left: rail-aware all-reduce. Right: rail-aware MoE all-to-all. Mean $\pm $ 95\% CI over 5 seeds. ``IB'' denotes RoCE/DCQCN.}}{4}{}\protected@file@percent }
+\newlabel{fig:railms}{{4}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Rail-optimized clusters with NVLink}{4}{}\protected@file@percent }
+\newlabel{sec:rail}{{\mbox  {IV-C}}{4}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Discussion and Limitations}{4}{}\protected@file@percent }
+\newlabel{sec:discussion}{{V}{4}}
+\citation{dcqcn}
+\citation{rdma-scale}
+\citation{hpcc}
+\citation{irn}
+\citation{ndp}
+\citation{spray}
+\citation{hedera}
+\citation{uec-spec,uec-design,reps}
+\citation{hoefler-ethernet}
+\citation{railonly}
+\bibstyle{IEEEtran}
+\bibdata{refs}
+\bibcite{pfc}{1}
+\bibcite{dcqcn}{2}
+\bibcite{uec-spec}{3}
+\bibcite{uec-design}{4}
+\bibcite{ndp}{5}
+\bibcite{rdma-scale}{6}
+\bibcite{hedera}{7}
+\bibcite{spray}{8}
+\bibcite{reps}{9}
+\bibcite{hpcc}{10}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Makespan change from rail-optimized placement relative to the shape-matched flat control (negative = rails faster). Filled markers are significant (Welch $p{<}0.05$). ``IB'' denotes RoCE/DCQCN.}}{5}{}\protected@file@percent }
+\newlabel{fig:rail}{{5}{5}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Future Work}{5}{}\protected@file@percent }
+\newlabel{sec:future}{{VI}{5}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Related Work}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Conclusion}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{5}{}\protected@file@percent }
+\bibcite{irn}{11}
+\bibcite{hoefler-ethernet}{12}
+\bibcite{railonly}{13}
+\gdef \@abspage@last{6}

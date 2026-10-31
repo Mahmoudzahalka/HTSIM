@@ -166,11 +166,14 @@ void DCQCNSrc::doNextEvent(){
         eventlist().sourceIsPendingRel(*this, _cc_update_period);
 }
 
-void DCQCNSrc::receivePacket(Packet& pkt) 
+void DCQCNSrc::receivePacket(Packet& pkt)
 {
     if (!_flow_started){
         assert(pkt.type()==ETH_PAUSE);
-        return; 
+        // BUGFIX(#11): free the PFC pause broadcast to a not-yet-started source
+        // instead of leaking it (see RoceSrc::receivePacket). Memory only.
+        pkt.free();
+        return;
     }
 
     if (_stop_time && eventlist().now() >= _stop_time) {

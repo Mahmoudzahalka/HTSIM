@@ -70,6 +70,21 @@ public:
         _num_failed_links = num_failed_links;
     }
 
+    // DEGRADED-LINKS study: severity of a degraded link (fraction of normal
+    // linkspeed; default 0.25 keeps the original -failed behaviour).
+    void set_failed_link_ratio(double ratio) {
+        assert(ratio > 0 && ratio <= 1);
+        _failed_link_ratio = ratio;
+    }
+    // DEGRADED-LINKS study: in 3-tier trees -failed only degrades the core->agg
+    // direction. When set, the matching agg->core uplink is degraded too, so a
+    // failed link behaves like a bad cable (both directions). Default off.
+    void set_failed_bidir(bool bidir) { _failed_bidir = bidir; }
+    // DEGRADED-LINKS study: keep the full switch buffer on a degraded link
+    // (a slow optic does not shrink the switch's memory). Default off = the
+    // original behaviour, which scales the buffer by _failed_link_ratio too.
+    void set_failed_keep_queue(bool keep) { _failed_keep_queue = keep; }
+
     void set_tiers(uint32_t tiers) { if(tiers!=0) _tiers = tiers;}
     uint32_t get_tiers() const { return _tiers; }
 
@@ -255,6 +270,8 @@ private:
     //failed links hack
     uint32_t _num_failed_links;
     double _failed_link_ratio;
+    bool _failed_bidir;
+    bool _failed_keep_queue;
 
     uint32_t _no_of_nodes;
     simtime_picosec _hop_latency,_switch_latency;

@@ -218,8 +218,10 @@ fidelityRuns/
   bigbox_bundle/          self-contained kit for the ~90 GB machine
 ```
 
-`<study>` ∈ `uet_perm_incast`, `uet_a2a_concurrent`, `uet_a2a_serial`,
-`uet_allreduce_ring`, `ib_perm_incast_a2a`, `ib_allreduce_a2a_serial`, `rail`.
+`<study>` ∈ `uet_perm_incast`, `uet_a2a_concurrent`, `uet_allreduce_ring`,
+`ib_perm_incast_a2a`, `ib_allreduce_a2a_serial` (now holds only IB ring all-reduce;
+the name is historical), `rail`. Serial all-to-all was dropped from the study on
+2026-09-29 as not representative of MoE traffic.
 
 Branch: `study/rail-optimized-nvlink` — the only branch carrying the DCQCN
 fixes, the SIGTERM/util finalisation fix, `-logtime_us`, and the rail/NVLink

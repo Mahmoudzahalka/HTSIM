@@ -193,3 +193,23 @@ PARALLEL=2 LIGHT_MEM_GB=40 bash bin/start_sweep.sh     # 2 x 40 GB = 80 GB
 Nothing else needs re-running, and no completed work is repeated. With the §8 fix in
 place, if 40 GB still is not enough these will now correctly report `mem_capped`
 rather than hiding as `incomplete`.
+
+
+---
+
+## Addendum (2026-09-29, analysis box) — serial all-to-all is now out of scope by decision
+
+§1 records the serial-a2a arms as dropped because their matrices were unrecoverable. Two
+corrections to that:
+
+- **The matrices were recoverable.** All three exist on the analysis box, both at
+  `/media/.../Data/a2a_128_1024/matrices/` and in `fidelityRuns/matrices/a2a_serial/`, with
+  md5s matching the originals. They never reached the big box only because
+  `.gitignore` excludes `fidelityRuns/matrices/` wholesale.
+- **It no longer matters.** Serial all-to-all has been dropped from the study deliberately,
+  as not representative of MoE traffic (each GPU sends to one peer at a time, in random order,
+  with 16-100 MB per pair). MoE is represented by the rail-aware MoE all-to-all instead.
+  `bin/build_manifest.py` now skips the serial arm, so a regenerated manifest will not re-add it.
+
+`ib_allreduce_a2a_serial` keeps its name: renaming it would orphan its 45 IB ring all-reduce
+rows. Treat the name as historical.

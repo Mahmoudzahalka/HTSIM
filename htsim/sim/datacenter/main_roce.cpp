@@ -56,6 +56,37 @@ EventList eventlist;
 static volatile sig_atomic_t g_roce_stop = 0;
 static void roce_handle_sigterm(int) { g_roce_stop = 1; }
 
+// MULTI-QP (-qps K): a fabric flow is split statically across K queue pairs,
+// NCCL_IB_QPS_PER_CONNECTION-style. Each QP is an ordinary RoceSrc/DCQCNSrc +
+// sink (own seq space, go-back-N, DCQCN state, PFC, own flow id -> own ECMP
+// hash). This group is every QP's end trigger: once all K are fully ACKed it
+// prints the single per-flow "finished at" line (so the watchdog and
+// flow_metrics.py see one line per connection, as with K=1) and fires the
+// connection's send_done_trigger once.
+class RoceQpGroup : public Trigger {
+public:
+    RoceQpGroup(EventList& eventlist, const string& name, Trigger* done_trigger)
+        : Trigger(eventlist, 0), _name(name), _done_trigger(done_trigger), _remaining(0) {}
+    void add_qp(RoceSrc* qp) { _qps.push_back(qp); _remaining++; }
+    virtual void activate() {
+        assert(_remaining > 0);
+        if (--_remaining > 0)
+            return;
+        uint64_t pkts = 0;   // same unit as the K=1 line: packets ACKed
+        for (size_t q = 0; q < _qps.size(); q++)
+            pkts += _qps[q]->_last_acked;
+        cout << "Flow " << _name << " " << _qps[0]->get_id() << " finished at " << timeAsUs(_eventlist.now())
+             << " total bytes " << pkts << " qps " << _qps.size() << endl;
+        if (_done_trigger)
+            _done_trigger->activate();
+    }
+private:
+    string _name;
+    Trigger* _done_trigger;
+    vector<RoceSrc*> _qps;
+    size_t _remaining;
+};
+
 void exit_error(char* progr) {
     cout << "Usage " << progr << " [-nodes N]\n\t[-q queue_size]\n\t[-queue_type composite|random|lossless|lossless_input|]\n\t[-tm traffic_matrix_file]\n\t[-strat route_strategy (single,\n\tecmp_host,ecmp_ar,\n\tecmp_host_ar ar_thresh)]\n\t[-log log_level]\n\t[-seed random_seed]\n\t[-end end_time_in_usec]\n\t[-mtu MTU]\n\t[-hop_latency x] per hop wire latency in us,default 1\n\t[-switch_latency x] switching latency in us, default 0\n\t[-start_delta] time in us to randomly delay the start of connections\n\t[-pfc_thresholds low high]" << endl;
     exit(1);
@@ -98,6 +129,9 @@ int main(int argc, char **argv) {
     int seed = 13;
     int i = 1;
     uint32_t topo_num_failed = 0;
+    double topo_failed_ratio = 0.25;   // DEGRADED-LINKS
+    bool topo_failed_bidir = false;    // DEGRADED-LINKS
+    bool topo_failed_keep_queue = false; // DEGRADED-LINKS
     filename << "logout.dat";
     int end_time = 1000;//in microseconds
 
@@ -116,6 +150,8 @@ int main(int argc, char **argv) {
     // a topology without "Rails N" (e.g. the flat control). Defaults to the main
     // topology's rails() when that is set.
     uint32_t gpus_per_server = 0;
+    // MULTI-QP: queue pairs per fabric flow (1 = original single-QP behaviour)
+    uint32_t qps_per_flow = 1;
 
     while (i<argc) {
         if (!strcmp(argv[i],"-o")) {
@@ -139,6 +175,16 @@ int main(int argc, char **argv) {
             // number of failed links (failed to 25% linkspeed)
             topo_num_failed = atoi(argv[i+1]);
             i++;
+        } else if (!strcmp(argv[i],"-failed_ratio")){
+            // DEGRADED-LINKS: fraction of linkspeed a -failed link keeps (default 0.25)
+            topo_failed_ratio = atof(argv[i+1]);
+            i++;
+        } else if (!strcmp(argv[i],"-failed_bidir")){
+            // DEGRADED-LINKS: 3-tier only -- degrade both directions of a -failed link
+            topo_failed_bidir = true;
+        } else if (!strcmp(argv[i],"-failed_keep_queue")){
+            // DEGRADED-LINKS: do not shrink a -failed link's buffer by the ratio
+            topo_failed_keep_queue = true;
         } else if (!strcmp(argv[i],"-tiers")) {
             tiers = atoi(argv[i+1]);
             cout << "tiers "<< tiers << endl;
@@ -251,6 +297,15 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[i],"-paths")){
             path_entropy_size = atoi(argv[i+1]);
             cout << "no of paths " << path_entropy_size << endl;
+            i++;
+        } else if (!strcmp(argv[i],"-qps")){
+            // MULTI-QP: split each fabric flow statically across K queue pairs
+            qps_per_flow = atoi(argv[i+1]);
+            if (qps_per_flow < 1) {
+                cerr << "-qps must be >= 1" << endl;
+                exit(1);
+            }
+            cout << "Queue pairs per flow " << qps_per_flow << endl;
             i++;
         } else if (!strcmp(argv[i],"-hop_latency")){
             hop_latency = timeFromUs(atof(argv[i+1]));
@@ -461,6 +516,12 @@ int main(int argc, char **argv) {
 
     if (topo_num_failed > 0) {
         topo_cfg->set_failed_links(topo_num_failed);
+        // DEGRADED-LINKS
+        topo_cfg->set_failed_link_ratio(topo_failed_ratio);
+        topo_cfg->set_failed_bidir(topo_failed_bidir);
+        topo_cfg->set_failed_keep_queue(topo_failed_keep_queue);
+        cout << "DEGRADED_LINKS failed=" << topo_num_failed << " ratio=" << topo_failed_ratio
+             << " bidir=" << topo_failed_bidir << " keep_queue=" << topo_failed_keep_queue << endl;
     }
 
     top = make_unique<FatTreeTopology>(topo_cfg.get(), qlf, &eventlist, nullptr);
@@ -624,6 +685,38 @@ int main(int argc, char **argv) {
         FatTreeTopologyCfg* fcfg  = same_server ? nvlink_cfg.get() : topo_cfg.get();
         linkspeed_bps       frate = same_server ? nvlink_linkspeed : linkspeed;
 
+        // --- MULTI-QP static split (-qps K) ---------------------------------
+        // Only fabric flows with a finite size are split (NVLink flows never use
+        // IB QPs). The flow is cut on MTU boundaries: P = ceil(size/mss) packets,
+        // each QP gets floor(P/K) packets and the first P%K get one more; the
+        // last QP takes the byte remainder (incl. any partial final packet), so
+        // per-QP sizes sum to exactly crt->size. Never more QPs than packets.
+        // Every QP starts at the full line rate (frate); DCQCN adapts each one
+        // independently and the host NIC queue serialises them at line rate.
+        uint32_t nqp = 1;
+        uint64_t qp_mss = Packet::data_packet_size();
+        uint64_t qp_pkts_total = 0;
+        if (qps_per_flow > 1 && !same_server && crt->size > 0) {
+            qp_pkts_total = (crt->size + qp_mss - 1) / qp_mss;
+            nqp = (uint32_t)min((uint64_t)qps_per_flow, qp_pkts_total);
+        }
+        RoceQpGroup* qp_group = NULL;
+        if (nqp > 1) {
+            Trigger* done_trig = crt->send_done_trigger ? conns->getTrigger(crt->send_done_trigger, eventlist) : NULL;
+            qp_group = new RoceQpGroup(eventlist, "Roce_" + ntoa(src) + "_" + ntoa(dest), done_trig);
+            if (crt->trigger && dynamic_cast<MultiShotTrigger*>(conns->getTrigger(crt->trigger, eventlist))) {
+                // a multishot start trigger activates one target per firing, so it
+                // would start only one of the K QPs
+                cerr << "-qps > 1 does not support multishot start triggers (connection "
+                     << src << "->" << dest << ")" << endl;
+                exit(1);
+            }
+        }
+        uint64_t qp_bytes_assigned = 0;
+        // NOTE: the per-QP body below is the original single-connection body,
+        // deliberately not re-indented so the diff stays small and revertable.
+        for (uint32_t q = 0; q < nqp; q++) {
+
         if (dcqcn)
             roceSrc = new DCQCNSrc(NULL, NULL, eventlist,frate);
         else
@@ -632,21 +725,52 @@ int main(int argc, char **argv) {
         roce_srcs.push_back(roceSrc);
         roceSrc->set_dst(dest);
                         
-        if (crt->size>0){
+        // ORIGINAL (kept for easy revert):
+        // if (crt->size>0){
+        //     roceSrc->set_flowsize(crt->size);
+        // }
+        if (qp_group) {
+            // MULTI-QP: this QP's share of the flow (see split rule above)
+            uint64_t qp_bytes;
+            if (q < nqp - 1) {
+                uint64_t qp_pkts = qp_pkts_total / nqp + (q < qp_pkts_total % nqp ? 1 : 0);
+                qp_bytes = qp_pkts * qp_mss;
+            } else {
+                qp_bytes = crt->size - qp_bytes_assigned;
+            }
+            assert(qp_bytes > 0);
+            qp_bytes_assigned += qp_bytes;
+            roceSrc->set_flowsize(qp_bytes);
+            cout << "QP " << q << "/" << nqp << " of " << src << "->" << dest << " size " << qp_bytes << endl;
+        } else if (crt->size>0){
             roceSrc->set_flowsize(crt->size);
         }
 
-        if (crt->flowid) {
+        // ORIGINAL (kept for easy revert):
+        // if (crt->flowid) {
+        // MULTI-QP: only QP 0 takes the matrix flow id; the others keep their
+        // auto-assigned ids (>= FLOW_ID_DYNAMIC_BASE, so never clash). Distinct
+        // ids are required: ToRs deliver to the sink by flow id, and they give
+        // each QP its own ECMP hash.
+        if (crt->flowid && q == 0) {
             roceSrc->set_flowid(crt->flowid);
             assert(flowmap.find(crt->flowid) == flowmap.end()); // don't have dups
             flowmap[crt->flowid] = roceSrc;
         }
 
+        // MULTI-QP: all K QPs are targets of the start trigger, so they start together
         if (crt->trigger) {
             Trigger* trig = conns->getTrigger(crt->trigger, eventlist);
             trig->add_target(*roceSrc);
         }
-        if (crt->send_done_trigger) {
+        // ORIGINAL (kept for easy revert):
+        // if (crt->send_done_trigger) {
+        if (qp_group) {
+            // MULTI-QP: the group fires send_done_trigger once all QPs are done
+            roceSrc->_qp_member = true;
+            roceSrc->set_end_trigger(*qp_group);
+            qp_group->add_qp(roceSrc);
+        } else if (crt->send_done_trigger) {
             Trigger* trig = conns->getTrigger(crt->send_done_trigger, eventlist);
             roceSrc->set_end_trigger(*trig);
         }
@@ -657,13 +781,19 @@ int main(int argc, char **argv) {
             roceSnk = new RoceSink();
         
                         
-        roceSrc->setName("Roce_" + ntoa(src) + "_" + ntoa(dest));
+        // ORIGINAL (kept for easy revert):
+        // roceSrc->setName("Roce_" + ntoa(src) + "_" + ntoa(dest));
+        // MULTI-QP: QPs of a split flow get a "_qp<q>" suffix
+        string qp_suffix = qp_group ? "_qp" + ntoa(q) : "";
+        roceSrc->setName("Roce_" + ntoa(src) + "_" + ntoa(dest) + qp_suffix);
 
         logfile.writeName(*roceSrc);
 
         roceSnk->set_src(src);
-                        
-        roceSnk->setName("Roce_sink_" + ntoa(src) + "_" + ntoa(dest));
+
+        // ORIGINAL (kept for easy revert):
+        // roceSnk->setName("Roce_sink_" + ntoa(src) + "_" + ntoa(dest));
+        roceSnk->setName("Roce_sink_" + ntoa(src) + "_" + ntoa(dest) + qp_suffix);
         logfile.writeName(*roceSnk);
                         
         ((HostQueue*)ftop->queues_ns_nlp[src][fcfg->HOST_POD_SWITCH(src)][0])->addHostSender(roceSrc);
@@ -683,7 +813,10 @@ int main(int argc, char **argv) {
             dsttotor->push_back(ftop->queues_ns_nlp[dest][fcfg->HOST_POD_SWITCH(dest)][0]->getRemoteEndpoint());
 
 
-            if (crt->start != TRIGGER_START && start_delta > 0){
+            // ORIGINAL (kept for easy revert):
+            // if (crt->start != TRIGGER_START && start_delta > 0){
+            // MULTI-QP: jitter the connection start once, not once per QP
+            if (q == 0 && crt->start != TRIGGER_START && start_delta > 0){
                 crt->start += timeFromUs(drand48()*start_delta);
                 cout << "Start is " << timeAsUs(crt->start) << endl;
             }
@@ -703,6 +836,13 @@ int main(int argc, char **argv) {
             routein->add_endpoints(roceSnk, roceSrc);
             roceSrc->connect(routeout, routein, *roceSnk, timeFromUs((uint32_t)rand()%20));
         }
+
+        // MULTI-QP: monitor every QP's sink (originally done once, below)
+        if (log_sink) {
+            sinkLogger.monitorSink(roceSnk);
+        }
+        } // MULTI-QP: end of per-QP loop
+        assert(!qp_group || qp_bytes_assigned == crt->size);
 
         path_refcounts[src][dest]--;
         path_refcounts[dest][src]--;
@@ -727,9 +867,10 @@ int main(int argc, char **argv) {
             delete net_paths[dest][src];
         }
 
-        if (log_sink) {
-            sinkLogger.monitorSink(roceSnk);
-        }
+        // ORIGINAL (kept for easy revert; moved into the per-QP loop above):
+        // if (log_sink) {
+        //     sinkLogger.monitorSink(roceSnk);
+        // }
     }
 
     for (size_t ix = 0; ix < no_of_nodes; ix++) {

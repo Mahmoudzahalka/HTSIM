@@ -117,7 +117,12 @@ public:
     void log_me();
     bool _log_me;
 
-    static uint32_t _global_node_count; 
+    // MULTI-QP: true when this source is one of K QPs carrying a split flow
+    // (main_roce -qps K). Its completion then prints "QP ... done at" instead
+    // of "Flow ... finished at"; the per-flow line comes from the QP group.
+    bool _qp_member;
+
+    static uint32_t _global_node_count;
     static uint32_t _global_rto_count;  // keep track of the total number of timeouts across all srcs
     static simtime_picosec _min_rto;
 

@@ -102,6 +102,8 @@ FatTreeTopologyCfg::FatTreeTopologyCfg(queue_type q, queue_type snd):
                         _ecn_high(0),
                         _num_failed_links(0),
                         _failed_link_ratio(0.25),
+                        _failed_bidir(false),
+                        _failed_keep_queue(false),
                         _no_of_nodes(0),
                         _hop_latency(0),
                         _switch_latency(0),
@@ -1045,7 +1047,17 @@ FatTreeTopology::FatTreeTopology(const FatTreeTopologyCfg* cfg,
                         queueLogger = NULL;
                     }
                     assert(queues_nup_nc[agg][core][b] == NULL);
-                    queues_nup_nc[agg][core][b] = alloc_queue(queueLogger, _cfg->_queue_up[AGG_TIER], UPLINK, AGG_TIER);
+                    // ORIGINAL (kept for easy revert):
+                    // queues_nup_nc[agg][core][b] = alloc_queue(queueLogger, _cfg->_queue_up[AGG_TIER], UPLINK, AGG_TIER);
+                    // DEGRADED-LINKS: with -failed_bidir, degrade the uplink of the same
+                    // link the core->agg downlink failure below selects. Uplinks take the
+                    // tier above's speed, hence _downlink_speeds[CORE_TIER].
+                    if (_cfg->_failed_bidir && (l+agg*_cfg->_agg_switches_per_pod)<_cfg->_num_failed_links){
+                        queues_nup_nc[agg][core][b] = alloc_queue(queueLogger, _cfg->_downlink_speeds[CORE_TIER], _cfg->_queue_up[AGG_TIER], UPLINK, AGG_TIER, false, true);
+                        cout << "Failure: US" + ntoa(agg) + "->CS" + ntoa(core) + "(" + ntoa(b) + ") linkspeed set to " << speedAsGbps(_cfg->_downlink_speeds[CORE_TIER] * _cfg->_failed_link_ratio) << endl;
+                    } else {
+                        queues_nup_nc[agg][core][b] = alloc_queue(queueLogger, _cfg->_queue_up[AGG_TIER], UPLINK, AGG_TIER);
+                    }
                     queues_nup_nc[agg][core][b]->setName("US" + ntoa(agg) + "->CS" + ntoa(core) + "(" + ntoa(b) + ")");
                     //cout << queues_nup_nc[agg][core][b]->str() << endl;
                     //if (logfile) logfile->writeName(*(queues_nup_nc[agg][core]));
@@ -1065,6 +1077,7 @@ FatTreeTopology::FatTreeTopology(const FatTreeTopologyCfg* cfg,
                     if ((l+agg*_cfg->_agg_switches_per_pod)<_cfg->_num_failed_links){
                         queues_nc_nup[core][agg][b] = alloc_queue(queueLogger, _cfg->_downlink_speeds[CORE_TIER], _cfg->_queue_down[CORE_TIER], DOWNLINK, CORE_TIER, false,true);
                         cout << "Adding link failure for agg_sw " << ntoa(agg) << " l " << ntoa(l) << " b " << ntoa(b) << endl;
+                        cout << "Failure: CS" + ntoa(core) + "->US" + ntoa(agg) + "(" + ntoa(b) + ") linkspeed set to " << speedAsGbps(_cfg->_downlink_speeds[CORE_TIER] * _cfg->_failed_link_ratio) << endl;
                     } else {
                         queues_nc_nup[core][agg][b] = alloc_queue(queueLogger, _cfg->_queue_down[CORE_TIER], DOWNLINK, CORE_TIER);
                     }
@@ -1225,7 +1238,11 @@ FatTreeTopology::alloc_queue(QueueLogger* queueLogger, linkspeed_bps speed, cons
     
     if (reduced_speed){
         speed = speed * _cfg->_failed_link_ratio;
-        queuesize = queuesize * _cfg->_failed_link_ratio;
+        // ORIGINAL (kept for easy revert):
+        // queuesize = queuesize * _cfg->_failed_link_ratio;
+        // DEGRADED-LINKS: -failed_keep_queue leaves the buffer at full size.
+        if (!_cfg->_failed_keep_queue)
+            queuesize = queuesize * _cfg->_failed_link_ratio;
     }
 
     switch (_cfg->_qt) {

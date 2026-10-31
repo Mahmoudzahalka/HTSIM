@@ -27,7 +27,9 @@ FID  = os.path.join(RUNS, "fidelityRuns")
 SOURCES = [
     ("uet_perm_incast",          "uet/perm_incast_128_1024/results_combined.csv",        "uet", "uet/perm_incast_128_1024/matrices",     "fine"),
     ("uet_a2a_concurrent",       "uet/a2a_concurrent_128_1024/results_combined.csv",     "uet", "uet/a2a_concurrent_128_1024/matrices",  "fine"),
-    ("uet_a2a_serial",           "uet/a2a_serial_128_1024/results_combined.csv",         "uet", "@SERIAL",                               "fine"),
+    # DROPPED 2026-09-29: serial all-to-all is out of scope (not representative of MoE;
+    # MoE is covered by the rail-aware MoE all-to-all). Kept commented for easy revert.
+    # ("uet_a2a_serial",           "uet/a2a_serial_128_1024/results_combined.csv",         "uet", "@SERIAL",                               "fine"),
     ("uet_allreduce_ring",       "uet/allreduce_ring_128/results_combined.csv",          "uet", "uet/allreduce_ring_128/matrices",       "fine"),
     ("ib_perm_incast_a2a",       "ib_dcqcn/perm_incast_a2a_128_1024/results_ib.csv",     "ib",  "@IBMAIN",                               "ib_coarse"),
     ("ib_allreduce_a2a_serial",  "ib_dcqcn/allreduce_a2a_serial_128/results_ib_parity.csv","ib", "@IBPARITY",                             "all_coarse"),
@@ -143,6 +145,8 @@ def main():
             wl = x.get("workload") or re.sub(r'_\d+n_\d+MB$', '', base)
             if wl == "a2a":
                 wl = "a2a_serial" if "serial" in study else "a2a_concurrent"
+            if wl == "a2a_serial":        # DROPPED 2026-09-29 -- see the SOURCES note above
+                continue
             qs = qsize_for(stack, nodes, base)
             est = estimate_mb(conns, int(szm.group(1)) if szm else 0, nodes, stack, qs)
             if pinned_bigbox(wl, nodes, int(szm.group(1)) if szm else 0):

@@ -29,8 +29,7 @@ Seven study arms, all in one manifest:
 | `rail` | 240 | rail-aware all-reduce + MoE all-to-all, rail vs flat, 1024 + 2048 |
 | `uet_allreduce_ring` | 45 | ring all-reduce |
 | `uet_a2a_concurrent` | 45 | concurrent all-to-all |
-| `uet_a2a_serial` | 45 | serial-triggered all-to-all |
-| `ib_allreduce_a2a_serial` | 90 | IB parity arm |
+| `ib_allreduce_a2a_serial` | 45 | IB ring all-reduce (the arm's name is historical — its serial a2a half was dropped) |
 
 **Runtime.** The manifest's `orig_wall_s` totals **929 h serial**, but those are
 *200 G* timings — at 400 G runs are 1.5–3x faster, so expect roughly **400–600 h
