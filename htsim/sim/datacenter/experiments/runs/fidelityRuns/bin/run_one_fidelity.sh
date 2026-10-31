@@ -155,10 +155,28 @@ case "$topo_kind" in
 esac
 [ -f "$TOPO" ] || { echo "missing topo $TOPO" >&2; exit 2; }
 
-tag="${base}.${stack}.${topo_kind}.s${seed}"
-log="$FID/$study/logs/${tag}.log"
-row="$FID/$study/rows/${tag}.row"
-urow="$FID/$study/util_rows/${tag}.urow"
+# ---- ABLATION HOOKS (added 2026-10-31, ablationMultipath/) -------------------
+# All three default to empty/FID, which reproduces the fidelity behaviour exactly
+# (same command line, same tag, same output paths).
+#   ARM       label appended to the tag, e.g. qp4 / ecmp (keeps work dirs and
+#             rows of different arms of the same cell apart)
+#   ARM_ARGS  extra htsim flags for this arm, e.g. "-qps 4" (RoCE) or
+#             "-load_balancing_algo ecmp" (UET); word-split on purpose
+#   OUTROOT   directory that holds <study>/{rows,logs,util_rows}
+ARM="${ARM:-}"
+ARM_ARGS="${ARM_ARGS:-}"
+OUTROOT="${OUTROOT:-$FID}"
+mkdir -p "$OUTROOT/$study/logs" "$OUTROOT/$study/rows" "$OUTROOT/$study/util_rows"
+
+# ORIGINAL (kept for easy revert):
+# tag="${base}.${stack}.${topo_kind}.s${seed}"
+# log="$FID/$study/logs/${tag}.log"
+# row="$FID/$study/rows/${tag}.row"
+# urow="$FID/$study/util_rows/${tag}.urow"
+tag="${base}.${stack}.${topo_kind}.s${seed}${ARM:+.$ARM}"
+log="$OUTROOT/$study/logs/${tag}.log"
+row="$OUTROOT/$study/rows/${tag}.row"
+urow="$OUTROOT/$study/util_rows/${tag}.urow"
 
 # ---- resume guard: a completed run is never repeated ------------------------
 if [ -s "$row" ] && awk -F, '$11=="ok"{ok=1}END{exit !ok}' "$row" 2>/dev/null; then
@@ -178,14 +196,16 @@ if [ "$stack" = ib ]; then
       -linkspeed "$FABRIC_MBPS" -strat ecmp_host -paths "$PATHS" \
       -queue_type lossless_input -pfc_thresholds 12 15 -q "$QSIZE" \
       -dcqcn "$DCQCN_K" -end 600000000 -logtime_us "$LOGTIME_US" \
-      -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw" 2>&1 &
+      -log tor_downqueue -log tor_upqueue -o "$work/util.bin" $ARM_ARGS ) > "$raw" 2>&1 &
+      # ABLATION: $ARM_ARGS appended above (empty for the fidelity study)
 else
   MSS=4150
   ( cd "$work" && { [ "$MEM_CAP_GB" -gt 0 ] && ulimit -v $((MEM_CAP_GB*1024*1024)); }
     exec timeout "$TIMEOUT" "$UEC_BIN" \
       -tm "$matrix" -sender_cc_only -nodes "$n" -topo "$TOPO" $NV -seed "$seed" \
       -linkspeed "$FABRIC_MBPS" -end 600000 -logtime_us "$LOGTIME_US" \
-      -log tor_downqueue -log tor_upqueue -o "$work/util.bin" ) > "$raw" 2>&1 &
+      -log tor_downqueue -log tor_upqueue -o "$work/util.bin" $ARM_ARGS ) > "$raw" 2>&1 &
+      # ABLATION: $ARM_ARGS appended above (empty for the fidelity study)
 fi
 pid=$!
 
