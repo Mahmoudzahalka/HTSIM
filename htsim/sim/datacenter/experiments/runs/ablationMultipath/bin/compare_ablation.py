@@ -47,7 +47,9 @@ def main():
         if len(parts) != len(COLS):
             print(f"  !! {os.path.basename(p)}: {len(parts)} fields -- skipped", file=sys.stderr); continue
         r = dict(zip(COLS, parts))
-        arm = r["study"].split("_")[-1]                       # abl_ib_qp4 -> qp4
+        if r["workload"] == "a2a":                           # runner relabels a2a only for fidelity study names
+            r["workload"] = "a2a_concurrent"
+        arm =r["study"].split("_")[-1]                       # abl_ib_qp4 -> qp4
         runs[(r["workload"], r["size_MB"], r["nodes"], r["seed"])][(r["stack"], arm)] = r
     if not runs:
         print("no ablation rows yet"); return

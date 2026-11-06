@@ -10,9 +10,11 @@ baseline row in fidelityRuns/results/runs_all.csv.
          uet -> ecmp            (-load_balancing_algo ecmp: one path per flow)
   scope  topo_kind == 1os only, fabric fat tree only (no rail/flat/NVLink)
 
-usage: build_ablation_manifest.py [--seeds 13,101,202,303,404] [--include-uet-ring-large]
+usage: build_ablation_manifest.py [--seeds 13,101,202,303,404] [--sizes 16,64,100]
+                                  [--include-uet-ring-large]
 
   seeds  default = the 5 fidelity seeds; the pilot phase is seed 13 only
+  sizes  default = all three fidelity sizes (MB)
 """
 import argparse, csv, os, sys
 
@@ -39,16 +41,19 @@ HEAVY_WORKLOADS = {"allreduce_ring", "a2a_concurrent"}   # hours-long, GB-scale
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", default="13,101,202,303,404")
+    ap.add_argument("--sizes", default="16,64,100")
     ap.add_argument("--include-uet-ring-large", action="store_true",
                     help="keep UET allreduce_ring 64/100 MB (dropped from the fidelity "
                          "study, so they have NO spray baseline)")
     a = ap.parse_args()
     seeds = {s.strip() for s in a.seeds.split(",") if s.strip()}
+    sizes = {s.strip() for s in a.sizes.split(",") if s.strip()}
 
     out_rows, missing = [], []
     with open(os.path.join(FID, "MANIFEST.csv")) as f:
         for r in csv.DictReader(f):
-            if r["topo_kind"] != "1os" or r["seed"] not in seeds or r["stack"] not in ARMS:
+            if (r["topo_kind"] != "1os" or r["seed"] not in seeds or r["size_MB"] not in sizes
+                    or r["stack"] not in ARMS):
                 continue
             if (r["stack"] == "uet" and r["workload"] == "allreduce_ring"
                     and r["size_MB"] in ("64", "100") and not a.include_uet_ring_large):
@@ -79,7 +84,7 @@ def main():
         w = csv.DictWriter(f, fieldnames=cols); w.writeheader(); w.writerows(out_rows)
 
     from collections import Counter
-    print(f"wrote {len(out_rows)} jobs to {os.path.join(ABL, 'MANIFEST.csv')}  (seeds {','.join(sorted(seeds, key=int))})")
+    print(f"wrote {len(out_rows)} jobs to {os.path.join(ABL, 'MANIFEST.csv')}  (seeds {','.join(sorted(seeds, key=int))}; sizes {','.join(sorted(sizes, key=int))} MB)")
     for k, v in sorted(Counter((r["phase"], r["study"]) for r in out_rows).items()):
         print(f"  {k[0]:5s} {k[1]:14s} {v}")
 

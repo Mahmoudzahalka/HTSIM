@@ -1,0 +1,1 @@
+abl_uet_ecmp,/csl/mahmoud.za/HTSIM/htsim/sim/datacenter/experiments/runs/fidelityRuns/../uet/perm_incast_128_1024/matrices/allreduce_ring_128n_16MB.cm,allreduce_ring,16,128,32640,uet,1os,303,4,ok,2949,1134,32640,241402.0,331.0,115171.0,229948.0,241402.0,522.240,127818240,1955617,2,0,86848975,1955612,0,0,3,0,0,0,359.9294,718.5589,754.3447,0.0560,0
