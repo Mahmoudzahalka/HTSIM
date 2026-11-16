@@ -1,0 +1,100 @@
+\relax 
+\citation{pfc}
+\citation{dcqcn}
+\citation{uec-spec,uec-design}
+\citation{ndp}
+\citation{ndp}
+\citation{rdma-scale}
+\citation{dcqcn}
+\citation{hedera}
+\citation{uec-spec,uec-design}
+\citation{spray,reps}
+\citation{ndp}
+\citation{reps}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Background}{1}{}\protected@file@percent }
+\citation{ndp}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces The two transport stacks. All other parameters are identical.}}{2}{}\protected@file@percent }
+\newlabel{tab:stacks}{{I}{2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The 128-node, three-tier full-bisection fat-tree (two of eight pods drawn). Each ToR has as many uplinks as hosts, and any two pods are joined by 16 paths. The 1024-node tree has the same structure with 16 pods of 64 hosts, 8 switches per tier per pod, 64 core switches and 64 inter-pod paths.}}{2}{}\protected@file@percent }
+\newlabel{fig:fattree}{{1}{2}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Methodology}{2}{}\protected@file@percent }
+\newlabel{sec:method}{{III}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Simulator and stacks}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Topologies}{2}{}\protected@file@percent }
+\newlabel{sec:topo}{{\mbox  {III-B}}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Workloads}{2}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Workloads. $N$ = number of nodes, $S$ = flow size.}}{2}{}\protected@file@percent }
+\newlabel{tab:workloads}{{II}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Metrics and statistics}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Results on the Flat Fat-Tree}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Speed on the flat fat-tree}{2}{}\protected@file@percent }
+\newlabel{sec:flat}{{\mbox  {IV-A}}{2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The traffic patterns, drawn for eight nodes (the real runs use 128 or 1024 nodes, and 1024 or 2048 GPUs for the rail-aware collectives). The orange node is the incast receiver. In OutInc the incast senders also fan out to other nodes (pink). In the rail-aware collectives, orange arrows are NVLink phases inside a server and blue arrows are rail-local phases between GPUs on the same rail; no flow crosses rails.}}{3}{}\protected@file@percent }
+\newlabel{fig:workloads}{{2}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces RoCE/DCQCN makespan divided by UET makespan on the full-bisection fat-tree (mean of 5 seeds; row label = pattern $\cdot $ nodes). Values above 1 mean UET is faster. All 34 differences are significant (Welch $p{<}0.05$). --- = not run (memory budget).}}{3}{}\protected@file@percent }
+\newlabel{fig:ratio}{{3}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The two currencies of congestion. Left: UET trim rate (\% of all transmissions). Right: RoCE/DCQCN cumulative PFC pause time summed over all ports (log scale). Mean $\pm $ 95\% CI over 5 seeds; row = pattern $\cdot $ nodes.}}{3}{}\protected@file@percent }
+\newlabel{fig:cost}{{4}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}What each stack pays}{3}{}\protected@file@percent }
+\newlabel{sec:cost}{{\mbox  {IV-B}}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Mean link utilization per tier and direction, 128 nodes, 16\,MB flows (mean of 5 seeds).}}{4}{}\protected@file@percent }
+\newlabel{fig:util}{{5}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces The two-plane GPU cluster (two of 128/256 servers shown). Every GPU has two egress planes: a flow between GPUs of the same server uses the server's NVLink switch, any other flow uses the 400\,Gb/s fabric, where GPU $k$ of every server attaches to a leaf of rail\nobreakspace  {}$k$ (one leaf per rail drawn; 4 or 8 in the real cluster).}}{4}{}\protected@file@percent }
+\newlabel{fig:railtopo}{{6}{4}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Rail-Optimized GPU Clusters with NVLink}{4}{}\protected@file@percent }
+\newlabel{sec:rail}{{V}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Cluster and NVLink model}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Rail-aware collectives}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Rails help both transports}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}RoCE/DCQCN versus UET on the cluster}{4}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Makespan on the 1024- and 2048-GPU clusters with NVLink: rail placement (solid) next to flat placement (hatched), for both stacks. Left: rail-aware all-reduce. Right: rail-aware MoE all-to-all. Mean $\pm $ 95\% CI over 5 seeds.}}{5}{}\protected@file@percent }
+\newlabel{fig:railms}{{7}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Makespan change from rail placement relative to flat placement (negative = rails faster). Filled markers are significant (Welch $p{<}0.05$); faint dots are individual seeds.}}{5}{}\protected@file@percent }
+\newlabel{fig:rail}{{8}{5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-E}}What rails save, and how cost scales}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Multipath Ablation: Spraying versus Transport}{5}{}\protected@file@percent }
+\newlabel{sec:ablation}{{VI}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Congestion cost of rail-aware MoE all-to-all, rail placement (solid, value labelled) next to flat placement (hatched). Left: RoCE/DCQCN cumulative PFC pause time. Right: UET retransmitted packets. Mean $\pm $ 95\% CI over 5 seeds.}}{6}{}\protected@file@percent }
+\newlabel{fig:railcost}{{9}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces RoCE/DCQCN makespan divided by UET makespan on the GPU cluster, rail placement (filled) and flat placement (hollow); AR = rail-aware all-reduce, MoE = rail-aware MoE all-to-all, then GPUs and size. Values above 1 mean UET is faster. Mean $\pm $ propagated 95\% CI over 5 seeds.}}{6}{}\protected@file@percent }
+\newlabel{fig:railratio}{{10}{6}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Discussion and Limitations}{6}{}\protected@file@percent }
+\newlabel{sec:discussion}{{VII}{6}}
+\citation{dcqcn}
+\citation{rdma-scale}
+\citation{hpcc}
+\citation{irn}
+\citation{ndp}
+\citation{spray}
+\citation{hedera}
+\citation{uec-spec,uec-design,reps}
+\citation{hoefler-ethernet}
+\citation{railonly}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Multipath ablation at 16\,MB: makespan of every arm, normalized to UET with spraying (log scale; mean $\pm $ 95\% CI over 5 seeds). Blue: RoCE/DCQCN with 1, 2, 4 and 8 QPs per flow. Hatched orange: UET on a single ECMP path.}}{7}{}\protected@file@percent }
+\newlabel{fig:abl}{{11}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Decomposition of the RoCE/DCQCN-to-UET gap at 16\,MB on a log scale: transport, measured with both stacks on a single path (RoCE 1 QP vs.\ UET single-path), and spraying, measured within UET (single-path vs.\ spraying). The two segments multiply to the total.}}{7}{}\protected@file@percent }
+\newlabel{fig:decomp}{{12}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces RoCE/DCQCN speed-up from splitting each flow over $K$ QPs, relative to $K{=}1$ (16\,MB; mean $\pm $ 95\% CI over 5 seeds). Solid: 128 nodes; dashed: 1024 nodes.}}{7}{}\protected@file@percent }
+\newlabel{fig:kcurve}{{13}{7}}
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Future Work}{7}{}\protected@file@percent }
+\newlabel{sec:future}{{VIII}{7}}
+\bibstyle{IEEEtran}
+\bibdata{refs}
+\bibcite{pfc}{1}
+\bibcite{dcqcn}{2}
+\bibcite{uec-spec}{3}
+\bibcite{uec-design}{4}
+\bibcite{ndp}{5}
+\bibcite{rdma-scale}{6}
+\bibcite{hedera}{7}
+\bibcite{spray}{8}
+\bibcite{reps}{9}
+\bibcite{hpcc}{10}
+\bibcite{irn}{11}
+\bibcite{hoefler-ethernet}{12}
+\bibcite{railonly}{13}
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Related Work}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {X}Conclusion}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{8}{}\protected@file@percent }
+\gdef \@abspage@last{8}

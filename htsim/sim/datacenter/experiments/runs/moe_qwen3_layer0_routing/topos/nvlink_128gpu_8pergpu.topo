@@ -1,0 +1,27 @@
+# NVLink / NVSwitch intra-server domain for the 128-GPU rail cluster.
+#
+#   16 servers x 8 GPUs. Tier 0 leaf = ONE server's NVSwitch: 8 GPUs on a single
+#   3600 Gbps non-blocking crossbar (same NVLink figure as the existing
+#   shared/topos_h100/nvlink_1024gpu_8pergpu.topo). Consecutive attachment (NO
+#   "Rails" line): leaf s owns GPUs 8s..8s+7 = one server.
+#
+#   Only intra-server flows are attached to this topology, so traffic never
+#   leaves a leaf; Tier 1 exists only because htsim needs >= 2 tiers (inert).
+Nodes 128
+Tiers 2
+Podsize 128
+
+Tier 0
+Oversubscribed 8
+Downlink_speed_Gbps 3600
+Radix_Down 8
+Radix_Up 1
+Downlink_Latency_ns 100
+Switch_Latency_ns 0
+
+Tier 1
+Downlink_speed_Gbps 3600
+Radix_Down 16
+Downlink_Latency_ns 100
+Switch_Latency_ns 0
+Bundle 1

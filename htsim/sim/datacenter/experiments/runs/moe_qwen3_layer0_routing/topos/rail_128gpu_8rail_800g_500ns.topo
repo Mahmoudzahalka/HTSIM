@@ -1,0 +1,32 @@
+# Rail-optimized 128-GPU compute fabric for the Ofan MoE study, 2-tier leaf-spine.
+#
+#   128 GPUs = 16 servers x 8 GPUs; each GPU has its own 800G NIC -> its own rail.
+#   8 rails; rail r is ONE leaf with 16 downlinks (GPU r of all 16 servers) + 16
+#   uplinks => 32-port leaf. 8 leaves, 16 spines of radix 8, NON-BLOCKING.
+#   Links 800 Gbps, 0.5 us (the Ofan paper's link parameters).
+#
+#   "Rails 8": GPU g -> rail (g%8), server (g/8), leaf = rail.
+#   DeepEP-style dispatch sends every inter-server flow to the SAME-RANK GPU, i.e.
+#   the same rail, so all fabric traffic stays on one leaf (never touches a spine).
+#   Intra-server traffic goes over the NVLink plane (nvlink_128gpu_8pergpu.topo),
+#   selected at connect time by htsim when -nvlink_topo is given.
+#   Pattern copied from shared/topos_h100/rail_1024gpu_8rail.topo.
+Nodes 128
+Tiers 2
+Podsize 128
+Rails 8
+
+Tier 0
+Oversubscribed 1
+Downlink_speed_Gbps 800
+Radix_Down 16
+Radix_Up 16
+Downlink_Latency_ns 500
+Switch_Latency_ns 0
+
+Tier 1
+Downlink_speed_Gbps 800
+Radix_Down 8
+Downlink_Latency_ns 500
+Switch_Latency_ns 0
+Bundle 1

@@ -1,0 +1,28 @@
+# Ofan paper MoE setup: 3-tier k=8 fat tree, 128 hosts, 800 Gbps links, 0.5 us per link (copied from shared/topos_h100/fat_tree_128_1os.topo)
+Nodes 128
+Tiers 3
+Podsize 16
+
+Tier 0
+Oversubscribed 1
+Downlink_speed_Gbps 800
+Radix_Down 4
+Radix_Up 4
+Downlink_Latency_ns 500
+Switch_Latency_ns 0
+
+Tier 1
+Oversubscribed 1
+Downlink_speed_Gbps 800
+Radix_Down 4
+Radix_Up 4
+Downlink_Latency_ns 500
+Switch_Latency_ns 0
+Bundle 1
+
+Tier 2
+Downlink_speed_Gbps 800
+Radix_Down 8
+Downlink_Latency_ns 500
+Switch_Latency_ns 0
+Bundle 1
