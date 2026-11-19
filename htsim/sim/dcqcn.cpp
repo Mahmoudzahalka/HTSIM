@@ -178,7 +178,10 @@ void DCQCNSrc::receivePacket(Packet& pkt)
 
     if (_stop_time && eventlist().now() >= _stop_time) {
         // stop sending new data, but allow us to finish any retransmissions
-        _flow_size = _highest_sent+_mss;
+        // BUGFIX(#13): _highest_sent is a packet count; the original added it to
+        // bytes. Match RoceSrc::receivePacket (sent packets in bytes + one MSS).
+        //_flow_size = _highest_sent+_mss;
+        _flow_size = _highest_sent * _mss + _mss;
         _stop_time = 0;
     }
 

@@ -149,7 +149,14 @@ void RoceSrc::processNack(const RoceNack& nack){
     if (_log_me)
         cout << "Src " << get_id() << " go back n from " <<  _highest_sent << " to " << _last_acked << " at " << timeAsUs(eventlist().now()) << " us" << endl;
 
-    if (_flow_size && _highest_sent>=_flow_size && _last_acked < _flow_size){
+    // BUGFIX(#12): _highest_sent/_last_acked are packet counts but _flow_size is
+    // in bytes, so the original guard never fired. That was harmless while the
+    // source ticked forever, but since BUGFIX(#5) the source stops after its last
+    // packet, so a NACK for a loss in the final window must restart it here or
+    // the flow wedges (RoceSrc has no retransmit timer). Convert to bytes, using
+    // the same stop condition as doNextEvent().
+    //if (_flow_size && _highest_sent>=_flow_size && _last_acked < _flow_size){
+    if (_flow_size && _highest_sent * _mss >= _flow_size && _last_acked * _mss < _flow_size){
         //restart the pacing of packets, this has stopped once we've passed the flow size but now a packet in the last window was lost.
         if (_log_me)
             cout << "Src " << get_id() << " restarting pacing\n";
